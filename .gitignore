@@ -1,0 +1,34 @@
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local runtime logs and scratch output
+run_stdout.txt
+run_stderr.txt
+*.log
+mode_switch_debug_*.txt
+diffusion_debug_*.txt
+
+# Build/package output
+build/
+dist/
+*.spec
+
+# Editor/OS noise
+.vs/
+.vscode/
+.idea/
+Desktop.ini
+Thumbs.db
+
+# Generated CGA/DOS/image outputs
+*.com
+*.gif
+*.bmp
+

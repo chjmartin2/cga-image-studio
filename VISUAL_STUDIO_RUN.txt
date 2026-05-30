@@ -1,0 +1,16 @@
+CGA Converter v165 - Visual Studio run settings
+
+Open folder:
+C:\Users\chjmartin2\Desktop\CGAFun
+
+Python interpreter:
+C:\Users\chjmartin2\Desktop\CGAFun\.venv\Scripts\python.exe
+
+Startup file:
+C:\Users\chjmartin2\Desktop\CGAFun\cga_v165.py
+
+Quick manual launch:
+Double-click run_cga_v165.cmd from this folder.
+
+If the app starts correctly, the window title is:
+CGA Converter v165
