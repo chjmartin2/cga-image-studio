@@ -1,18 +1,29 @@
-# CGA Converter
+# CGA Image Studio
 
-CGA Converter is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
+CGA Image Studio is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
 
 This repository starts from the historical manually versioned source file `cga_v165.py`. The first GitHub baseline is version `0.1.0`, corresponding to the working `v165` application.
 
+## Project Status
+
+This project is in early active development. The current version is buggy, some features are incomplete, and several planned features are not implemented yet. Expect rough edges while the app is being cleaned up, refactored, and prepared for more stable releases.
+
 ## Quick Start
 
-From this folder:
+Create a virtual environment and install dependencies:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Run the application:
 
 ```powershell
 .\.venv\Scripts\python.exe cga_v165.py
 ```
 
-Or double-click:
+On Windows, you can also run:
 
 ```text
 run_cga_v165.cmd
@@ -26,13 +37,6 @@ The application window title should show `CGA Converter v165`.
 - Pillow
 - NumPy
 - Tkinter, included with standard Windows Python installs
-
-Install dependencies into a virtual environment:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
 
 ## Main Features
 
@@ -61,20 +65,6 @@ python -m venv .venv
 - `640x200 (1024 Colors)`
 - `320x200 (4 Colors) Mode Switch`
 - `640x200 (2 Colors) Mode Switch`
-
-## Visual Studio Setup
-
-Open this folder in Visual Studio and select this interpreter:
-
-```text
-C:\Users\chjmartin2\Desktop\CGAFun\.venv\Scripts\python.exe
-```
-
-Use this startup file:
-
-```text
-C:\Users\chjmartin2\Desktop\CGAFun\cga_v165.py
-```
 
 ## Versioning
 
@@ -111,4 +101,3 @@ src/
 tests/
 docs/
 ```
-
