@@ -4666,7 +4666,7 @@ def build_com_cga_160x100x16(vram_text_16000: bytes) -> bytes:
     out_crtc(0x09, 0x01)  # Max scanline = 1 (2 scanlines/char)
 
     # OUT 3D8h, AL=09h (video on, blink disabled, 80 col)
-    code += bytes([0xBA, 0xD8, 0x03, 0xB0, 0x09,
+    code += bytes([0xBA, 0xD8, 0x03, 0xB0, 0x09, 0xEE])  # mov dx,3D8h / mov al,09h / out dx,al
 
     # mov ax,B800h ; mov es,ax
     code += bytes([0xB8, 0x00, 0xB8, 0x8E, 0xC0])
