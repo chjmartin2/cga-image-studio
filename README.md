@@ -2,7 +2,7 @@
 
 CGA Image Studio is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
 
-This repository starts from the historical manually versioned source file `cga_v165.py`. The first GitHub baseline is version `0.1.0`, corresponding to the working `v165` application.
+This repository starts from the historical manually versioned source file `cga_v165.py`. The first GitHub baseline is version `0.1.0`, corresponding to the working `v165` application. Current development continues in `cga_v167.py`.
 
 ## Project Status
 
@@ -20,16 +20,16 @@ python -m venv .venv
 Run the application:
 
 ```powershell
-.\.venv\Scripts\python.exe cga_v165.py
+.\.venv\Scripts\python.exe cga_v167.py
 ```
 
 On Windows, you can also run:
 
 ```text
-run_cga_v165.cmd
+run_cga_v167.cmd
 ```
 
-The application window title should show `CGA Converter v165`.
+The application window title should show `CGA Converter v167`.
 
 ## Requirements
 
@@ -49,6 +49,11 @@ The application window title should show `CGA Converter v165`.
 - Simulate NTSC composite artifact color behavior.
 - Export preview GIFs.
 - Export DOS `.COM` files for many modes.
+- Export NASM-compatible `.ASM` source that rebuilds the generated `.COM` exactly.
+- Export a bootable DOS `.DSK` image containing the generated program as `TEST.COM`.
+- Use the verified `320x200 (4 Colors) Mode Switch` dense lockstep profile:
+  13 calibrated palette writes per scanline, exported with the 199-block plus
+  five-write drain-tail schedule. Patterns are `Fixed` and `Dispersed`.
 
 ## Supported Mode Families
 
@@ -71,6 +76,9 @@ The application window title should show `CGA Converter v165`.
 This project is moving from manual filename revisioning, such as `cga_v165.py`, to semantic versioning.
 
 - `0.1.0`: first GitHub baseline, historical app version `v165`
+- `0.2.0` development: two-write lockstep Mode Switch encoder, app version `v166`
+- `0.3.0` development: 13-write dense lockstep Mode Switch encoder, app version
+  `v167`
 - `0.x`: active development and refactoring
 - `1.0.0`: future stable release milestone
 

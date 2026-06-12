@@ -1,0 +1,7 @@
+# Python virtual environment (must never be committed)
+.venv/
+
+# Python bytecode caches
+__pycache__/
+*.py[cod]
+*$py.class

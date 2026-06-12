@@ -5440,7 +5440,8 @@ def build_cga_reg_table(pals_by_y) -> bytes:
 
 
 def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
-                                  display_frames: int = 1800) -> bytes:
+                                  display_frames: int = 1800,
+                                  exit_on_keypress: bool = False) -> bytes:
     """Build a stable DOS .COM that displays a 320x200 image with one palette change
     per scanline (CGA Mode Switch, N=1 segments).
 
@@ -5481,6 +5482,9 @@ def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
         reg_table_400: 400 bytes — 200 (3D8, 3D9) pairs, line 0 first.
         display_frames: number of CGA frames to display before auto-exit.
                        Default 1800 = 30 seconds at 60Hz. Max 65535.
+        exit_on_keypress: when True, briefly re-enable interrupts between frames
+                          and exit after a keypress. The timing-critical scanline
+                          loop still runs with interrupts disabled.
 
     Returns:
         bytes — the .COM file contents
@@ -5704,7 +5708,22 @@ def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
         code += bytes([0xE2, loop_disp & 0xFF])
 
     # ============================================================
-    # End of frame. Decrement counter; if not zero, loop back.
+    # End of frame. Optionally check keyboard, then decrement counter.
+    # ============================================================
+    key_exit_jmp_patch = None
+    if exit_on_keypress:
+        # Keyboard IRQs are blocked while the scanline loop runs under CLI, so
+        # we briefly enable interrupts between frames before using BIOS int 16h.
+        code += bytes([0xFB])                    # sti
+        code += bytes([0xB4, 0x01, 0xCD, 0x16])  # mov ah,01h ; int 16h
+        code += bytes([0x74, 0x07])              # jz no_key
+        code += bytes([0x30, 0xE4, 0xCD, 0x16])  # xor ah,ah ; int 16h
+        key_exit_jmp_patch = len(code) + 1
+        code += bytes([0xE9, 0x00, 0x00])        # jmp exit (patched)
+        code += bytes([0xFA])                    # no_key: cli
+
+    # ============================================================
+    # Decrement counter; if not zero, loop back.
     # ============================================================
     # dec bp ; jz exit (skip 3-byte jmp) ; jmp main_loop
     code += bytes([0x4D])
@@ -5716,6 +5735,7 @@ def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
     # ============================================================
     # exit: BP=0 fell through. STI, restore text mode, exit to DOS.
     # ============================================================
+    exit_off = len(code)
     code += bytes([0xFB])                                # sti
     code += bytes([0xB8, 0x03, 0x00, 0xCD, 0x10])        # mov ax, 3 ; int 10h
     code += bytes([0xB4, 0x4C, 0xCD, 0x21])              # mov ah, 4Ch ; int 21h
@@ -5727,6 +5747,10 @@ def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
     code[fb_si_patch + 1] = (fb_off >> 8) & 0xFF
     code[pal_si_patch]    = pal_off & 0xFF
     code[pal_si_patch + 1] = (pal_off >> 8) & 0xFF
+    if key_exit_jmp_patch is not None:
+        key_exit_disp = exit_off - (key_exit_jmp_patch + 2)
+        code[key_exit_jmp_patch] = key_exit_disp & 0xFF
+        code[key_exit_jmp_patch + 1] = (key_exit_disp >> 8) & 0xFF
 
     if constant_3d8:
         # Fast path: only 200 bytes of 3D9 values
@@ -5854,23 +5878,22 @@ def _emit_delay_smart(target_cycles, prefer_no_clobber=False):
 
 
 def _emit_delay_exact(target_cycles):
-    """Emit bytes that delay EXACTLY target_cycles using NOP (3c, 1B), INC AX
-    (2c, 1B, opcode 0x40), and JMP-to-next (15c, 2B).
+    """Emit bytes that delay EXACTLY target_cycles using NOP (3c, 1B), MOV AX,AX
+    (2c, 2B), and JMP-to-next (15c, 2B).
 
-    Clobbers AX (low byte gets incremented). This is fine in our cycle-counted
-    inner loop because every LODSB completely overwrites AL before each OUT
-    consumes it — so AX is "scratch" between any LODSB+OUT pair and the next
-    LODSB.
+    MOV AX,AX is used as the 2-cycle filler because it preserves registers and
+    flags. Using INC AX here would disturb flags and is not a reliable 2-cycle
+    primitive on 8088/8086.
 
-    The 2-cycle INC AX granularity lets us hit any target >= 2 exactly. The
-    only impossible target is 1 cycle (closest is INC AX at 2c).
+    The 2-cycle MOV AX,AX granularity lets us hit any target >= 2 exactly. The
+    only impossible target is 1 cycle (closest is MOV AX,AX at 2c).
 
     Returns (bytes, actual_cycles).
     """
     if target_cycles <= 0:
         return (b'', 0)
     if target_cycles == 1:
-        return (b'\x40', 2)  # impossible to hit 1c exactly; closest is 2c
+        return (b'\x89\xC0', 2)  # impossible to hit 1c exactly; closest is 2c
 
     best_code = None
     best_actual = -1
@@ -5881,7 +5904,7 @@ def _emit_delay_exact(target_cycles):
         rem = target_cycles - n_jmp * 15
         if rem < 0:
             continue
-        # Hit rem exactly with NOPs (3c) and INC AX (2c)
+        # Hit rem exactly with NOPs (3c) and MOV AX,AX (2c)
         if rem == 0:
             a, b, actual, err = 0, 0, n_jmp * 15, 0
         elif rem == 1:
@@ -5894,11 +5917,11 @@ def _emit_delay_exact(target_cycles):
             a, b, actual, err = 0, rem // 2, n_jmp * 15 + rem, 0
         else:  # odd, >= 5
             a, b, actual, err = 1, (rem - 3) // 2, n_jmp * 15 + rem, 0
-        size = n_jmp * 2 + a + b
+        size = n_jmp * 2 + a + b * 2
         if (err, size) < (best_err, best_size):
             best_err = err
             best_size = size
-            best_code = b'\xEB\x00' * n_jmp + b'\x90' * a + b'\x40' * b
+            best_code = b'\xEB\x00' * n_jmp + b'\x90' * a + b'\x89\xC0' * b
             best_actual = actual
 
     return (best_code, best_actual)
@@ -6720,6 +6743,7 @@ def build_com_320_mode_switch_n_whole_frame(vram16k, data_table_v2, N,
 
     # ---- Display loop ----
     display_loop_off = len(code)
+    code += bytes([0xFA])                             # cli
     code += bytes([0xBA, 0xDA, 0x03])                 # mov dx, 0x3DA
     # vsync_wait_1 (jnz to self while bit3=1)
     code += bytes([0xEC, 0xA8, 0x08, 0x75, 0xFB])
@@ -6807,6 +6831,7 @@ def build_com_320_mode_switch_n_whole_frame(vram16k, data_table_v2, N,
             f"(actual {cycles_so_far}, target {_WF_CYCLES_PER_SCANLINE})")
 
     # ---- After loop: keypress check, then exit or repeat ----
+    code += bytes([0xFB])                             # sti
     code += bytes([0xB4, 0x01, 0xCD, 0x16])           # mov ah,1 ; int 16h
     jz_disp = display_loop_off - (len(code) + 2)
     if -128 <= jz_disp <= 127:
@@ -6908,6 +6933,7 @@ def build_com_320_mode_switch_n_whole_frame_constdelay(vram16k, data_table_v2, N
     code += bytes([0xFC, 0xF3, 0xA5])
 
     display_loop_off = len(code)
+    code += bytes([0xFA])                             # cli
     code += bytes([0xBA, 0xDA, 0x03])
     code += bytes([0xEC, 0xA8, 0x08, 0x75, 0xFB])
     code += bytes([0xEC, 0xA8, 0x08, 0x74, 0xFB])
@@ -6994,6 +7020,7 @@ def build_com_320_mode_switch_n_whole_frame_constdelay(vram16k, data_table_v2, N
         raise RuntimeError(
             f"const-delay variant: per-iteration cycles {cycles_so_far} != 304")
 
+    code += bytes([0xFB])                             # sti
     code += bytes([0xB4, 0x01, 0xCD, 0x16])
     jz_disp = display_loop_off - (len(code) + 2)
     if -128 <= jz_disp <= 127:
@@ -12769,7 +12796,11 @@ class CgaConverterApp(tk.Tk):
                     idx_arr = derive_indices_320_from_rgb(self.output_pimage, pals_by_y)
                     vram = pack_cga_320_vram_from_indices(idx_arr)
                     reg_table = build_cga_reg_table(pals_by_y)
-                    com = build_com_320_mode_switch_n1(vram, reg_table)
+                    com = build_com_320_mode_switch_n1(
+                        vram,
+                        reg_table,
+                        exit_on_keypress=True,
+                    )
                     default_name = "cga_320_modeswitch_n1.com"
                 else:
                     # N>=2 cycle-counted path
