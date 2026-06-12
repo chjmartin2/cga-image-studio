@@ -10132,7 +10132,13 @@ _CGA_LOCKSTEP_MAX_PATTERNS = ("Fixed", "Dispersed")
 # current-line slot 1.
 _CGA_LOCKSTEP_MAX_FIXED_SLOTS = (9, 10, 11, 12, 13, 1, 2, 3, 4, 5)
 _CGA_LOCKSTEP_MAX_FIXED_DELTAS = (-1, -1, -1, -1, -1, 0, 0, 0, 0, 0)
-_CGA_LOCKSTEP_MAX_FIXED_BOUNDS = (0, 9, 41, 89, 121, 153, 193, 225, 257, 297, 320)
+# Zone boundaries re-measured 2026-06-12 from ALIGNCAL.DSK / ZONE.COM against
+# MartyPC's exact 2x screenshot (PIX.COM confirmed the pixel axis is already
+# pixel-accurate, so this corrects the palette/beam axis only). Slot identity and
+# per-line deltas matched the prior calibration; only the spatial bounds were off
+# (reality sits 0-16px right of the old model bounds, non-constant per slot).
+# Old (model, mismatched COM): (0, 9, 41, 89, 121, 153, 193, 225, 257, 297, 320)
+_CGA_LOCKSTEP_MAX_FIXED_BOUNDS = (0, 25, 57, 89, 129, 169, 193, 233, 273, 305, 320)
 _CGA_LOCKSTEP_MAX_VISIBLE_WRITE_SLOTS = (10, 11, 12, 13, 1, 2, 3, 4, 5)
 _CGA_LOCKSTEP_MAX_BASE_WRITE_X = {
     10: 17,
