@@ -22,8 +22,14 @@ lockstep preview model silently assumes share an origin:
       each visible zone inherits, isolating the line/straddle axis (_DELTAS and
       the y-1/y split) that ZONE's line-invariant colors cannot test.
 
-All three COMs are placed on a single bootable work disk, files/ALIGNCAL.DSK,
-which boots to a DOS prompt. At the prompt type ZONE then PIX then LINES,
+  Test D - FG.COM (foreground index / palette-transition axis)
+      VRAM tiled with 2px bars cycling indices 0,1,2,3 while each slot's 3D9 value
+      cycles the four foreground palettes across the visible zones. The only test
+      that exercises foreground pixels (indices 1-3) under a changing per-zone
+      palette and a real palette transition at every seam.
+
+All four COMs are placed on a single bootable work disk, files/ALIGNCAL.DSK,
+which boots to a DOS prompt. At the prompt type ZONE then PIX then LINES then FG,
 screenshotting each.
 
 The renderer's own predicted output for each test is written next to this tool
@@ -178,6 +184,52 @@ def build_lines_test(zones_by_line):
     return com, expected, plan
 
 
+# Test D - FG.COM (foreground index / palette-transition axis)
+#     VRAM is tiled with 2px vertical bars cycling pixel indices 0,1,2,3 so every
+#     zone contains all four colors (mimicking dithered content), and each slot's
+#     3D9 value cycles the four foreground palettes (palette-select + intensity
+#     bits) across the visible zones over a constant grey bg. Per-line values are
+#     held constant so the (already-confirmed) line axis is not re-entangled. This
+#     is the one thing ZONE/PIX/LINES never exercised: foreground pixels (indices
+#     1-3) rendered under a changing per-zone palette, plus a real palette
+#     transition at every zone seam. If real photos streak on dithered rows but
+#     FG matches its expected preview, the residual is a subtler content trigger;
+#     if FG diverges, it localizes the fg index->color mapping / seam-transition
+#     glitch.
+FG_BAR_W = 2
+FG_BG_NIBBLE = 0x08  # constant grey background so index 0 stays visible
+
+
+def fg_slot_values():
+    """Per-slot 3D9 values: cycle the 4 fg palettes across the visible zones."""
+    values = [0] * N
+    for i, slot in enumerate(cga._CGA_LOCKSTEP_MAX_FIXED_SLOTS):
+        values[slot - 1] = ((i % 4) << 4) | FG_BG_NIBBLE
+    return values
+
+
+def fg_bar_indices():
+    idx = np.zeros((H, W), dtype=np.uint8)
+    for x in range(W):
+        idx[:, x] = (x // FG_BAR_W) % 4
+    return idx
+
+
+def build_fg_test(zones_by_line):
+    """Test D: dithered-style fg bars under a per-zone-varying fg palette."""
+    slot_values = fg_slot_values()
+    values_by_line = [list(slot_values) for _ in range(H)]
+    preline_values = list(slot_values)
+    indices = fg_bar_indices()
+
+    plan = base_plan(values_by_line, preline_values, indices, zones_by_line)
+    plan["entry_palette"] = cga.cga_mode04_palette_from_3d9(slot_values[0])
+    vram = cga.pack_cga_320_vram_from_indices(indices)
+    com = cga.build_com_320_mode_switch_lockstep_max(vram, plan)
+    expected = cga.render_cga_lockstep_max_physical_preview(plan, W=W, H=H)
+    return com, expected, plan
+
+
 def hexrgb(rgb):
     return "#%02X%02X%02X" % (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
@@ -214,6 +266,19 @@ def print_lines_reference():
         print(f"    {y:>2} : {v:>2} -> {hexrgb(cga.cga_mode04_palette_from_3d9(v)[0])}")
 
 
+def print_fg_reference(zones_by_line):
+    print("\n[Test D / FG.COM] expected per-visible-zone fg palette"
+          " (2px bars cycle index 0,1,2,3; bg nibble 0x%X):" % FG_BG_NIBBLE)
+    print("  zone  x0   x1  slot  3D9   idx0     idx1     idx2     idx3")
+    row = zones_by_line[100]
+    values = fg_slot_values()
+    for i, z in enumerate(row):
+        v = values[z["slot"] - 1]
+        pal = cga.cga_mode04_palette_from_3d9(v)
+        cols = "  ".join(hexrgb(pal[k]) for k in range(4))
+        print(f"  {i:>2}   {z['x0']:>3} {z['x1']:>3}   {z['slot']:>2}  0x{v:02X}  {cols}")
+
+
 def main():
     FILES.mkdir(parents=True, exist_ok=True)
     TEST_IMAGES.mkdir(parents=True, exist_ok=True)
@@ -223,21 +288,22 @@ def main():
     zone_com, zone_expected, _ = build_zone_test(zones_by_line)
     pix_com, pix_expected, _ = build_pix_test(zones_by_line)
     lines_com, lines_expected, _ = build_lines_test(zones_by_line)
+    fg_com, fg_expected, _ = build_fg_test(zones_by_line)
 
     zone_com_path = FILES / "ZONE.COM"
     pix_com_path = FILES / "PIX.COM"
     lines_com_path = FILES / "LINES.COM"
+    fg_com_path = FILES / "FG.COM"
     zone_com_path.write_bytes(zone_com)
     pix_com_path.write_bytes(pix_com)
     lines_com_path.write_bytes(lines_com)
+    fg_com_path.write_bytes(fg_com)
 
     # Save expected previews at native 320x200 and a 2x nearest copy for overlay.
-    zone_expected.save(TEST_IMAGES / "zone_expected.png")
-    pix_expected.save(TEST_IMAGES / "pix_expected.png")
-    lines_expected.save(TEST_IMAGES / "lines_expected.png")
-    zone_expected.resize((W * 2, H * 2), Image.NEAREST).save(TEST_IMAGES / "zone_expected_2x.png")
-    pix_expected.resize((W * 2, H * 2), Image.NEAREST).save(TEST_IMAGES / "pix_expected_2x.png")
-    lines_expected.resize((W * 2, H * 2), Image.NEAREST).save(TEST_IMAGES / "lines_expected_2x.png")
+    for name, img in (("zone", zone_expected), ("pix", pix_expected),
+                      ("lines", lines_expected), ("fg", fg_expected)):
+        img.save(TEST_IMAGES / f"{name}_expected.png")
+        img.resize((W * 2, H * 2), Image.NEAREST).save(TEST_IMAGES / f"{name}_expected_2x.png")
 
     dsk = FILES / "ALIGNCAL.DSK"
     mode = disk.build_image(
@@ -245,23 +311,26 @@ def main():
         template=TEMPLATE,
         output=dsk,
         image_name="ZONE.COM",
-        extra_files=[(pix_com_path, "PIX.COM"), (lines_com_path, "LINES.COM")],
+        extra_files=[(pix_com_path, "PIX.COM"), (lines_com_path, "LINES.COM"),
+                     (fg_com_path, "FG.COM")],
     )
 
     print(f"Disk: {mode}")
     print(f"Wrote {zone_com_path}  ({len(zone_com)} bytes)")
     print(f"Wrote {pix_com_path}  ({len(pix_com)} bytes)")
     print(f"Wrote {lines_com_path}  ({len(lines_com)} bytes)")
+    print(f"Wrote {fg_com_path}  ({len(fg_com)} bytes)")
     print(f"Wrote {dsk}")
-    print(f"Wrote {TEST_IMAGES / 'zone_expected.png'} (+ _2x)")
-    print(f"Wrote {TEST_IMAGES / 'pix_expected.png'} (+ _2x)")
-    print(f"Wrote {TEST_IMAGES / 'lines_expected.png'} (+ _2x)")
+    for name in ("zone", "pix", "lines", "fg"):
+        print(f"Wrote {TEST_IMAGES / (name + '_expected.png')} (+ _2x)")
     print_zone_reference(zones_by_line)
     print_pix_reference()
     print_lines_reference()
+    print_fg_reference(zones_by_line)
     print("\nNext: boot files/ALIGNCAL.DSK in MartyPC; at the prompt run ZONE,"
-          " screenshot; then PIX, screenshot; then LINES, screenshot. Capture at"
-          " exact 2x (640x400), no aspect correction, no scanline/CRT filter, PNG.")
+          " screenshot; then PIX; then LINES; then FG, screenshotting each."
+          " Capture at exact 2x (640x400), no aspect correction, no scanline/CRT"
+          " filter, PNG.")
 
 
 if __name__ == "__main__":
