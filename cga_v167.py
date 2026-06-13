@@ -10304,6 +10304,48 @@ def cga_mode04_palette_from_3d9(value):
     return [CGA_COLORS[bg_idx]] + [CGA_COLORS[i] for i in fg_indices]
 
 
+# A 3D9h write sets the bg/border nibble (bits 0-3) AND the foreground
+# palette/intensity bits (4-5) in one byte, but on real CGA the bg change takes
+# effect at its own zone while the fg palette bits only take effect at the NEXT
+# write (one zone later). Measured 2026-06-13 via ALIGNCAL.DSK / FG.COM. The
+# renderers below model that lag so the preview matches hardware; the quantizer
+# compensates by packing fg one write early (see quantize path).
+_CGA_LOCKSTEP_3D9_BG_MASK = 0x0F
+_CGA_LOCKSTEP_3D9_FG_MASK = 0x30
+
+
+def _cga_lockstep_max_value(lines, preline_values, slot, line, H):
+    """Raw 3D9 value written for (slot, emitted line), or None if out of range."""
+    if not (1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES):
+        return None
+    if line == -1:
+        return int(preline_values[slot - 1])
+    if 0 <= line < H:
+        return int(lines[line]["values_3d9"][slot - 1])
+    return None
+
+
+def _cga_lockstep_max_prev_write(slot, line):
+    """(slot, line) of the 3D9 write immediately preceding (slot, line) in ring
+    order. Writes fire slot 1..13 ascending per emitted line, then wrap."""
+    if slot > 1:
+        return slot - 1, line
+    return _CGA_LOCKSTEP_MAX_WRITES, line - 1
+
+
+def _cga_lockstep_max_displayed_3d9(lines, preline_values, slot, target_y, H):
+    """Hardware-faithful 3D9 value for a zone: bg nibble from this write, fg
+    palette/intensity bits from the immediately-preceding write (the fg lag)."""
+    cur = _cga_lockstep_max_value(lines, preline_values, slot, target_y, H)
+    if cur is None:
+        return 0
+    ps, pl = _cga_lockstep_max_prev_write(slot, target_y)
+    prev = _cga_lockstep_max_value(lines, preline_values, ps, pl, H)
+    if prev is None:
+        prev = cur  # no preceding write (top-left edge) -> no lag information
+    return (cur & _CGA_LOCKSTEP_3D9_BG_MASK) | (prev & _CGA_LOCKSTEP_3D9_FG_MASK)
+
+
 def render_cga_lockstep_max_physical_preview(plan, W=320, H=200):
     """Render dense lockstep output from final 3D9h writes plus packed indices.
 
@@ -10331,12 +10373,8 @@ def render_cga_lockstep_max_physical_preview(plan, W=320, H=200):
                 continue
             slot = int(zone["slot"])
             target_y = y + int(zone.get("line_delta", 0))
-            if target_y == -1 and 1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES:
-                value_3d9 = int(preline_values[slot - 1])
-            elif 0 <= target_y < H and 1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES:
-                value_3d9 = int(lines[target_y]["values_3d9"][slot - 1])
-            else:
-                value_3d9 = 0
+            value_3d9 = _cga_lockstep_max_displayed_3d9(
+                lines, preline_values, slot, target_y, H)
             palette = np.asarray(cga_mode04_palette_from_3d9(value_3d9), dtype=np.uint8)
             arr[y, x0:x1] = palette[indices[y, x0:x1] & 0x03]
     return Image.fromarray(arr, "RGB")
@@ -10613,6 +10651,22 @@ def quantize_320x200_mode_switch_lockstep_max(
     out_pixels = [(0, 0, 0)] * (W * H)
     out_indices = np.zeros((H, W), dtype=np.uint8)
 
+    # Compensate for the fg-palette lag (see _cga_lockstep_max_displayed_3d9):
+    # the byte a zone's pixels actually display takes its bg from this write but
+    # its fg palette bits from the PREVIOUS write. So write each zone's chosen bg
+    # into its own slot and its chosen fg into the immediately-preceding write,
+    # so the lagged display reconstructs the intended (bg, fg) per zone.
+    def _store_field(slot, line, value, mask):
+        if not (1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES):
+            return
+        if line == -1:
+            row = preline_values
+        elif 0 <= line < H:
+            row = values_by_line[line]
+        else:
+            return  # write above the first emitted line: not visible, drop
+        row[slot - 1] = (row[slot - 1] & ~mask) | (value & mask)
+
     for y in range(H):
         if progress_cb is not None and (y % 8) == 0:
             try:
@@ -10652,10 +10706,12 @@ def quantize_320x200_mode_switch_lockstep_max(
                 raise ValueError("Dense lockstep quantizer selected a non-mode-04h palette")
             target_y = y + int(zone.get("line_delta", 0))
             slot = int(zone["slot"])
-            if target_y == -1 and 1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES:
-                preline_values[slot - 1] = color_3d9
-            elif 0 <= target_y < H and 1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES:
-                values_by_line[target_y][slot - 1] = color_3d9
+            # bg/border nibble lands on this zone's own write...
+            _store_field(slot, target_y, color_3d9, _CGA_LOCKSTEP_3D9_BG_MASK)
+            # ...while the fg palette/intensity bits must be written one step
+            # earlier so the hardware lag delivers them to this zone.
+            ps, pl = _cga_lockstep_max_prev_write(slot, target_y)
+            _store_field(ps, pl, color_3d9, _CGA_LOCKSTEP_3D9_FG_MASK)
             zone["palette"] = palette
 
             if serpentine and (y & 1):
@@ -10725,12 +10781,9 @@ def build_cga_lockstep_max_palette_strip(plan, W=320, H=200):
             x1 = int(zone["x1"])
             slot = int(zone["slot"])
             target_y = y + int(zone.get("line_delta", 0))
-            if target_y == -1 and 1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES:
-                palette = cga_mode04_palette_from_3d9(preline_values[slot - 1])
-            elif 0 <= target_y < H and 1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES:
-                palette = cga_mode04_palette_from_3d9(lines[target_y]["values_3d9"][slot - 1])
-            else:
-                palette = cga_mode04_palette_from_3d9(0)
+            palette = cga_mode04_palette_from_3d9(
+                _cga_lockstep_max_displayed_3d9(
+                    lines, preline_values, slot, target_y, H))
             width = x1 - x0
             for ci in range(4):
                 cx0 = x0 + (ci * width) // 4
