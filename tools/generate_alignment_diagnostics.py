@@ -299,6 +299,32 @@ def build_cal_test(zones_by_line, indices):
     return com, expected, plan
 
 
+# Test H - CALCONST.COM (constant foreground mode + foreground content)
+#     Background varies per slot (bg=k) but the 3D9 high bits (palette/intensity)
+#     are held CONSTANT (mode 0) on every write, with the 2px bars VRAM. Tests the
+#     hypothesis that the slot->column mapping is clean/content-independent (matches
+#     the bounds, like ZONE) WHENEVER writes only change the bg nibble -- i.e. that
+#     the misalignment is caused specifically by cycling the fg palette/intensity
+#     bits. If CALCONST lines up to the bounds, constraining the quantizer to one
+#     fg mode per line is the fix.
+def calconst_slot_values():
+    """slot k -> bg=k, fg mode 0 (high bits clear) for every write."""
+    return [k & 0x0F for k in range(1, N + 1)]
+
+
+def build_calconst_test(zones_by_line):
+    slot_values = calconst_slot_values()
+    values_by_line = [list(slot_values) for _ in range(H)]
+    preline_values = list(slot_values)
+    indices = fg_bar_indices()
+    plan = base_plan(values_by_line, preline_values, indices, zones_by_line)
+    plan["entry_palette"] = cga.cga_mode04_palette_from_3d9(slot_values[0])
+    vram = cga.pack_cga_320_vram_from_indices(indices)
+    com = cga.build_com_320_mode_switch_lockstep_max(vram, plan)
+    expected = cga.render_cga_lockstep_max_physical_preview(plan, W=W, H=H)
+    return com, expected, plan
+
+
 def hexrgb(rgb):
     return "#%02X%02X%02X" % (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
@@ -374,11 +400,13 @@ def main():
     fg2_com, fg2_expected, _ = build_fg2_test(zones_by_line)
     calbg_com, calbg_expected, _ = build_cal_test(zones_by_line, np.zeros((H, W), dtype=np.uint8))
     calbars_com, calbars_expected, _ = build_cal_test(zones_by_line, fg_bar_indices())
+    calconst_com, calconst_expected, _ = build_calconst_test(zones_by_line)
 
     coms = [
         ("ZONE.COM", zone_com), ("PIX.COM", pix_com), ("LINES.COM", lines_com),
         ("FG.COM", fg_com), ("FG2.COM", fg2_com),
         ("CALBG.COM", calbg_com), ("CALBARS.COM", calbars_com),
+        ("CALCONST.COM", calconst_com),
     ]
     paths = {}
     for nm, data in coms:
@@ -390,7 +418,7 @@ def main():
     for name, img in (("zone", zone_expected), ("pix", pix_expected),
                       ("lines", lines_expected), ("fg", fg_expected),
                       ("fg2", fg2_expected), ("calbg", calbg_expected),
-                      ("calbars", calbars_expected)):
+                      ("calbars", calbars_expected), ("calconst", calconst_expected)):
         img.save(TEST_IMAGES / f"{name}_expected.png")
         img.resize((W * 2, H * 2), Image.NEAREST).save(TEST_IMAGES / f"{name}_expected_2x.png")
 
@@ -407,7 +435,7 @@ def main():
     for nm, data in coms:
         print(f"Wrote {paths[nm]}  ({len(data)} bytes)")
     print(f"Wrote {dsk}")
-    for name in ("zone", "pix", "lines", "fg", "fg2", "calbg", "calbars"):
+    for name in ("zone", "pix", "lines", "fg", "fg2", "calbg", "calbars", "calconst"):
         print(f"Wrote {TEST_IMAGES / (name + '_expected.png')} (+ _2x)")
     print_zone_reference(zones_by_line)
     print_pix_reference()
