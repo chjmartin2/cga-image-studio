@@ -10304,15 +10304,17 @@ def cga_mode04_palette_from_3d9(value):
     return [CGA_COLORS[bg_idx]] + [CGA_COLORS[i] for i in fg_indices]
 
 
-# Measured 2026-06-13 (ALIGNCAL.DSK FG/FG2 vs MartyPC): on real CGA the dense
-# lockstep color-register change is displayed ~24px to the RIGHT of the calibrated
-# zone bounds whenever the scanline carries foreground pixels -- the WHOLE palette
-# (bg/border nibble AND fg palette/intensity bits) lags together. The all-index-0
-# ZONE.COM case shows no shift (no foreground to delay); that degenerate case is
-# the one the bounds were calibrated from, which is why the shift was invisible
-# there. Preview and quantizer below apply this display shift so the model matches
-# hardware; the COM and its write timing are unchanged.
-_CGA_LOCKSTEP_PALETTE_DELAY_PX = 24
+# Measured 2026-06-13/14 (ALIGNCAL.DSK + Fred re-renders vs MartyPC): on real CGA
+# the dense lockstep color-register change is displayed a fixed number of pixels to
+# the RIGHT of the calibrated zone bounds whenever the scanline carries foreground
+# pixels -- the WHOLE palette (bg/border nibble AND fg palette/intensity bits) lags
+# together. The all-index-0 ZONE.COM case shows no shift (no foreground to delay);
+# that degenerate case is the one the bounds were calibrated from, which is why the
+# shift was invisible there. The exact delay is mildly content-dependent (per-zone
+# fits: error-diffused photo content ~16px, the synthetic FG2 bar pattern ~24px);
+# 16 is calibrated from real error-diffused images (the converter's actual target).
+# Preview and quantizer below apply this display shift; COM/write timing unchanged.
+_CGA_LOCKSTEP_PALETTE_DELAY_PX = 16
 
 
 def _cga_lockstep_max_value(lines, preline_values, slot, line, H):
