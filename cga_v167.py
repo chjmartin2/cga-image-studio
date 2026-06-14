@@ -10314,7 +10314,7 @@ def cga_mode04_palette_from_3d9(value):
 # fits: error-diffused photo content ~16px, the synthetic FG2 bar pattern ~24px);
 # 16 is calibrated from real error-diffused images (the converter's actual target).
 # Preview and quantizer below apply this display shift; COM/write timing unchanged.
-_CGA_LOCKSTEP_PALETTE_DELAY_PX = 16
+_CGA_LOCKSTEP_PALETTE_DELAY_PX = 24
 
 
 def _cga_lockstep_max_value(lines, preline_values, slot, line, H):

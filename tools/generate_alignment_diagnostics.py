@@ -271,6 +271,34 @@ def build_fg2_test(zones_by_line):
     return com, expected, plan
 
 
+# Tests F/G - CALBG.COM / CALBARS.COM (content-independence of the mapping)
+#     The SAME fixed per-slot palette progression (slot k -> bg=k, fg mode=(k-1)%4,
+#     so all 13 writes are distinct and line-invariant), emitted with two different
+#     VRAM fills:
+#       CALBG  : VRAM all index 0  -> pure background readout
+#       CALBARS: VRAM 2px 0/1/2/3 bars -> background AND foreground present
+#     Same palette values, same write timing -- the ONLY difference is pixel
+#     content. If the background transitions land at the same columns in both, the
+#     column->palette mapping is fixed and content-independent; if they differ,
+#     pixel content moves the mapping (and by how much). Settles the ZONE-vs-FG2
+#     ambiguity (those used different palette values, so were not comparable).
+def cal_slot_values():
+    """slot k (1..13) -> bg nibble k, fg palette mode (k-1)%4. All 13 distinct."""
+    return [(((k - 1) % 4) << 4) | (k & 0x0F) for k in range(1, N + 1)]
+
+
+def build_cal_test(zones_by_line, indices):
+    slot_values = cal_slot_values()
+    values_by_line = [list(slot_values) for _ in range(H)]
+    preline_values = list(slot_values)
+    plan = base_plan(values_by_line, preline_values, indices, zones_by_line)
+    plan["entry_palette"] = cga.cga_mode04_palette_from_3d9(slot_values[0])
+    vram = cga.pack_cga_320_vram_from_indices(indices)
+    com = cga.build_com_320_mode_switch_lockstep_max(vram, plan)
+    expected = cga.render_cga_lockstep_max_physical_preview(plan, W=W, H=H)
+    return com, expected, plan
+
+
 def hexrgb(rgb):
     return "#%02X%02X%02X" % (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 
@@ -344,53 +372,55 @@ def main():
     lines_com, lines_expected, _ = build_lines_test(zones_by_line)
     fg_com, fg_expected, _ = build_fg_test(zones_by_line)
     fg2_com, fg2_expected, _ = build_fg2_test(zones_by_line)
+    calbg_com, calbg_expected, _ = build_cal_test(zones_by_line, np.zeros((H, W), dtype=np.uint8))
+    calbars_com, calbars_expected, _ = build_cal_test(zones_by_line, fg_bar_indices())
 
-    zone_com_path = FILES / "ZONE.COM"
-    pix_com_path = FILES / "PIX.COM"
-    lines_com_path = FILES / "LINES.COM"
-    fg_com_path = FILES / "FG.COM"
-    fg2_com_path = FILES / "FG2.COM"
-    zone_com_path.write_bytes(zone_com)
-    pix_com_path.write_bytes(pix_com)
-    lines_com_path.write_bytes(lines_com)
-    fg_com_path.write_bytes(fg_com)
-    fg2_com_path.write_bytes(fg2_com)
+    coms = [
+        ("ZONE.COM", zone_com), ("PIX.COM", pix_com), ("LINES.COM", lines_com),
+        ("FG.COM", fg_com), ("FG2.COM", fg2_com),
+        ("CALBG.COM", calbg_com), ("CALBARS.COM", calbars_com),
+    ]
+    paths = {}
+    for nm, data in coms:
+        p = FILES / nm
+        p.write_bytes(data)
+        paths[nm] = p
 
     # Save expected previews at native 320x200 and a 2x nearest copy for overlay.
     for name, img in (("zone", zone_expected), ("pix", pix_expected),
                       ("lines", lines_expected), ("fg", fg_expected),
-                      ("fg2", fg2_expected)):
+                      ("fg2", fg2_expected), ("calbg", calbg_expected),
+                      ("calbars", calbars_expected)):
         img.save(TEST_IMAGES / f"{name}_expected.png")
         img.resize((W * 2, H * 2), Image.NEAREST).save(TEST_IMAGES / f"{name}_expected_2x.png")
 
     dsk = FILES / "ALIGNCAL.DSK"
     mode = disk.build_image(
-        source=zone_com_path,
+        source=paths["ZONE.COM"],
         template=TEMPLATE,
         output=dsk,
         image_name="ZONE.COM",
-        extra_files=[(pix_com_path, "PIX.COM"), (lines_com_path, "LINES.COM"),
-                     (fg_com_path, "FG.COM"), (fg2_com_path, "FG2.COM")],
+        extra_files=[(paths[nm], nm) for nm, _ in coms[1:]],
     )
 
     print(f"Disk: {mode}")
-    print(f"Wrote {zone_com_path}  ({len(zone_com)} bytes)")
-    print(f"Wrote {pix_com_path}  ({len(pix_com)} bytes)")
-    print(f"Wrote {lines_com_path}  ({len(lines_com)} bytes)")
-    print(f"Wrote {fg_com_path}  ({len(fg_com)} bytes)")
-    print(f"Wrote {fg2_com_path}  ({len(fg2_com)} bytes)")
+    for nm, data in coms:
+        print(f"Wrote {paths[nm]}  ({len(data)} bytes)")
     print(f"Wrote {dsk}")
-    for name in ("zone", "pix", "lines", "fg", "fg2"):
+    for name in ("zone", "pix", "lines", "fg", "fg2", "calbg", "calbars"):
         print(f"Wrote {TEST_IMAGES / (name + '_expected.png')} (+ _2x)")
     print_zone_reference(zones_by_line)
     print_pix_reference()
     print_lines_reference()
     print_fg_reference(zones_by_line)
     print_fg2_reference(zones_by_line)
-    print("\nNext: boot files/ALIGNCAL.DSK in MartyPC; at the prompt run ZONE,"
-          " screenshot; then PIX; then LINES; then FG; then FG2, screenshotting"
-          " each. Capture at exact 2x (640x400), no aspect correction, no"
-          " scanline/CRT filter, PNG.")
+    print("\n[Tests F/G] CALBG.COM and CALBARS.COM use the SAME 13-palette"
+          " progression (slot k -> bg=k, fg mode=(k-1)%4); CALBG has VRAM all"
+          " index-0, CALBARS has 2px 0/1/2/3 bars. Compare bg transition columns"
+          " between them to test whether pixel content moves the mapping.")
+    print("\nNext: boot files/ALIGNCAL.DSK in MartyPC; run each of ZONE, PIX,"
+          " LINES, FG, FG2, CALBG, CALBARS, screenshotting each. Capture at exact"
+          " 2x (640x400), no aspect correction, no scanline/CRT filter, PNG.")
 
 
 if __name__ == "__main__":
