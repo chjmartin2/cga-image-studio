@@ -10555,6 +10555,7 @@ def quantize_320x200_mode_switch_lockstep_max(
     keep_border_black=True,
     progress_cb=None,
     constant_fg_per_line=False,
+    palette_delay_override=None,
 ):
     """Quantize for the dense 13-write lockstep COM profile.
 
@@ -10591,8 +10592,15 @@ def quantize_320x200_mode_switch_lockstep_max(
 
     # In constant-fg mode every write on a line shares one fg palette/intensity
     # mode (3D9 bits 4-5); group the candidates by that mode so a line can be
-    # restricted to one group. Constant-fg lands cleanly at the bounds -> delay 0.
-    palette_delay_px = 0 if constant_fg_per_line else _CGA_LOCKSTEP_PALETTE_DELAY_PX
+    # restricted to one group.
+    # palette_delay_px = how many pixels right of the calibrated bounds the palette
+    # actually lands on hardware. If palette_delay_override is given (incl. 0), it
+    # wins; otherwise default per mode. Exposed in the GUI so it can be dialed in
+    # against a real MartyPC capture without a code change.
+    if palette_delay_override is not None:
+        palette_delay_px = int(palette_delay_override)
+    else:
+        palette_delay_px = 0 if constant_fg_per_line else _CGA_LOCKSTEP_PALETTE_DELAY_PX
     fg_mode_groups = []
     if constant_fg_per_line:
         groups = {}
@@ -11627,6 +11635,23 @@ class CgaConverterApp(tk.Tk):
             command=self._on_mode_switch_options_changed,
         )
         self.ms_constant_fg_cb.grid(row=10, column=0, columnspan=4, sticky="w", padx=4, pady=2)
+
+        # Dense palette display delay: how many pixels right of the calibrated zone
+        # bounds the palette actually lands on real CGA. -1 = auto (0 for the
+        # aligned const-fg sub-mode, 24 for vary-both). Dial against a MartyPC
+        # capture; the preview and the quantizer both honor it.
+        ttk.Label(options, text="Dense palette delay (px, -1=auto):").grid(row=11, column=0, sticky="w", padx=4, pady=2)
+        self.ms_palette_delay_var = tk.IntVar(value=-1)
+        self.ms_palette_delay_spin = ttk.Spinbox(
+            options,
+            from_=-1, to=48,
+            textvariable=self.ms_palette_delay_var,
+            width=5,
+            command=self._on_mode_switch_options_changed,
+        )
+        self.ms_palette_delay_spin.grid(row=11, column=1, sticky="w", padx=4, pady=2)
+        self.ms_palette_delay_spin.bind("<FocusOut>", lambda e: self._on_mode_switch_options_changed())
+        self.ms_palette_delay_spin.bind("<Return>", lambda e: self._on_mode_switch_options_changed())
 
         # Retained as an internal compatibility variable for older helper paths.
         self.ms_stagger_optimize_var = tk.BooleanVar(value=False)
@@ -13778,6 +13803,11 @@ class CgaConverterApp(tk.Tk):
                     ),
                     "constant_fg_per_line": bool(
                         getattr(self, "ms_constant_fg_var", tk.BooleanVar(value=False)).get()
+                    ),
+                    "palette_delay_override": (
+                        None
+                        if int(getattr(self, "ms_palette_delay_var", tk.IntVar(value=-1)).get()) < 0
+                        else int(self.ms_palette_delay_var.get())
                     ),
                     "progress_cb": (lambda frac: self.set_progress(int(30 + frac*65))),
                 }
