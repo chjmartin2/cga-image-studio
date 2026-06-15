@@ -10328,11 +10328,16 @@ def _cga_lockstep_max_value(lines, preline_values, slot, line, H):
     return None
 
 
-def _cga_lockstep_max_display_span(zone, zone_index, W):
+def _cga_lockstep_max_display_span(zone, zone_index, W, delay=None):
     """Display pixel span [dx0, dx1) a zone's palette actually covers, after the
-    ~24px whole-palette delay. The leftmost zone is extended to x=0 to fill the
-    wrap region; the rightmost zone(s) clip off the right edge."""
-    delay = _CGA_LOCKSTEP_PALETTE_DELAY_PX
+    whole-palette display delay. delay=0 means the palette lands exactly at the
+    calibrated bounds (the clean case when only the bg nibble changes per line).
+    The leftmost zone is extended to x=0 to fill the wrap region; the rightmost
+    zone(s) clip off the right edge."""
+    if delay is None:
+        delay = _CGA_LOCKSTEP_PALETTE_DELAY_PX
+    if delay == 0:
+        return max(0, min(W, int(zone["x0"]))), max(0, min(W, int(zone["x1"])))
     dx0 = 0 if zone_index == 0 else int(zone["x0"]) + delay
     dx1 = int(zone["x1"]) + delay
     return max(0, min(W, dx0)), max(0, min(W, dx1))
@@ -10359,9 +10364,10 @@ def render_cga_lockstep_max_physical_preview(plan, W=320, H=200):
     preline_values = plan.get("preline_values_3d9")
     if preline_values is None:
         preline_values = [0] * _CGA_LOCKSTEP_MAX_WRITES
+    delay = plan.get("palette_delay_px")
     for y, line in enumerate(lines):
         for zi, zone in enumerate(line.get("zones", [])):
-            dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W)
+            dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W, delay)
             if dx1 <= dx0:
                 continue
             slot = int(zone["slot"])
@@ -10548,8 +10554,17 @@ def quantize_320x200_mode_switch_lockstep_max(
     pattern="Fixed",
     keep_border_black=True,
     progress_cb=None,
+    constant_fg_per_line=False,
 ):
-    """Quantize for the production dense 13-write lockstep COM profile."""
+    """Quantize for the dense 13-write lockstep COM profile.
+
+    constant_fg_per_line: when True, every 3D9 write on a line shares one
+    foreground palette/intensity mode (only the background nibble varies across
+    the 13 writes). This is the clean, aligned profile -- because nothing but the
+    bg changes mid-line, the palette lands exactly at the calibrated bounds (no
+    display delay), matching the ZONE/CALCONST calibration. The cost is one fg
+    triple per line instead of per zone.
+    """
     img = image_rgb_320x200.convert("RGB")
     if img.size != (320, 200):
         img = img.resize((320, 200), Image.LANCZOS)
@@ -10573,6 +10588,18 @@ def quantize_320x200_mode_switch_lockstep_max(
     slot_candidates = list(candidates)
     if forced_bg_idx is not None:
         slot_candidates = palettes_with_bg(slot_candidates, forced_bg_idx)
+
+    # In constant-fg mode every write on a line shares one fg palette/intensity
+    # mode (3D9 bits 4-5); group the candidates by that mode so a line can be
+    # restricted to one group. Constant-fg lands cleanly at the bounds -> delay 0.
+    palette_delay_px = 0 if constant_fg_per_line else _CGA_LOCKSTEP_PALETTE_DELAY_PX
+    fg_mode_groups = []
+    if constant_fg_per_line:
+        groups = {}
+        for p in slot_candidates:
+            fg_bits = palette_to_cga_regs(p)[1] & 0x30  # palette-select + intensity
+            groups.setdefault(fg_bits, []).append(p)
+        fg_mode_groups = [groups[k] for k in sorted(groups)]
 
     ord_n = max(2, min(16, int(ordered_matrix_size)))
     ord_strength = max(0.0, min(3.0, float(ordered_strength)))
@@ -10632,7 +10659,7 @@ def quantize_320x200_mode_switch_lockstep_max(
             if error < best_error:
                 best_palette = palette
                 best_error = error
-        return best_palette
+        return best_palette, best_error
 
     entry_palette = slot_candidates[0]
     entry_3d9 = palette_to_cga_regs(entry_palette)[1]
@@ -10682,18 +10709,40 @@ def quantize_320x200_mode_switch_lockstep_max(
             zone_order = range(len(zones))
             k_use = kernel
 
+        # Per-zone palette pool. In constant-fg mode, first pick the single fg
+        # mode that best fits this whole line, then each zone picks its bg within
+        # that mode. (Selection uses current work[] without diffusion; the actual
+        # dither below applies diffusion with the chosen pool.)
+        line_pool = slot_candidates
+        if constant_fg_per_line and fg_mode_groups:
+            best_group = fg_mode_groups[0]
+            best_group_err = float("inf")
+            for group in fg_mode_groups:
+                total = 0.0
+                for zi, zone in enumerate(zones):
+                    dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W, palette_delay_px)
+                    if dx1 <= dx0:
+                        continue
+                    total += choose_palette([(y, dx0, dx1)], group)[1]
+                    if total >= best_group_err:
+                        break
+                if total < best_group_err:
+                    best_group_err = total
+                    best_group = group
+            line_pool = best_group
+
         for zi in zone_order:
             zone = zones[zi]
             target_y = y + int(zone.get("line_delta", 0))
             slot = int(zone["slot"])
             # The zone's palette is displayed shifted right by the measured delay,
             # so choose/quantize against the display span it actually governs.
-            dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W)
+            dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W, palette_delay_px)
             if dx1 <= dx0:
                 # Shifted off the right edge (rightmost zone); never displayed.
                 zone["palette"] = entry_palette
                 continue
-            palette = choose_palette([(y, dx0, dx1)], slot_candidates)
+            palette, _ = choose_palette([(y, dx0, dx1)], line_pool)
             mode_3d8, color_3d9 = palette_to_cga_regs(palette)
             if mode_3d8 != _CGA_MODE_3D8_MODE04:
                 raise ValueError("Dense lockstep quantizer selected a non-mode-04h palette")
@@ -10748,6 +10797,8 @@ def quantize_320x200_mode_switch_lockstep_max(
         "preline_values_3d9": list(preline_values),
         "indices": out_indices,
         "lines": lines,
+        "palette_delay_px": palette_delay_px,
+        "constant_fg_per_line": bool(constant_fg_per_line),
     }
     return render_cga_lockstep_max_physical_preview(plan, W=W, H=H), plan
 
@@ -11563,6 +11614,19 @@ class CgaConverterApp(tk.Tk):
         )
         self.ms_stagger_mode_cb.grid(row=7, column=4, columnspan=2, sticky="w", padx=4, pady=2)
         self.ms_stagger_mode_cb.bind("<<ComboboxSelected>>", lambda e: self._on_mode_switch_options_changed())
+
+        # Dense 13-write sub-mode: hold one fg palette/intensity mode per line and
+        # vary only the background across the writes. This is the aligned profile
+        # (palette lands exactly at the bounds, no display delay); only meaningful
+        # when "writes per line" is the dense 13-write schedule.
+        self.ms_constant_fg_var = tk.BooleanVar(value=False)
+        self.ms_constant_fg_cb = ttk.Checkbutton(
+            options,
+            text="Dense: 1 FG palette/line, multi BG (aligned)",
+            variable=self.ms_constant_fg_var,
+            command=self._on_mode_switch_options_changed,
+        )
+        self.ms_constant_fg_cb.grid(row=8, column=3, columnspan=3, sticky="w", padx=4, pady=2)
 
         # Retained as an internal compatibility variable for older helper paths.
         self.ms_stagger_optimize_var = tk.BooleanVar(value=False)
@@ -13711,6 +13775,9 @@ class CgaConverterApp(tk.Tk):
                     "pattern": pattern_320,
                     "keep_border_black": bool(
                         getattr(self, "ms_black_border_var", tk.BooleanVar(value=True)).get()
+                    ),
+                    "constant_fg_per_line": bool(
+                        getattr(self, "ms_constant_fg_var", tk.BooleanVar(value=False)).get()
                     ),
                     "progress_cb": (lambda frac: self.set_progress(int(30 + frac*65))),
                 }
