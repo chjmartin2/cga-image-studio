@@ -11626,7 +11626,7 @@ class CgaConverterApp(tk.Tk):
             variable=self.ms_constant_fg_var,
             command=self._on_mode_switch_options_changed,
         )
-        self.ms_constant_fg_cb.grid(row=8, column=3, columnspan=3, sticky="w", padx=4, pady=2)
+        self.ms_constant_fg_cb.grid(row=10, column=0, columnspan=4, sticky="w", padx=4, pady=2)
 
         # Retained as an internal compatibility variable for older helper paths.
         self.ms_stagger_optimize_var = tk.BooleanVar(value=False)
