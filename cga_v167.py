@@ -10126,19 +10126,39 @@ _CGA_LOCKSTEP_MAX_DISPERSED_INTERVALS = tuple(
     for amount in _CGA_LOCKSTEP_MAX_DISPERSED_AMOUNTS
 )
 _CGA_LOCKSTEP_MAX_PATTERNS = ("Fixed", "Dispersed")
-# Measured from a slot-background calibration COM against MartyPC's exact 2x
-# screenshot output. The active bitmap starts inside the late slot-9 region of
-# the previous emitted palette line, then wraps from previous-line slot 13 to
-# current-line slot 1.
-_CGA_LOCKSTEP_MAX_FIXED_SLOTS = (9, 10, 11, 12, 13, 1, 2, 3, 4, 5)
-_CGA_LOCKSTEP_MAX_FIXED_DELTAS = (-1, -1, -1, -1, -1, 0, 0, 0, 0, 0)
-# Zone boundaries re-measured 2026-06-12 from ALIGNCAL.DSK / ZONE.COM against
-# MartyPC's exact 2x screenshot (PIX.COM confirmed the pixel axis is already
-# pixel-accurate, so this corrects the palette/beam axis only). Slot identity and
-# per-line deltas matched the prior calibration; only the spatial bounds were off
-# (reality sits 0-16px right of the old model bounds, non-constant per slot).
-# Old (model, mismatched COM): (0, 9, 41, 89, 121, 153, 193, 225, 257, 297, 320)
-_CGA_LOCKSTEP_MAX_FIXED_BOUNDS = (0, 25, 57, 89, 129, 169, 193, 233, 273, 305, 320)
+# Calibrated 2026-06-15 directly against a MartyPC cycle-accurate trace + ZONE.COM
+# screenshot (640x400 2x). The dense loop runs as ONE continuous, scanline-locked
+# write stream (304 CPU cyc/line); per-write beam spacing is set by real 8088
+# instruction+prefetch timing (irregular, NOT a uniform 32px grid) and is content-
+# independent (verified from MartyPC's CGA source: no fg/bg or duplicate-write
+# difference). So there is ONE layout for all modes. The builder emits
+# values_3d9[p] at write position p, so model "slot" = position+1.
+#
+# Derivation: builder emits values_3d9[p] at write position p (slot=position+1);
+# values_3d9 = [0,1,..,12] (value == position), confirmed from the FULL-FIELD debug
+# capture (912x262). The 13 writes land at fixed field hdots and the loop is locked
+# to the scanline, so within a run the image is fully stable (NOT per-frame jitter).
+# Measured DIRECTLY off the full-field ZONE capture (screenshot0052), reading the
+# value (=position) in each segment across the CROPPED active window (hdot 192..832):
+#   active lo-res col : 0   1   41  73  105 | 145 177 209 249 289 313
+#   value(=position)  : 8   9   10  11  12  | 0   1   2   3   4   5
+#   slot (=value+1)   : 9   10  11  12  13  | 1   2   3   4   5   6
+# 11 visible writes (the left col-0 and right col-313 ones are edge slivers).
+# NOTE: an older Cropped capture (0048) sat one write-position off from the current
+# session; calibrating to it rotated the slots wrong. Always derive from a full-field
+# capture of the SAME run. values_3d9==position is the fixed truth; the absolute
+# write column can shift between runs (PIT/DMA phase after the program's PIT reset).
+_CGA_LOCKSTEP_MAX_FIXED_SLOTS = (9, 10, 11, 12, 13, 1, 2, 3, 4, 5, 6)
+# Line/straddle axis: the loop wrap (position 12 -> position 0 == value 12 -> 0) IS
+# the line boundary, at active col 145. Zones left of it (positions 8..12) inherit
+# the previous emitted line; zones right (positions 0..5) the current.
+_CGA_LOCKSTEP_MAX_FIXED_DELTAS = (-1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0)
+# Active-window write columns, measured off the full-field ZONE capture (0052).
+# Old hand-tuned model (never matched hardware): (0,25,57,89,129,169,193,233,273,305,320)
+_CGA_LOCKSTEP_MAX_FIXED_BOUNDS = (0, 1, 41, 73, 105, 145, 177, 209, 249, 289, 313, 320)
+# Content-independent -> vary-both uses the SAME bounds (the earlier split, built on
+# a confounded CHEETBG read where shared bg nibbles hid seams, is retired).
+_CGA_LOCKSTEP_MAX_FIXED_BOUNDS_VARYBOTH = _CGA_LOCKSTEP_MAX_FIXED_BOUNDS
 _CGA_LOCKSTEP_MAX_VISIBLE_WRITE_SLOTS = (10, 11, 12, 13, 1, 2, 3, 4, 5)
 _CGA_LOCKSTEP_MAX_BASE_WRITE_X = {
     10: 17,
@@ -10164,6 +10184,32 @@ _CGA_LOCKSTEP_MAX_RING_PIXELS = (
     _CGA_LOCKSTEP_MAX_WRITES * _CGA_LOCKSTEP_MAX_BASE_GAP_PIXELS
     + sum(_CGA_LOCKSTEP_MAX_FIXED_INTERVALS) * _CGA_LOCKSTEP_MAX_PIXELS_PER_NOP
 )
+
+# FREE16 profile (the robust build_hlt_pit line): 16 back-to-back palette writes per
+# scanline, NO nops / NO lodsb comp -> 16*19 = 304 cyc, writes on a dead-uniform 57-hdot
+# grid. Calibrated 2026-06-20 from F16Z.COM (phase_lock 7, ramp 0..15, VRAM=0) full-field
+# capture (screenshot0116) + cycle trace: line=304 exact, writes exactly 19 cyc apart.
+# Active window (hdot 192..832 = lo-res px 0..320) shows 12 zones straddling the loop wrap
+# at px 73 (write 15 -> write 0). BOUNDS = active-window zone edges (lo-res px); SLOTS =
+# 1-based write index (write#+1); DELTAS = -1 for the pre-wrap writes (13,14,15 = previous
+# emitted line), 0 for the post-wrap writes (0..8 = current line). Measured at palette-
+# delay 0 (all-bg ZONE), like the 13-write bounds; the per-image fg delay is applied on top.
+# BOOT-STABLE FREE16 = 8 writes/line, NOT 16. The 16-write line at 19cyc precesses through
+# every character phase, so some seams ALWAYS sit on a char-clock knife-edge and the lock's
+# +-1cyc residual flips them by a whole char boot-to-boot (proven bistable). 8 writes spaced
+# 27cyc (inter_nops=2) make the seams CLUSTER (+1 char-phase/write), and lead_nops parks that
+# cluster mid-character where +-1cyc can't reach an edge -> ROCK STABLE across cold boots
+# (NW8L2: 4/4 identical). See [[hlt-pit-feedback]].
+_CGA_FREE16_WRITES = 8
+_CGA_FREE16_INTER_NOPS = 2     # nops between writes: 2 -> 27cyc spacing -> seams cluster
+_CGA_FREE16_LEAD_NOPS = 2      # per-line lead: parks the cluster in the safe mid-char window
+# Measured off NW8L2 (shots 146-149, bit-identical): the 8 writes land on a UNIFORM 40px grid,
+# seams at lo-res 32,72,112,152,192,232,272,312 (active window x=113.5 screen, 2 hdots/px).
+# BOUNDS = lo-res zone edges; SLOTS = 1-based write#+1 (zone [0,32) is the PREVIOUS line's
+# write 7 = slot 8 delta -1; [32,72)..[312,320) are this line's writes 0..7 = slots 1..8).
+_CGA_FREE16_BOUNDS = (0, 32, 72, 112, 152, 192, 232, 272, 312, 320)
+_CGA_FREE16_SLOTS = (8, 1, 2, 3, 4, 5, 6, 7, 8)
+_CGA_FREE16_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0, 0)
 
 
 def normalize_mode_switch_max_pattern(pattern):
@@ -10214,19 +10260,43 @@ def _cga_lockstep_max_events_for_logical_line(line, pattern="Fixed"):
     return events
 
 
-def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320):
+def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320, constant_fg=True, free16=False, free16_h_shift=0):
     """Active-area zones for the calibrated 13-write profile.
 
     The visible scanline straddles two emitted palette lines. The left/middle
     zones inherit late writes from emitted line y-1, while the wrapped right
     zones use early writes from emitted line y.
+
+    constant_fg selects the spatial bounds: the clean bg-only mapping for the
+    aligned mode, or the content-dependent vary-both mapping when the fg palette
+    also changes mid-line (the two were measured to differ; see the bounds defs).
+
+    free16: the robust 16-write all-writes profile (uniform 57-hdot grid).
     """
+    if free16 and W == 320:
+        # HARD-WIRED measured seams (the char-snapped 32/24px bars from the FR registration
+        # test). These are exact, so free16_h_shift defaults to 0; it remains only as a
+        # whole-map fine-nudge if a future capture ever needs it.
+        h = int(free16_h_shift)
+        zones = []
+        for i, slot in enumerate(_CGA_FREE16_SLOTS):
+            x0 = max(0, min(W, int(_CGA_FREE16_BOUNDS[i]) + h))
+            x1 = max(0, min(W, int(_CGA_FREE16_BOUNDS[i + 1]) + h))
+            if x1 > x0:
+                zones.append({
+                    "x0": x0, "x1": x1,
+                    "slot": int(slot),
+                    "line_delta": int(_CGA_FREE16_DELTAS[i]),
+                })
+        return {"zones": zones, "intervals": None}
     pattern = normalize_mode_switch_max_pattern(pattern)
     if pattern == "Fixed" and W == 320:
+        bounds = (_CGA_LOCKSTEP_MAX_FIXED_BOUNDS if constant_fg
+                  else _CGA_LOCKSTEP_MAX_FIXED_BOUNDS_VARYBOTH)
         zones = []
         for i, slot in enumerate(_CGA_LOCKSTEP_MAX_FIXED_SLOTS):
-            x0 = int(_CGA_LOCKSTEP_MAX_FIXED_BOUNDS[i])
-            x1 = int(_CGA_LOCKSTEP_MAX_FIXED_BOUNDS[i + 1])
+            x0 = int(bounds[i])
+            x1 = int(bounds[i + 1])
             line_delta = int(_CGA_LOCKSTEP_MAX_FIXED_DELTAS[i])
             if x1 > x0:
                 zones.append({
@@ -10290,8 +10360,8 @@ def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320):
     return {"zones": zones, "intervals": cga_lockstep_max_intervals_for_line(y, pattern)}
 
 
-def build_cga_lockstep_max_layouts(pattern="Fixed", H=200, W=320):
-    return [cga_lockstep_max_layout_for_line(y, pattern, W=W) for y in range(H)]
+def build_cga_lockstep_max_layouts(pattern="Fixed", H=200, W=320, constant_fg=True, free16=False, free16_h_shift=0):
+    return [cga_lockstep_max_layout_for_line(y, pattern, W=W, constant_fg=constant_fg, free16=free16, free16_h_shift=free16_h_shift) for y in range(H)]
 
 
 def cga_mode04_palette_from_3d9(value):
@@ -10305,21 +10375,21 @@ def cga_mode04_palette_from_3d9(value):
 
 
 # Measured 2026-06-13/14 (ALIGNCAL.DSK + Fred re-renders vs MartyPC): on real CGA
-# the dense lockstep color-register change is displayed a fixed number of pixels to
+# the dense lockstep color-register change is displayed a FIXED number of pixels to
 # the RIGHT of the calibrated zone bounds whenever the scanline carries foreground
 # pixels -- the WHOLE palette (bg/border nibble AND fg palette/intensity bits) lags
 # together. The all-index-0 ZONE.COM case shows no shift (no foreground to delay);
 # that degenerate case is the one the bounds were calibrated from, which is why the
-# shift was invisible there. The exact delay is mildly content-dependent (per-zone
-# fits: error-diffused photo content ~16px, the synthetic FG2 bar pattern ~24px);
-# 16 is calibrated from real error-diffused images (the converter's actual target).
+# shift was invisible there. The lag is a CONSTANT -- NOT content-dependent (proven
+# repeatedly; an earlier "~16 photo / ~24 synthetic" note was a measurement artifact,
+# not real variation). A single delay/phase value aligns every image.
 # Preview and quantizer below apply this display shift; COM/write timing unchanged.
 _CGA_LOCKSTEP_PALETTE_DELAY_PX = 24
 
 
 def _cga_lockstep_max_value(lines, preline_values, slot, line, H):
     """Raw 3D9 value written for (slot, emitted line), or None if out of range."""
-    if not (1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES):
+    if not (1 <= slot <= len(preline_values)):   # length-based: 13-write OR 16-write (free16)
         return None
     if line == -1:
         return int(preline_values[slot - 1])
@@ -10422,6 +10492,8 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
     if entry_palette is None:
         raise ValueError("Dense lockstep plan is missing its entry palette")
     preline_values = plan.get("preline_values_3d9")
+    # writes/line: 13 (calibrated comp line) or 16 (FREE16 all-writes line, free16_writes set)
+    nwb = int(plan.get("free16_writes", 0) or 0) or _CGA_LOCKSTEP_MAX_WRITES
 
     code = bytearray()
     labels = {}
@@ -10442,6 +10514,25 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
         emit(0xE9, 0x00, 0x00)
         fixups.append((pos, name))
 
+    # Extra fixup kinds used by the phase_lock 7 (HLT+PIT) lock. call_near shares the
+    # 3-byte near-relative resolution with jmp_near; short_fixups patch 1-byte jcc rels;
+    # abs_fixups patch a 16-bit ORG-relative (label + 0x100) offset (computed jumps).
+    short_fixups = []
+    abs_fixups = []
+
+    def call_near(name):
+        pos = len(code)
+        emit(0xE8, 0x00, 0x00)
+        fixups.append((pos, name))
+
+    def jcc_short(cc, name):
+        emit(cc, 0x00)
+        short_fixups.append((len(code) - 1, name))
+
+    def abs16(name):
+        emit(0x00, 0x00)
+        abs_fixups.append((len(code) - 2, name))
+
     def palette_3d9(palette):
         mode_3d8, color_3d9 = palette_to_cga_regs(palette)
         if mode_3d8 != _CGA_MODE_3D8_MODE04:
@@ -10450,12 +10541,12 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
 
     black_3d9 = palette_3d9(entry_palette)
     if preline_values is None:
-        preline_values = [black_3d9] * _CGA_LOCKSTEP_MAX_WRITES
+        preline_values = [black_3d9] * nwb
     else:
         preline_values = [int(v) & 0xFF for v in preline_values]
-        if len(preline_values) != _CGA_LOCKSTEP_MAX_WRITES:
+        if len(preline_values) != nwb:
             raise ValueError(
-                f"Expected {_CGA_LOCKSTEP_MAX_WRITES} preroll write values, got {len(preline_values)}"
+                f"Expected {nwb} preroll write values, got {len(preline_values)}"
             )
 
     def emit_dense_line(values, intervals):
@@ -10467,13 +10558,53 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
             emit(0xB0, int(value) & 0xFF, 0xEE)
             if i < _CGA_LOCKSTEP_MAX_WRITES - 1:
                 nops(intervals[i])
-        nops(intervals[-1])
+        # Trailing inter-line gap. phase_lock 6 may drop ONE nop here (base 287->283)
+        # so the comp can reach exactly 304; this gap is AFTER write 12, so dropping
+        # it does NOT move any of the 13 visible writes (their columns are unchanged).
+        nops(max(0, intervals[-1] - (1 if refresh_drop_last_nop else 0)))
+        # phase_lock 6 disables DRAM refresh, so the 4 per-line refresh steals that
+        # padded the loop to one scanline (912 hdots = 304 CPU cyc) are gone. Re-steal
+        # those 17 cyc back. Measured filler costs (MartyPC, bus-bound dense loop):
+        #   nop=+4 (==0 mod4), dup-out=+11 (==3), lodsb=+10 (==2), seg-prefix=+4.
+        # 287 (==3 mod4) can't reach 304 (==0) with any combo (min odd combo 10+11=21).
+        # Fix: drop 1 trailing nop -> base 283, then lodsb(10)+dup(11)=21 -> 304 exactly.
+        # ORDER IS LOAD-BEARING FOR TIMING: lodsb (AC) MUST come BEFORE dup-out (EE).
+        # This [lodsb; dup] order is the calibrated 304-cyc/line recipe (original B304).
+        # Swapping to [dup; lodsb] shifts the line to 306 in MartyPC (the bus scheduling of
+        # memory-read-then-I/O-write differs by 2 cyc from I/O-write-then-memory-read) and
+        # SLANTS the image -- do NOT reorder. The dup-out writes AL = DS:[si] (the lodsb'd
+        # byte); in pl6 that lands in blanking so it's invisible. Both are deterministic.
+        if refresh_comp:
+            nops(refresh_comp)
+        for _ in range(refresh_lodsb):
+            emit(0xAC)                      # lodsb  (DS:[si] read, +10 cyc) -- FIRST (304 recipe)
+        for _ in range(refresh_dups):
+            emit(0xEE)                      # out dx,al  (duplicate write, +11 cyc) -- SECOND
+        for _ in range(refresh_prefixes):
+            emit(0x2E)                      # cs: prefix on next mov (inert, +4 cyc)
 
     def emit_dense_prefix(values, intervals, count):
         for i in range(count):
             emit(0xB0, int(values[i]) & 0xFF, 0xEE)
             if i < count - 1:
                 nops(intervals[i])
+
+    def emit_free16_line(values, n):
+        # CHAR-MIDDLE FREE16 line (NW8L2, proven boot-stable). n writes (B0 vv EE, 19cyc each)
+        # spaced by inter nops (4cyc), a per-line lead to phase the cluster mid-character, and
+        # a tail pad so the line is EXACTLY 304 cyc = one scanline. No memory read (no lodsb),
+        # so nothing for the 8088 bus scheduler to mis-time. n=8/inter=2/lead=2 => seams on a
+        # uniform 40px grid that the lock's +-1cyc wobble can't flip. Pad short rows with 0.
+        inter = int(plan.get("free16_inter_nops", _CGA_FREE16_INTER_NOPS))
+        lead = int(plan.get("free16_lead_nops", _CGA_FREE16_LEAD_NOPS))
+        pad = (304 - 19 * n) // 4 - lead - inter * (n - 1)
+        nops(lead)
+        for i in range(n):
+            v = values[i] if i < len(values) else 0
+            emit(0xB0, int(v) & 0xFF, 0xEE)
+            if i < n - 1:
+                nops(inter)
+        nops(max(0, pad))
 
     emit(0xB8, 0x04, 0x00, 0xCD, 0x10)  # mov ax,0004h / int 10h
     emit(0x0E, 0x1F)                    # push cs / pop ds
@@ -10484,25 +10615,210 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
     emit(0xB9, 0x00, 0x20)              # mov cx,2000h
     emit(0xF3, 0xA5)                    # rep movsw; keep timed loop byte-aligned with CGALK22
 
-    emit(0xB0, 0x54, 0xE6, 0x43)       # PIT channel 1 refresh count 19
-    emit(0xB0, 19, 0xE6, 0x41)
+    # phase_lock levels (re-pin DRAM-refresh phase to the beam):
+    #   0 off : PIT ch1 reprogram during VRAM load, random frame phase -> drifts.
+    #   1     : sync vsync once, program ch1 once before the loop.
+    #   2     : 1 + lahf nop-slide to a refresh boundary (one-time; pins to PIT
+    #           tick but the ONE-TIME sync hasn't converged -> sub-tick residual).
+    #   3     : slide + reprogram EVERY frame INSIDE the mainloop, where the vsync
+    #           sync has converged frame-to-frame -> boot-independent phase. The
+    #           slide aligns to the refresh boundary so the per-frame reprogram is
+    #           seamless (no reload-latency scroll).
+    #   6     : DISABLE DRAM refresh entirely (Reenigne "get away with disabling
+    #           refresh"). No PIT-driven steals -> no run-to-run refresh-phase drift;
+    #           the only residual is the one-time vsync poll slop. Instruction fetch
+    #           of the unrolled stream refreshes DRAM during the active area; a
+    #           vblank memory sweep covers the spin gap. Per-line cycle comp
+    #           (refresh_comp_nops) re-pays the removed steals to stay scanline-locked.
+    phase_lock = int(plan.get("phase_lock", 0) or 0)
+    free16_n = int(plan.get("free16_writes", 0) or 0)  # >0 = FREE16 all-writes line (robust)
+    # per-line steal compensation for refresh-off (phase_lock 6 AND 7 disable refresh, so
+    # both need the per-line comp to keep each dense line at 304 cyc / one scanline).
+    # Measured (CPU cyc): comp-nop=+4, dup-out=+11; the TRAILING interval nop costs +6
+    # (prefetch). Anchors: drop+lodsb+dup = 300; no-drop+lodsb+dup = 306. So 304 = drop
+    # (remove the 6-cost nop) + 1 comp-nop (+4) + lodsb + dup = 300 + 4. (verified by trace).
+    _refresh_off = phase_lock in (6, 7)
+    refresh_drop_last_nop = bool(plan.get("refresh_drop_last_nop", True)) if _refresh_off else False
+    refresh_comp = int(plan.get("refresh_comp_nops", 1)) if _refresh_off else 0
+    refresh_lodsb = int(plan.get("refresh_comp_lodsb", 1)) if _refresh_off else 0
+    refresh_dups = int(plan.get("refresh_comp_dups", 1)) if _refresh_off else 0
+    refresh_prefixes = int(plan.get("refresh_comp_prefixes", 0)) if _refresh_off else 0
+    # Filler-cost calibration: when calib_fillers is set, replace the per-line comp
+    # with one candidate filler per block of `calib_group` visible lines, so a single
+    # cycle trace yields each filler's exact cost (block period = 287 + filler cost).
+    calib_fillers = plan.get("calib_fillers") if phase_lock == 6 else None
+    calib_group = int(plan.get("calib_group", 25))
+    if calib_fillers:
+        refresh_comp = refresh_lodsb = refresh_dups = refresh_prefixes = 0  # calib supplies filler
+        refresh_drop_last_nop = False
+
+    def emit_pit_slide():
+        # latch ch1 (live refresh counter, mode2, 1..19), lahf-slide forward by its
+        # count (1 lahf = 1 byte = 4 CPU cyc = 1 PIT tick) so the program below
+        # always fires on the same refresh boundary.
+        emit(0xB0, 0x40, 0xE6, 0x43)        # mov al,40h / out 43h,al : latch ch1
+        emit(0xE4, 0x41)                    # in al,41h
+        emit(0x32, 0xE4)                    # xor ah,ah
+        emit(0xBB, 0x00, 0x00)             # mov bx,<slide_base+19>  (patched)
+        patch = len(code) - 2
+        emit(0x2B, 0xD8)                    # sub bx,ax  -> slide_base + (19-count)
+        emit(0xFF, 0xE3)                    # jmp bx
+        base = len(code)
+        for _ in range(19):
+            emit(0x9F)                      # lahf
+        a = 0x100 + base + 19
+        code[patch] = a & 0xFF
+        code[patch + 1] = (a >> 8) & 0xFF
+
+    def emit_pit_program():
+        emit(0xB0, 0x54, 0xE6, 0x43)        # PIT ch1 ctrl 0x54
+        emit(0xB0, 19, 0xE6, 0x41)          # count 19 -> 4 refreshes/scanline
+
+    def emit_refresh_off():
+        # ch1 mode0 (InterruptOnTerminalCount), LSB access, binary -> 0x50. Writing
+        # the control word forces OUT low and parks the counter in WaitingForReload;
+        # we never load a count, so OUT never rises again. MartyPC fires refresh only
+        # on ch1 OUT rising edges (pit.rs:426) -> refresh permanently off. Real 8253
+        # behaves the same (OUT low after mode write, stays low with no count).
+        emit(0xB0, 0x50, 0xE6, 0x43)        # mov al,50h / out 43h,al
+
+    # NOTE: no vblank refresh sweep. Instruction fetch of the 238-line unrolled stream
+    # sweeps thousands of consecutive code bytes per frame (refreshing all DRAM rows
+    # during drawing); the leftover vsync spin is only ~1.5ms, well under the 4ms 4164
+    # window. An explicit 512-byte lodsb sweep cost 16352 cyc/frame -> overran the CGA
+    # frame (87435 > 79648 cyc) and made the image beat/blink, so it's removed.
+
+    if phase_lock in (1, 2):
+        emit(0xBA, 0xDA, 0x03)              # one-time coarse vsync sync
+        emit(0xEC, 0xA8, 0x08, 0x75, 0xFB)
+        emit(0xEC, 0xA8, 0x08, 0x74, 0xFB)
+        if phase_lock == 2:
+            emit_pit_slide()
+        emit_pit_program()
+    elif phase_lock in (4, 5):
+        emit_pit_program()                  # rough program so the mainloop converges
+        emit(0xC6, 0x06, 0x80, 0x00, 0x03)  # mov byte [0080h],3  (PSP scratch counter)
+    elif phase_lock == 6:
+        emit_refresh_off()                  # kill DRAM refresh; fetch + vblank sweep keep RAM alive
+    elif phase_lock == 7:
+        # HLT+PIT BIT-EXACT lock (proven pixel-identical cross-boot in tools/build_hlt_pit.py).
+        # Refresh off, hook IRQ0 with a minimal EOI ISR, mask PIC to IRQ0 only, PIT ch0 mode2 =
+        # one IRQ0/frame, then coarse->cadj->fine search pins the HLT wake to the vsync(bit3)
+        # FALLING edge -> launch-independent. The mainloop then HLTs to that lock each frame.
+        emit_refresh_off()                  # ch1 mode0 (no refresh steals)
+        emit(0x31, 0xC0, 0x8E, 0xC0)        # xor ax,ax / mov es,ax  (ES=0 -> IVT)
+        emit(0xFA)                          # cli
+        emit(0x26, 0xC7, 0x06, 0x20, 0x00); abs16("hlt_isr")  # mov word [es:0020h], <isr off>
+        emit(0x26, 0x8C, 0x0E, 0x22, 0x00)  # mov [es:0022h], cs
+        emit(0xB0, 0xFE, 0xE6, 0x21)        # mov al,0FEh / out 21h,al  (unmask IRQ0 only)
+        emit(0xBA, 0xDA, 0x03)              # mov dx,03DAh
+        emit(0xEC, 0xA8, 0x08, 0x75, 0xFB)  # wait vsync clear
+        emit(0xEC, 0xA8, 0x08, 0x74, 0xFB)  # wait vsync set
+        emit(0xB0, 0x34, 0xE6, 0x43)        # mov al,34h / out 43h,al  (ch0,LSB/MSB,mode2,bin)
+        emit(0xB8, 0xC8, 0x4D)              # mov ax,19912  (=79648/4 -> one IRQ0 per frame)
+        emit(0xE6, 0x40, 0x88, 0xE0, 0xE6, 0x40)  # out 40h,al / mov al,ah / out 40h,al
+        emit(0xBB, 0x00, 0x04)              # mov bx,1024  (coarse nop-slide delay count)
+        emit(0xBD, 0x04, 0x00)              # mov bp,4     (fine k held during coarse)
+        emit(0xBE, 0x00, 0x02)              # mov si,512   (coarse search step)
+        emit(0xFB)                          # sti
+        label("hlt_csearch")                # COARSE: binary-search bx ~ vsync falling edge
+        emit(0xF4)                          # hlt
+        call_near("hlt_delay")
+        emit(0xBA, 0xDA, 0x03)
+        emit(0xEC, 0xA8, 0x08)              # in al,dx ; test al,8
+        jcc_short(0x74, "hlt_cdec")
+        emit(0x01, 0xF3)                    # add bx,si
+        jmp_near("hlt_chalve")
+        label("hlt_cdec")
+        emit(0x29, 0xF3)                    # sub bx,si
+        label("hlt_chalve")
+        emit(0xD1, 0xEE)                    # shr si,1
+        jcc_short(0x75, "hlt_csearch")
+        label("hlt_cadj")                   # BIAS: dec bx until bit3=1 at k=4 (just below edge)
+        emit(0xF4)
+        call_near("hlt_delay")
+        emit(0xBA, 0xDA, 0x03)
+        emit(0xEC, 0xA8, 0x08)
+        jcc_short(0x75, "hlt_cadj_done")    # jnz -> bit3=1, ok
+        emit(0x4B)                          # dec bx
+        jmp_near("hlt_cadj")
+        label("hlt_cadj_done")
+        emit(0x31, 0xED)                    # xor bp,bp  (FINE: linear walk k=0..8)
+        label("hlt_fsearch")
+        emit(0xF4)
+        call_near("hlt_delay")
+        emit(0xBA, 0xDA, 0x03)
+        emit(0xEC, 0xA8, 0x08)
+        jcc_short(0x74, "mainloop")         # jz -> past edge -> k pinned, fall into draw
+        emit(0x45)                          # inc bp
+        emit(0x83, 0xFD, 0x08)              # cmp bp,8
+        jcc_short(0x72, "hlt_fsearch")      # jb -> keep walking
+    elif phase_lock == 0:
+        emit_pit_program()                  # random pre-vsync phase
 
     label("mainloop")
-    emit(0xBA, 0xDA, 0x03)              # mov dx,03DAh
-    emit(0xEC, 0xA8, 0x08, 0x75, 0xFB)  # wait for VSYNC clear
-    emit(0xEC, 0xA8, 0x08, 0x74, 0xFB)  # wait for VSYNC set
-    emit(0xFA)                          # cli
+    if phase_lock == 7:
+        # EXACTLY build_hlt_pit's proven bit-exact draw entry: hlt; call delay; (mov dx,3D9h
+        # below). NOTHING else inside the locked frame. The FREE16 line is all-writes = a
+        # natural 304, so the old per-frame 'mov dx,3DAh / in al,dx' queue-fill (pl7_qfill)
+        # is unnecessary AND it read a beam-status port inside the lock -> removed (it was
+        # the dot-phase regression: boot-to-boot bar/tick wander).
+        emit(0xF4)                      # hlt -> wake at the PIT-locked vsync edge (bit-exact)
+        call_near("hlt_delay")          # bx nops + MUL(k) -> the locked beam position
+    else:
+        emit(0xBA, 0xDA, 0x03)              # mov dx,03DAh
+        emit(0xEC, 0xA8, 0x08, 0x75, 0xFB)  # wait for VSYNC clear
+        emit(0xEC, 0xA8, 0x08, 0x74, 0xFB)  # wait for VSYNC set
+    if phase_lock == 3:                     # re-pin every frame (scrolls -- diagnostic only)
+        emit_pit_slide()
+        emit_pit_program()
+    if phase_lock == 5:
+        # Align the WRITES themselves: slide every frame so they start on a fixed
+        # PIT tick (removes the mainloop poll slop -> ~6px sub-tick floor instead of
+        # ~42px). The slide aligns to ch1's boundary, so the refresh steals also sit
+        # at a fixed position relative to the writes.
+        emit_pit_slide()
+    if phase_lock in (4, 5):
+        # Reprogram refresh ONCE, on the 3rd frame, at the now-converged loop-start
+        # (for 5: at the slide-aligned phase) so the refresh is pinned to the same
+        # phase the writes use. One-shot via PSP-scratch counter [0080h] -> no scroll.
+        emit(0x80, 0x3E, 0x80, 0x00, 0x00)  # cmp byte [0080h],0
+        emit(0x74, 0x0E)                    # je skip
+        emit(0xFE, 0x0E, 0x80, 0x00)        # dec byte [0080h]
+        emit(0x75, 0x08)                    # jnz skip
+        emit_pit_program()                  # 8 bytes: re-pin refresh to this phase
+        # skip:
+    if phase_lock != 7:
+        emit(0xFA)                      # cli  (phase_lock 7 keeps IF set so HLT can wake)
     emit(0xBA, 0xD9, 0x03)              # mov dx,03D9h
-    nops(_CGA_LOCKSTEP_MAX_PHASE_NOPS)
+    if not free16_n:
+        nops(_CGA_LOCKSTEP_MAX_PHASE_NOPS)  # pl6: qfill 'in al,dx' + nops7 entry
+    # free16: NO entry phase nop -- the per-line lead_nops controls the cluster phase, so the
+    # entry matches NW8L2 (align_offset 0 + per-line lead) and the proven stable phase carries.
 
-    preroll_values = [black_3d9] * _CGA_LOCKSTEP_MAX_WRITES
-    for y in range(-_CGA_LOCKSTEP_MAX_PREROLL_LINES, 0):
+    preroll_values = [black_3d9] * nwb
+    # preroll lines position the visible draw vertically. pl7's HLT lock starts the draw at
+    # the vsync FALLING edge (~16 lines below pl6's vsync-poll start), so fewer preroll
+    # lines are needed to land the image on the active scan (measured: 16 lines down).
+    preroll_lines = int(plan.get("preroll_lines", _CGA_LOCKSTEP_MAX_PREROLL_LINES))
+    for y in range(-preroll_lines, 0):
         values = preline_values if y == -1 else preroll_values
-        emit_dense_line(values, cga_lockstep_max_intervals_for_line(y, pattern))
+        if free16_n:
+            emit_free16_line(values, free16_n)
+        else:
+            emit_dense_line(values, cga_lockstep_max_intervals_for_line(y, pattern))
+        if calib_fillers:
+            emit(0x90)                      # fixed preroll filler (period not measured)
 
     visible_blocks = min(_CGA_LOCKSTEP_MAX_VISIBLE_BLOCKS, len(lines))
     for y in range(visible_blocks):
-        emit_dense_line(lines[y]["values_3d9"], cga_lockstep_max_intervals_for_line(y, pattern))
+        if free16_n:
+            emit_free16_line(lines[y]["values_3d9"], free16_n)
+        else:
+            emit_dense_line(lines[y]["values_3d9"], cga_lockstep_max_intervals_for_line(y, pattern))
+        if calib_fillers:
+            g = min(y // calib_group, len(calib_fillers) - 1)
+            emit(*calib_fillers[g])         # one candidate filler per block of lines
 
     drain_line = min(visible_blocks, len(lines) - 1)
     emit_dense_prefix(
@@ -10512,27 +10828,58 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
     )
     emit(0xB0, 0x00, 0xEE)              # reset border/background after drain
 
-    emit(0xFB)                          # sti
-    emit(0xB4, 0x01, 0xCD, 0x16)       # keyboard status
-    emit(0x75, 0x03)                    # jnz haskey
-    jmp_near("mainloop")
+    if phase_lock == 7:
+        jmp_near("mainloop")            # HLT re-locks each frame; reset the emulator to exit (v1)
+        # --- HLT+PIT lock support routines (referenced by call_near/abs16 above) ---
+        label("hlt_delay")             # variable delay: bx nops (computed jump) + MUL(k) fine
+        emit(0xB8); abs16("hlt_slide_end")   # mov ax, <slide_end>
+        emit(0x29, 0xD8)               # sub ax,bx
+        emit(0xFF, 0xE0)               # jmp ax  (run bx nops)
+        nops(2048)                     # nop slide
+        label("hlt_slide_end")
+        emit(0x89, 0xEF)               # mov di,bp
+        emit(0x2E, 0x8A, 0x85); abs16("hlt_bittable")  # mov al, cs:[bittable+di]
+        emit(0xB1, 0xFF)               # mov cl,0FFh
+        emit(0xF6, 0xE1)               # mul cl  (= base + popcount(al) = base + k)
+        emit(0xC3)                     # ret
+        label("hlt_bittable")
+        emit(0, 1, 3, 7, 15, 31, 63, 127, 255)   # values with popcount 0..8
+        label("hlt_isr")              # minimal IRQ0 ISR: EOI + iret
+        emit(0x50)                     # push ax
+        emit(0xB0, 0x20, 0xE6, 0x20)   # mov al,20h / out 20h,al
+        emit(0x58)                     # pop ax
+        emit(0xCF)                     # iret
+    else:
+        emit(0xFB)                          # sti
+        emit(0xB4, 0x01, 0xCD, 0x16)       # keyboard status
+        emit(0x75, 0x03)                    # jnz haskey
+        jmp_near("mainloop")
 
-    label("haskey")
-    emit(0xB4, 0x00, 0xCD, 0x16)       # consume key
-    emit(0x3C, 0x1B)                    # ESC?
-    emit(0x74, 0x03)
-    jmp_near("mainloop")
+        label("haskey")
+        emit(0xB4, 0x00, 0xCD, 0x16)       # consume key
+        emit(0x3C, 0x1B)                    # ESC?
+        emit(0x74, 0x03)
+        jmp_near("mainloop")
 
-    label("exit")
-    emit(0xB0, 0x54, 0xE6, 0x43)       # restore PIT channel 1 count 18
-    emit(0xB0, 18, 0xE6, 0x41)
-    emit(0xB8, 0x03, 0x00, 0xCD, 0x10) # text mode
-    emit(0xB8, 0x00, 0x4C, 0xCD, 0x21) # terminate process
+        label("exit")
+        emit(0xB0, 0x54, 0xE6, 0x43)       # restore PIT channel 1 count 18
+        emit(0xB0, 18, 0xE6, 0x41)
+        emit(0xB8, 0x03, 0x00, 0xCD, 0x10) # text mode
+        emit(0xB8, 0x00, 0x4C, 0xCD, 0x21) # terminate process
 
     for pos, name in fixups:
         disp = labels[name] - (pos + 3)
         code[pos + 1] = disp & 0xFF
         code[pos + 2] = (disp >> 8) & 0xFF
+    for pos, name in short_fixups:
+        disp = labels[name] - (pos + 1)
+        if not -128 <= disp <= 127:
+            raise ValueError(f"phase_lock 7 short jump to {name} out of range: {disp}")
+        code[pos] = disp & 0xFF
+    for pos, name in abs_fixups:
+        val = (labels[name] + 0x100) & 0xFFFF
+        code[pos] = val & 0xFF
+        code[pos + 1] = (val >> 8) & 0xFF
 
     fb_offset = 0x100 + len(code)
     if fb_offset > 0xFFFF:
@@ -10556,6 +10903,9 @@ def quantize_320x200_mode_switch_lockstep_max(
     progress_cb=None,
     constant_fg_per_line=False,
     palette_delay_override=None,
+    free16=False,
+    free16_h_shift=0,
+    free16_preroll_lines=None,
 ):
     """Quantize for the dense 13-write lockstep COM profile.
 
@@ -10593,14 +10943,16 @@ def quantize_320x200_mode_switch_lockstep_max(
     # In constant-fg mode every write on a line shares one fg palette/intensity
     # mode (3D9 bits 4-5); group the candidates by that mode so a line can be
     # restricted to one group.
-    # palette_delay_px = how many pixels right of the calibrated bounds the palette
-    # actually lands on hardware. If palette_delay_override is given (incl. 0), it
-    # wins; otherwise default per mode. Exposed in the GUI so it can be dialed in
-    # against a real MartyPC capture without a code change.
+    # palette_delay_px = extra pixels right of the calibrated bounds the palette
+    # lands on hardware. Both modes now use directly-measured bounds (aligned vs
+    # vary-both), so the default is 0 -- the seams are already where reality put
+    # them. The GUI override remains to dial any residual fg-present shift against
+    # a real MartyPC capture without a code change. If palette_delay_override is
+    # given (incl. 0) it wins.
     if palette_delay_override is not None:
         palette_delay_px = int(palette_delay_override)
     else:
-        palette_delay_px = 0 if constant_fg_per_line else _CGA_LOCKSTEP_PALETTE_DELAY_PX
+        palette_delay_px = 0
     fg_mode_groups = []
     if constant_fg_per_line:
         groups = {}
@@ -10633,7 +10985,9 @@ def quantize_320x200_mode_switch_lockstep_max(
     }
     kernel = kernels.get(diffusion_name, kernels["Floyd-Steinberg"])
     intensity = max(0.0, min(3.0, float(diffusion_intensity)))
-    layouts = build_cga_lockstep_max_layouts(pattern, H=H, W=W)
+    n_writes = _CGA_FREE16_WRITES if free16 else _CGA_LOCKSTEP_MAX_WRITES
+    layouts = build_cga_lockstep_max_layouts(pattern, H=H, W=W, constant_fg=constant_fg_per_line,
+                                             free16=free16, free16_h_shift=(free16_h_shift if free16 else 0))
 
     def nearest_index(old_rgb, pal4):
         r, g, b = old_rgb
@@ -10672,16 +11026,16 @@ def quantize_320x200_mode_switch_lockstep_max(
     entry_palette = slot_candidates[0]
     entry_3d9 = palette_to_cga_regs(entry_palette)[1]
     values_by_line = [
-        [entry_3d9] * _CGA_LOCKSTEP_MAX_WRITES
+        [entry_3d9] * n_writes
         for _ in range(H)
     ]
-    preline_values = [entry_3d9] * _CGA_LOCKSTEP_MAX_WRITES
+    preline_values = [entry_3d9] * n_writes
     zones_by_visible_line = [None] * H
     out_pixels = [(0, 0, 0)] * (W * H)
     out_indices = np.zeros((H, W), dtype=np.uint8)
 
     def _store_value(slot, line, value):
-        if not (1 <= slot <= _CGA_LOCKSTEP_MAX_WRITES):
+        if not (1 <= slot <= n_writes):
             return
         if line == -1:
             preline_values[slot - 1] = value
@@ -10796,7 +11150,7 @@ def quantize_320x200_mode_switch_lockstep_max(
 
     plan = {
         "kind": "cga-lockstep-max",
-        "writes_per_line": _CGA_LOCKSTEP_MAX_WRITES,
+        "writes_per_line": n_writes,
         "pattern": pattern,
         "keep_border_black": bool(keep_border_black),
         "entry_palette": entry_palette,
@@ -10808,6 +11162,13 @@ def quantize_320x200_mode_switch_lockstep_max(
         "palette_delay_px": palette_delay_px,
         "constant_fg_per_line": bool(constant_fg_per_line),
     }
+    if free16:
+        plan["free16_writes"] = n_writes          # builder emits the all-writes line
+        plan["phase_lock"] = 7                     # FREE16 is the pl7 HLT+PIT lock path
+        # pl7 starts the draw at the vsync falling edge -> 16 fewer preroll lines (the
+        # measured 16px-down offset). Tunable via free16_preroll_lines.
+        plan["preroll_lines"] = int(free16_preroll_lines) if free16_preroll_lines is not None \
+            else _CGA_LOCKSTEP_MAX_PREROLL_LINES - 16
     return render_cga_lockstep_max_physical_preview(plan, W=W, H=H), plan
 
 
@@ -13922,6 +14283,10 @@ class CgaConverterApp(tk.Tk):
             lockstep_max_plan = None
             if seg_n_320 == _CGA_LOCKSTEP_MAX_WRITES:
                 max_kwargs = {
+                    # PRODUCTION DEFAULT: the boot-stable 8-write char-middle FREE16 line.
+                    # This is THE multi-change-per-line mode (the old 16/13-write lines were
+                    # bistable boot-to-boot; free16 is bit-identical across cold boots).
+                    "free16": True,
                     "forced_bg_idx": forced_bg_idx,
                     "serpentine": serpentine,
                     "pattern": pattern_320,
@@ -14734,6 +15099,9 @@ class CgaConverterApp(tk.Tk):
                         self.output_pimage, plan
                     )
                     vram = pack_cga_320_vram_from_indices(idx_arr)
+                    # phase_lock 7 = HLT+PIT bit-exact lock (pixel-identical every cold boot).
+                    # Default to it; a plan that already pins phase_lock is respected.
+                    plan = {**plan, "phase_lock": int(plan.get("phase_lock") or 7)}
                     com = build_com_320_mode_switch_lockstep_max(vram, plan)
                     default_name = "cga_320_modeswitch_lockstep_n13.com"
                 elif seg_n == 1:
