@@ -10203,11 +10203,14 @@ _CGA_LOCKSTEP_MAX_RING_PIXELS = (
 _CGA_FREE16_WRITES = 8
 _CGA_FREE16_INTER_NOPS = 2     # nops between writes: 2 -> 27cyc spacing -> seams cluster
 _CGA_FREE16_LEAD_NOPS = 2      # per-line lead: parks the cluster in the safe mid-char window
-# Measured off NW8L2 (shots 146-149, bit-identical): the 8 writes land on a UNIFORM 40px grid,
-# seams at lo-res 32,72,112,152,192,232,272,312 (active window x=113.5 screen, 2 hdots/px).
-# BOUNDS = lo-res zone edges; SLOTS = 1-based write#+1 (zone [0,32) is the PREVIOUS line's
-# write 7 = slot 8 delta -1; [32,72)..[312,320) are this line's writes 0..7 = slots 1..8).
-_CGA_FREE16_BOUNDS = (0, 32, 72, 112, 152, 192, 232, 272, 312, 320)
+# Measured off NW8L2 (shots 146-149, bit-identical): the 8 writes land on a UNIFORM 40px grid.
+# Corrected +1 from a full-field capture (brit2 / shot0150): the hardware switches palette one
+# lo-res pixel LATER than the bare-ramp estimate, so write-0 starts at lo-res 33 (not 32). With
+# the old 32 grid the quantizer dithered each boundary pixel against the NEXT zone's palette while
+# the hardware still showed the previous one -> a 1px colour smear at all 8 seams. True seams:
+# lo-res 33,73,113,153,193,233,273,313. BOUNDS = lo-res zone edges; SLOTS = 1-based write#+1
+# (zone [0,33) is the PREVIOUS line's write 7 = slot 8 delta -1; [33,73)..[313,320) = writes 0..7).
+_CGA_FREE16_BOUNDS = (0, 33, 73, 113, 153, 193, 233, 273, 313, 320)
 _CGA_FREE16_SLOTS = (8, 1, 2, 3, 4, 5, 6, 7, 8)
 _CGA_FREE16_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0, 0)
 
