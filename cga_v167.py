@@ -10921,6 +10921,7 @@ def quantize_320x200_mode_switch_lockstep_max(
     free16=False,
     free16_h_shift=0,
     free16_preroll_lines=None,
+    dither_aware=False,
 ):
     """Quantize for the multi-write lockstep COM profile (free16 = the 8-write
     production line; otherwise the legacy 13-write dense schedule).
@@ -11018,6 +11019,46 @@ def quantize_320x200_mode_switch_lockstep_max(
                 best_error = error
         return best_palette, best_error
 
+    # --- Dither-aware selection ("Dither aware optimization" mode) -------------------------
+    # The default choose_palette scores each candidate by PRE-dither nearest-colour error, which
+    # is blind to dithering and TIES for mid-tones -> the per-line palette oscillates -> the
+    # horizontal banding. This mode instead SIMULATES the error-diffusion dither across the zone
+    # for every candidate (carrying the in-row error forward exactly as the real pass does) and
+    # scores by the LAB error each pixel actually leaves (sum of squared CIE-Lab distances between
+    # the displayed colour and the dither-adjusted target). The palette whose levels best BRACKET
+    # the zone's tones wins, and the choice is stable line-to-line. Per-candidate sim -> opt-in.
+    _da_within = [(dx, w) for (dx, dy, w) in kernel if dy == 0 and dx > 0]  # in-row diffusion terms
+    _da_pools = {}
+    if dither_aware:
+        def _da_make(pals):
+            cols = np.array([[list(c) for c in p] for p in pals], dtype=np.float64)   # (N,4,3)
+            cols_lab = _rgb_array_to_lab(np.clip(cols, 0, 255).astype(np.uint8))       # (N,4,3)
+            return pals, cols, cols_lab
+        _da_pools["full"] = _da_make(slot_candidates)
+        _da_pools["black"] = _da_make(palettes_with_bg(slot_candidates, 0))
+
+    def choose_palette_dither_aware(yy, x0, x1, da_pool):
+        pals, cols, cols_lab = da_pool
+        N = len(pals)
+        W = x1 - x0
+        if W <= 0:
+            return pals[0]
+        tgt = np.array([work[yy][x] for x in range(x0, x1)], dtype=np.float64)         # (W,3)
+        carried = np.zeros((W + 4, N, 3))                                              # forward error
+        score = np.zeros(N)
+        idxN = np.arange(N)
+        for i in range(W):
+            adj = tgt[i] + carried[i]                                                  # (N,3) adj target
+            nn = ((adj[:, None, :] - cols) ** 2).sum(2).argmin(1)                       # RGB nearest of 4
+            chosen = cols[idxN, nn]                                                     # (N,3) displayed
+            adj_lab = _rgb_array_to_lab(np.clip(adj, 0, 255).round().astype(np.uint8))
+            score += ((cols_lab[idxN, nn] - adj_lab) ** 2).sum(1)                       # Lab err left here
+            err = adj - chosen
+            for dx, w in _da_within:                                                    # diffuse in-row
+                if i + dx < W:
+                    carried[i + dx] += err * (w * intensity)
+        return pals[int(score.argmin())]
+
     entry_palette = slot_candidates[0]
     entry_3d9 = palette_to_cga_regs(entry_palette)[1]
     values_by_line = [
@@ -11085,9 +11126,13 @@ def quantize_320x200_mode_switch_lockstep_max(
             # LEADING (slot n, the HBLANK write -> left + deep overscan). That keeps the WHOLE border
             # black while both edges still take their palette's fg colours.
             is_border_reg = free16 and slot in (n_writes - 1, n_writes)
-            pool = (palettes_with_bg(line_pool, 0)
-                    if (is_border_reg and keep_border_black) else line_pool)
-            palette, _ = choose_palette([(y, dx0, dx1)], pool)
+            black_pool = is_border_reg and keep_border_black
+            if dither_aware:
+                palette = choose_palette_dither_aware(
+                    y, dx0, dx1, _da_pools["black"] if black_pool else _da_pools["full"])
+            else:
+                pool = palettes_with_bg(line_pool, 0) if black_pool else line_pool
+                palette, _ = choose_palette([(y, dx0, dx1)], pool)
             mode_3d8, color_3d9 = palette_to_cga_regs(palette)
             if mode_3d8 != _CGA_MODE_3D8_MODE04:
                 raise ValueError("Dense lockstep quantizer selected a non-mode-04h palette")
@@ -12110,6 +12155,18 @@ class CgaConverterApp(tk.Tk):
         )
         self.ms_black_border_cb.grid(row=8, column=3, columnspan=3, sticky="w", padx=4, pady=2)
 
+        # Dither-aware palette selection: pick each zone's palette by SIMULATING the dither and
+        # scoring the resulting CIE-Lab error, instead of pre-dither nearest-colour. Stops the
+        # mid-tone palette oscillation that shows up as horizontal banding. Slower (per-candidate
+        # dither sim), so it is opt-in.
+        self.ms_dither_aware_var = tk.BooleanVar(value=False)
+        self.ms_dither_aware_cb = ttk.Checkbutton(
+            options,
+            text="Dither aware optimization (Lab, slower)",
+            variable=self.ms_dither_aware_var,
+        )
+        self.ms_dither_aware_cb.grid(row=9, column=0, columnspan=3, sticky="w", padx=4, pady=2)
+
         # Backward-compat alias (so old code paths that still reference ms_stagger_var don't crash)
         self.ms_stagger_var = tk.BooleanVar(value=False)
 
@@ -12751,6 +12808,12 @@ class CgaConverterApp(tk.Tk):
 
             # "Keep border black" is honoured by both the N=1 and the 8-write wrap paths.
             self.ms_black_border_cb.state(["!disabled"] if in_ms_mode else ["disabled"])
+
+            # Dither-aware optimization only applies to the 8-write lockstep selection path.
+            da_ok = in_ms_mode and seg_n == _CGA_FREE16_WRITES
+            self.ms_dither_aware_cb.state(["!disabled"] if da_ok else ["disabled"])
+            if not da_ok:
+                self.ms_dither_aware_var.set(False)
 
             # Multi-write lockstep is mode-04h only: changing 3D8h inside the
             # raster loop would alter the tested instruction cadence. Tweaked
@@ -14243,6 +14306,9 @@ class CgaConverterApp(tk.Tk):
                     "pattern": pattern_320,
                     "keep_border_black": bool(
                         getattr(self, "ms_black_border_var", tk.BooleanVar(value=True)).get()
+                    ),
+                    "dither_aware": bool(
+                        getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()
                     ),
                     "progress_cb": (lambda frac: self.set_progress(int(30 + frac*65))),
                 }
