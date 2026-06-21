@@ -1498,6 +1498,45 @@ _SRGB_LIN_TABLE = None  # lazily initialized in _rgb_array_to_lab
 _SRGB_LIN_TABLE_F32 = None  # lazily initialized in _rgb_array_to_lab_f32
 
 
+def _da_pool_arrays(pals):
+    """(palette list) -> (colours (N,4,3) float, colours-as-Lab (N,4,3)) for dither-aware scoring."""
+    import numpy as np
+    cols = np.array([[list(c) for c in p] for p in pals], dtype=np.float64)
+    cols_lab = _rgb_array_to_lab(np.clip(cols, 0, 255).astype(np.uint8))
+    return cols, cols_lab
+
+
+def _choose_palette_dither_aware(work, yy, ranges, pool_cols, pool_lab, within_terms, intensity):
+    """Pick the candidate palette INDEX that DITHERS the given row pixels best.
+
+    Simulates the error-diffusion dither across the pixels for EVERY candidate at once (carrying
+    the in-row error forward exactly as the real render pass does) and scores by the summed squared
+    CIE-Lab distance between each displayed colour and the dither-ADJUSTED target. The palette whose
+    levels best BRACKET the tones wins -- unlike pre-dither nearest-colour this is stable for
+    mid-tones, so it removes the per-line palette oscillation that shows up as horizontal banding.
+    Vectorised over the N candidates. ranges = list of (x0, x1) spans on row yy of work."""
+    import numpy as np
+    xs = [x for (x0, x1) in ranges for x in range(int(x0), int(x1))]
+    if not xs:
+        return 0
+    tgt = np.array([work[yy][x] for x in xs], dtype=np.float64)            # (W,3) targets in order
+    N = int(pool_cols.shape[0])
+    Wn = tgt.shape[0]
+    carried = np.zeros((Wn + 4, N, 3))                                     # forward in-row error
+    score = np.zeros(N)
+    idxN = np.arange(N)
+    for i in range(Wn):
+        adj = tgt[i] + carried[i]                                         # (N,3) adjusted target
+        nn = ((adj[:, None, :] - pool_cols) ** 2).sum(2).argmin(1)        # RGB nearest of the 4
+        adj_lab = _rgb_array_to_lab(np.clip(adj, 0, 255).round().astype(np.uint8))
+        score += ((pool_lab[idxN, nn] - adj_lab) ** 2).sum(1)            # Lab error left at this pixel
+        err = adj - pool_cols[idxN, nn]
+        for dx, w in within_terms:
+            if i + dx < Wn:
+                carried[i + dx] += err * (w * intensity)
+    return int(score.argmin())
+
+
 def _rgb_array_to_lab_f32(rgb_uint8):
     """Float32 variant of _rgb_array_to_lab. Returns shape (..., 3) float32.
 
@@ -9383,6 +9422,8 @@ def quantize_320x200_mode_switch(
     return_palettes=False,
     tweaked_mode="off",         # "off" → mode-04 palettes only (3D8=0x0A constant)
                                 # "on"  → mode-05 Tweaked palettes only (3D8=0x0E constant)
+    dither_aware=False,         # pick each segment's palette by simulating the dither (Lab) instead
+                                # of pre-dither nearest-colour -> kills mid-tone horizontal banding
 ):
     """
     320x200 Mode Switch:
@@ -9501,6 +9542,14 @@ def quantize_320x200_mode_switch(
 
     kernel = KERNELS.get(diffusion_name, KERNELS["Floyd-Steinberg"])
 
+    # Dither-aware selection (optional): precompute the candidate colours + Lab once. Each segment's
+    # palette is then chosen by simulating the dither (see _choose_palette_dither_aware) instead of
+    # pre-dither nearest-colour, which removes the mid-tone per-line oscillation / horizontal bands.
+    _da_within = [(dx, w) for (dx, dy, w) in kernel if dy == 0 and dx > 0]
+    _da_cols = _da_lab = None
+    if dither_aware:
+        _da_cols, _da_lab = _da_pool_arrays(candidates)
+
     # Output pixels
     out_pixels = [(0, 0, 0)] * (W * H)
 
@@ -9563,6 +9612,14 @@ def quantize_320x200_mode_switch(
         for si in range(seg_n):
             ranges = seg_x_ranges[si]
             if not ranges:
+                continue
+
+            if dither_aware:
+                bi = _choose_palette_dither_aware(
+                    work, y, ranges, _da_cols, _da_lab, _da_within, intensity)
+                seg_pals[si] = candidates[bi]
+                seg_idxs[si] = bi
+                seg_errs[si] = 0.0
                 continue
 
             best_err = float("inf")
@@ -11020,44 +11077,19 @@ def quantize_320x200_mode_switch_lockstep_max(
         return best_palette, best_error
 
     # --- Dither-aware selection ("Dither aware optimization" mode) -------------------------
-    # The default choose_palette scores each candidate by PRE-dither nearest-colour error, which
-    # is blind to dithering and TIES for mid-tones -> the per-line palette oscillates -> the
-    # horizontal banding. This mode instead SIMULATES the error-diffusion dither across the zone
-    # for every candidate (carrying the in-row error forward exactly as the real pass does) and
-    # scores by the LAB error each pixel actually leaves (sum of squared CIE-Lab distances between
-    # the displayed colour and the dither-adjusted target). The palette whose levels best BRACKET
-    # the zone's tones wins, and the choice is stable line-to-line. Per-candidate sim -> opt-in.
+    # See module-level _choose_palette_dither_aware: it SIMULATES the dither per candidate and
+    # scores in CIE-Lab so the choice is dither-aware and stable (kills the mid-tone banding).
     _da_within = [(dx, w) for (dx, dy, w) in kernel if dy == 0 and dx > 0]  # in-row diffusion terms
     _da_pools = {}
     if dither_aware:
-        def _da_make(pals):
-            cols = np.array([[list(c) for c in p] for p in pals], dtype=np.float64)   # (N,4,3)
-            cols_lab = _rgb_array_to_lab(np.clip(cols, 0, 255).astype(np.uint8))       # (N,4,3)
-            return pals, cols, cols_lab
-        _da_pools["full"] = _da_make(slot_candidates)
-        _da_pools["black"] = _da_make(palettes_with_bg(slot_candidates, 0))
+        _da_pools["full"] = (slot_candidates, *_da_pool_arrays(slot_candidates))
+        _blk = palettes_with_bg(slot_candidates, 0)
+        _da_pools["black"] = (_blk, *_da_pool_arrays(_blk))
 
     def choose_palette_dither_aware(yy, x0, x1, da_pool):
         pals, cols, cols_lab = da_pool
-        N = len(pals)
-        W = x1 - x0
-        if W <= 0:
-            return pals[0]
-        tgt = np.array([work[yy][x] for x in range(x0, x1)], dtype=np.float64)         # (W,3)
-        carried = np.zeros((W + 4, N, 3))                                              # forward error
-        score = np.zeros(N)
-        idxN = np.arange(N)
-        for i in range(W):
-            adj = tgt[i] + carried[i]                                                  # (N,3) adj target
-            nn = ((adj[:, None, :] - cols) ** 2).sum(2).argmin(1)                       # RGB nearest of 4
-            chosen = cols[idxN, nn]                                                     # (N,3) displayed
-            adj_lab = _rgb_array_to_lab(np.clip(adj, 0, 255).round().astype(np.uint8))
-            score += ((cols_lab[idxN, nn] - adj_lab) ** 2).sum(1)                       # Lab err left here
-            err = adj - chosen
-            for dx, w in _da_within:                                                    # diffuse in-row
-                if i + dx < W:
-                    carried[i + dx] += err * (w * intensity)
-        return pals[int(score.argmin())]
+        bi = _choose_palette_dither_aware(work, yy, [(x0, x1)], cols, cols_lab, _da_within, intensity)
+        return pals[bi]
 
     entry_palette = slot_candidates[0]
     entry_3d9 = palette_to_cga_regs(entry_palette)[1]
@@ -12810,7 +12842,7 @@ class CgaConverterApp(tk.Tk):
             self.ms_black_border_cb.state(["!disabled"] if in_ms_mode else ["disabled"])
 
             # Dither-aware optimization only applies to the 8-write lockstep selection path.
-            da_ok = in_ms_mode and seg_n == _CGA_FREE16_WRITES
+            da_ok = in_ms_mode and seg_n in (1, _CGA_FREE16_WRITES)
             self.ms_dither_aware_cb.state(["!disabled"] if da_ok else ["disabled"])
             if not da_ok:
                 self.ms_dither_aware_var.set(False)
@@ -14334,6 +14366,7 @@ class CgaConverterApp(tk.Tk):
                     toned_ms,
                     forced_bg_idx=forced_bg_idx,
                     dither_family="Ordered",
+                    dither_aware=bool(getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()),
                     ordered_matrix_size=ordered_size,
                     ordered_strength=ordered_strength,
                     serpentine=serpentine,
@@ -14351,6 +14384,7 @@ class CgaConverterApp(tk.Tk):
                     toned_ms,
                     forced_bg_idx=forced_bg_idx,
                     dither_family="Diffusion",
+                    dither_aware=bool(getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()),
                     diffusion_name=diffusion_method,
                     diffusion_intensity=dither_intensity,
                     serpentine=serpentine,
@@ -14367,6 +14401,7 @@ class CgaConverterApp(tk.Tk):
                     toned_ms,
                     forced_bg_idx=forced_bg_idx,
                     dither_family="None",
+                    dither_aware=bool(getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()),
                     serpentine=serpentine,
                     segments_per_line=seg_n_320,
                     stagger_mode=stagger_mode_320,
