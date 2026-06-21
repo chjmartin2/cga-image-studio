@@ -10798,6 +10798,10 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
         nops(_CGA_LOCKSTEP_MAX_PHASE_NOPS)  # pl6: qfill 'in al,dx' + nops7 entry
     # free16: NO entry phase nop -- the per-line lead_nops controls the cluster phase, so the
     # entry matches NW8L2 (align_offset 0 + per-line lead) and the proven stable phase carries.
+    # (An H-phase shift to kill the 7px wrap stub was tested -- E71 -- but any shift slides the
+    # last write off char-middle and re-introduces a 1-char boot-to-boot flip; see the bistability
+    # at lo-res 281-288. E0 is the unique stable phase, so the stub stays and we balance it in the
+    # quantizer instead. See [[free16-production-default]].)
 
     preroll_values = [black_3d9] * nwb
     # preroll lines position the visible draw vertically. pl7's HLT lock starts the draw at
@@ -11026,6 +11030,30 @@ def quantize_320x200_mode_switch_lockstep_max(
                 best_error = error
         return best_palette, best_error
 
+    def choose_palette_balanced(ranges, palette_pool):
+        """Best fit across several spans giving EACH span equal weight (its MEAN error),
+        so a small span (the 7px wrap tail) isn't drowned out by a large one (the 33px wrap
+        head). Used where one 3D9 register must serve two unequal regions at once."""
+        spans = [(yy, x0, x1) for yy, x0, x1 in ranges if x1 > x0]
+        if not spans:
+            return palette_pool[0]
+        best_palette = palette_pool[0]
+        best_score = float("inf")
+        for palette in palette_pool:
+            score = 0.0
+            for yy, x0, x1 in spans:
+                tot = 0.0
+                for xx in range(x0, x1):
+                    _, dist = nearest_index(work[yy][xx], palette)
+                    tot += dist
+                score += tot / (x1 - x0)          # per-span MEAN -> equal weight per region
+                if score >= best_score:
+                    break
+            if score < best_score:
+                best_score = score
+                best_palette = palette
+        return best_palette
+
     entry_palette = slot_candidates[0]
     entry_3d9 = palette_to_cga_regs(entry_palette)[1]
     values_by_line = [
@@ -11107,7 +11135,18 @@ def quantize_320x200_mode_switch_lockstep_max(
                 # Shifted off the right edge (rightmost zone); never displayed.
                 zone["palette"] = entry_palette
                 continue
-            palette, _ = choose_palette([(y, dx0, dx1)], line_pool)
+            # free16 wrap: this register (slot n, line_delta -1) ALSO paints the PREVIOUS line's
+            # right tail [last_seam, W) -- the single 3D9 value persists across the line boundary
+            # until write 0 of the next line. Pick ONE palette as the BEST FIT across BOTH spans,
+            # weighting each region EQUALLY (per-span mean) rather than letting the larger 33px
+            # head dominate the small 7px tail. last_seam = _CGA_FREE16_BOUNDS[-2].
+            is_wrap_tail = (free16 and slot == n_writes
+                            and int(zone.get("line_delta", 0)) == -1 and target_y >= 0)
+            if is_wrap_tail:
+                palette = choose_palette_balanced(
+                    [(y, dx0, dx1), (target_y, int(_CGA_FREE16_BOUNDS[-2]), W)], line_pool)
+            else:
+                palette, _ = choose_palette([(y, dx0, dx1)], line_pool)
             mode_3d8, color_3d9 = palette_to_cga_regs(palette)
             if mode_3d8 != _CGA_MODE_3D8_MODE04:
                 raise ValueError("Dense lockstep quantizer selected a non-mode-04h palette")
@@ -11140,6 +11179,15 @@ def quantize_320x200_mode_switch_lockstep_max(
                             work[yy][xx][0] = min(255.0, max(0.0, work[yy][xx][0] + er * factor))
                             work[yy][xx][1] = min(255.0, max(0.0, work[yy][xx][1] + eg * factor))
                             work[yy][xx][2] = min(255.0, max(0.0, work[yy][xx][2] + eb * factor))
+
+            if is_wrap_tail:
+                # Re-quantize the previous line's right tail against the FINAL wrap palette so it
+                # matches the register it actually displays. Plain nearest-colour (no error
+                # re-diffusion -- that line's pass already propagated); fixes the garbage strip.
+                for x in range(int(_CGA_FREE16_BOUNDS[-2]), W):
+                    pidx, _ = nearest_index(work[target_y][x], palette)
+                    out_indices[target_y, x] = pidx
+                    out_pixels[target_y * W + x] = palette[pidx]
 
         zones_by_visible_line[y] = zones
 
