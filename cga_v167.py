@@ -10201,18 +10201,20 @@ _CGA_LOCKSTEP_MAX_RING_PIXELS = (
 # cluster mid-character where +-1cyc can't reach an edge -> ROCK STABLE across cold boots
 # (NW8L2: 4/4 identical). See [[hlt-pit-feedback]].
 _CGA_FREE16_WRITES = 8
-_CGA_FREE16_INTER_NOPS = 2     # nops between writes: 2 -> 27cyc spacing -> seams cluster
+_CGA_FREE16_INTER_NOPS = 2     # nops between image writes: 2 -> 27cyc spacing -> seams cluster
 _CGA_FREE16_LEAD_NOPS = 2      # per-line lead: parks the cluster in the safe mid-char window
-# Measured off NW8L2 (shots 146-149, bit-identical): the 8 writes land on a UNIFORM 40px grid.
-# Corrected +1 from a full-field capture (brit2 / shot0150): the hardware switches palette one
-# lo-res pixel LATER than the bare-ramp estimate, so write-0 starts at lo-res 33 (not 32). With
-# the old 32 grid the quantizer dithered each boundary pixel against the NEXT zone's palette while
-# the hardware still showed the previous one -> a 1px colour smear at all 8 seams. True seams:
-# lo-res 33,73,113,153,193,233,273,313. BOUNDS = lo-res zone edges; SLOTS = 1-based write#+1
-# (zone [0,33) is the PREVIOUS line's write 7 = slot 8 delta -1; [33,73)..[313,320) = writes 0..7).
-_CGA_FREE16_BOUNDS = (0, 33, 73, 113, 153, 193, 233, 273, 313, 320)
-_CGA_FREE16_SLOTS = (8, 1, 2, 3, 4, 5, 6, 7, 8)
-_CGA_FREE16_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0, 0)
+_CGA_FREE16_HBLANK_AFTER = 6   # nops AFTER the moved (HBLANK) write so it lands in the overscan
+# HBLANK-LEADING structure (HBLEAD, proven 2026-06-21): of the 8 writes, the last is MOVED out of
+# the active area into the horizontal-blank pad, where it sets the NEXT line's LEADING [0,33)
+# palette independently of the trailing write -- killing the old write-7 wrap conflict at ZERO
+# cycle cost (still 8 writes = exactly 304). So 7 image writes land on the measured 40px grid at
+# lo-res 33,73,113,153,193,233,273 (write 6 covers [273,320), a 47px zone), and the 8th/HBLANK
+# write (slot 8) paints [0,33) of the next line. BOUNDS = lo-res zone edges; SLOTS = 1-based write
+# index+1 (zone [0,33) = PREVIOUS line's HBLANK write = slot 8, delta -1; [33,73)..[273,320) =
+# this line's image writes 0..6 = slots 1..7). The trailing/right-border register is slot 7.
+_CGA_FREE16_BOUNDS = (0, 33, 73, 113, 153, 193, 233, 273, 320)
+_CGA_FREE16_SLOTS = (8, 1, 2, 3, 4, 5, 6, 7)
+_CGA_FREE16_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0)
 
 
 def normalize_mode_switch_max_pattern(pattern):
@@ -10593,21 +10595,29 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
                 nops(intervals[i])
 
     def emit_free16_line(values, n):
-        # CHAR-MIDDLE FREE16 line (NW8L2, proven boot-stable). n writes (B0 vv EE, 19cyc each)
-        # spaced by inter nops (4cyc), a per-line lead to phase the cluster mid-character, and
-        # a tail pad so the line is EXACTLY 304 cyc = one scanline. No memory read (no lodsb),
-        # so nothing for the 8088 bus scheduler to mis-time. n=8/inter=2/lead=2 => seams on a
-        # uniform 40px grid that the lock's +-1cyc wobble can't flip. Pad short rows with 0.
+        # CHAR-MIDDLE FREE16 line (NW8L2/HBLEAD, proven boot-stable). n writes total (B0 vv EE,
+        # 19cyc each); the LAST one is MOVED out of the active area into the pad (the horizontal
+        # blank) where it sets the NEXT line's LEADING [0,33) palette. So (n-1) image writes,
+        # inter-spaced and lead-phased onto the char-middle grid, + 1 HBLANK write near the line
+        # end. Still n writes => EXACTLY 304 cyc = one scanline (no cycle-fit problem). No lodsb,
+        # nothing for the 8088 bus scheduler to mis-time. values[0..n-2] = image, values[n-1] =
+        # HBLANK leading. Pad short rows with 0.
         inter = int(plan.get("free16_inter_nops", _CGA_FREE16_INTER_NOPS))
         lead = int(plan.get("free16_lead_nops", _CGA_FREE16_LEAD_NOPS))
-        pad = (304 - 19 * n) // 4 - lead - inter * (n - 1)
+        hb_after = int(plan.get("free16_hblank_after", _CGA_FREE16_HBLANK_AFTER))
+        img = n - 1                                     # image writes (the last is the HBLANK)
+        total_nops = (304 - 19 * n) // 4
         nops(lead)
-        for i in range(n):
+        for i in range(img):
             v = values[i] if i < len(values) else 0
             emit(0xB0, int(v) & 0xFF, 0xEE)
-            if i < n - 1:
+            if i < img - 1:
                 nops(inter)
-        nops(max(0, pad))
+        pad = total_nops - lead - inter * (img - 1)     # pad around the HBLANK write
+        nops(max(0, pad - hb_after))                    # ... up to the horizontal blank
+        hb = values[n - 1] if (n - 1) < len(values) else 0
+        emit(0xB0, int(hb) & 0xFF, 0xEE)                # HBLANK write = next line's leading palette
+        nops(hb_after)                                  # land it in overscan before next px0
 
     emit(0xB8, 0x04, 0x00, 0xCD, 0x10)  # mov ax,0004h / int 10h
     emit(0x0E, 0x1F)                    # push cs / pop ds
@@ -11008,30 +11018,6 @@ def quantize_320x200_mode_switch_lockstep_max(
                 best_error = error
         return best_palette, best_error
 
-    def choose_palette_balanced(ranges, palette_pool):
-        """Best fit across several spans giving EACH span equal weight (its MEAN error),
-        so a small span (the 7px wrap tail) isn't drowned out by a large one (the 33px wrap
-        head). Used where one 3D9 register must serve two unequal regions at once."""
-        spans = [(yy, x0, x1) for yy, x0, x1 in ranges if x1 > x0]
-        if not spans:
-            return palette_pool[0]
-        best_palette = palette_pool[0]
-        best_score = float("inf")
-        for palette in palette_pool:
-            score = 0.0
-            for yy, x0, x1 in spans:
-                tot = 0.0
-                for xx in range(x0, x1):
-                    _, dist = nearest_index(work[yy][xx], palette)
-                    tot += dist
-                score += tot / (x1 - x0)          # per-span MEAN -> equal weight per region
-                if score >= best_score:
-                    break
-            if score < best_score:
-                best_score = score
-                best_palette = palette
-        return best_palette
-
     entry_palette = slot_candidates[0]
     entry_3d9 = palette_to_cga_regs(entry_palette)[1]
     values_by_line = [
@@ -11091,23 +11077,17 @@ def quantize_320x200_mode_switch_lockstep_max(
                 # Rightmost zone clipped off the edge; never displayed.
                 zone["palette"] = entry_palette
                 continue
-            # free16 wrap: this register (slot n, line_delta -1) ALSO paints the PREVIOUS line's
-            # right tail [last_seam, W) -- the single 3D9 value persists across the line boundary
-            # until write 0 of the next line, AND it is the value showing in the horizontal border/
-            # overscan. Pick ONE palette as the BEST FIT across BOTH spans, weighting each region
-            # EQUALLY (per-span mean) so the larger 33px head doesn't dominate the small 7px tail.
-            # keep_border_black: restrict this wrap register to a BLACK background (bg nibble 0) so
-            # the border/overscan stays black while fg pixels still take the palette's fg colours.
-            is_border_reg = free16 and slot == n_writes        # write 7 paints the border/overscan
-            is_wrap_tail = (is_border_reg
-                            and int(zone.get("line_delta", 0)) == -1 and target_y >= 0)
+            # free16 HBLANK-leading: the LEADING register (slot n, line_delta -1) paints THIS line's
+            # [0,33) only -- it is set by the PREVIOUS line's HBLANK write and is no longer shared
+            # with a trailing tail, so it is optimised independently like any other zone. The wrap
+            # conflict is gone. keep_border_black restricts BOTH border-painting registers to a
+            # black background: the TRAILING (slot n-1, last image write -> right overscan) AND the
+            # LEADING (slot n, the HBLANK write -> left + deep overscan). That keeps the WHOLE border
+            # black while both edges still take their palette's fg colours.
+            is_border_reg = free16 and slot in (n_writes - 1, n_writes)
             pool = (palettes_with_bg(line_pool, 0)
                     if (is_border_reg and keep_border_black) else line_pool)
-            if is_wrap_tail:
-                palette = choose_palette_balanced(
-                    [(y, dx0, dx1), (target_y, int(_CGA_FREE16_BOUNDS[-2]), W)], pool)
-            else:
-                palette, _ = choose_palette([(y, dx0, dx1)], pool)
+            palette, _ = choose_palette([(y, dx0, dx1)], pool)
             mode_3d8, color_3d9 = palette_to_cga_regs(palette)
             if mode_3d8 != _CGA_MODE_3D8_MODE04:
                 raise ValueError("Dense lockstep quantizer selected a non-mode-04h palette")
@@ -11140,15 +11120,6 @@ def quantize_320x200_mode_switch_lockstep_max(
                             work[yy][xx][0] = min(255.0, max(0.0, work[yy][xx][0] + er * factor))
                             work[yy][xx][1] = min(255.0, max(0.0, work[yy][xx][1] + eg * factor))
                             work[yy][xx][2] = min(255.0, max(0.0, work[yy][xx][2] + eb * factor))
-
-            if is_wrap_tail:
-                # Re-quantize the previous line's right tail against the FINAL wrap palette so it
-                # matches the register it actually displays. Plain nearest-colour (no error
-                # re-diffusion -- that line's pass already propagated); fixes the garbage strip.
-                for x in range(int(_CGA_FREE16_BOUNDS[-2]), W):
-                    pidx, _ = nearest_index(work[target_y][x], palette)
-                    out_indices[target_y, x] = pidx
-                    out_pixels[target_y * W + x] = palette[pidx]
 
         zones_by_visible_line[y] = zones
 
