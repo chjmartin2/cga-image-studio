@@ -10908,20 +10908,15 @@ def quantize_320x200_mode_switch_lockstep_max(
     pattern="Fixed",
     keep_border_black=True,
     progress_cb=None,
-    constant_fg_per_line=False,
-    palette_delay_override=None,
     free16=False,
     free16_h_shift=0,
     free16_preroll_lines=None,
 ):
-    """Quantize for the dense 13-write lockstep COM profile.
+    """Quantize for the multi-write lockstep COM profile (free16 = the 8-write
+    production line; otherwise the legacy 13-write dense schedule).
 
-    constant_fg_per_line: when True, every 3D9 write on a line shares one
-    foreground palette/intensity mode (only the background nibble varies across
-    the 13 writes). This is the clean, aligned profile -- because nothing but the
-    bg changes mid-line, the palette lands exactly at the calibrated bounds (no
-    display delay), matching the ZONE/CALCONST calibration. The cost is one fg
-    triple per line instead of per zone.
+    keep_border_black: restrict the wrap register (the one that paints the
+    horizontal border/overscan) to a black background so the border stays black.
     """
     img = image_rgb_320x200.convert("RGB")
     if img.size != (320, 200):
@@ -10947,26 +10942,9 @@ def quantize_320x200_mode_switch_lockstep_max(
     if forced_bg_idx is not None:
         slot_candidates = palettes_with_bg(slot_candidates, forced_bg_idx)
 
-    # In constant-fg mode every write on a line shares one fg palette/intensity
-    # mode (3D9 bits 4-5); group the candidates by that mode so a line can be
-    # restricted to one group.
-    # palette_delay_px = extra pixels right of the calibrated bounds the palette
-    # lands on hardware. Both modes now use directly-measured bounds (aligned vs
-    # vary-both), so the default is 0 -- the seams are already where reality put
-    # them. The GUI override remains to dial any residual fg-present shift against
-    # a real MartyPC capture without a code change. If palette_delay_override is
-    # given (incl. 0) it wins.
-    if palette_delay_override is not None:
-        palette_delay_px = int(palette_delay_override)
-    else:
-        palette_delay_px = 0
-    fg_mode_groups = []
-    if constant_fg_per_line:
-        groups = {}
-        for p in slot_candidates:
-            fg_bits = palette_to_cga_regs(p)[1] & 0x30  # palette-select + intensity
-            groups.setdefault(fg_bits, []).append(p)
-        fg_mode_groups = [groups[k] for k in sorted(groups)]
+    # The free16 / lockstep seams use directly-measured bounds, so the palette lands exactly
+    # where the quantizer places it -- no display-delay fudge.
+    palette_delay_px = 0
 
     ord_n = max(2, min(16, int(ordered_matrix_size)))
     ord_strength = max(0.0, min(3.0, float(ordered_strength)))
@@ -10993,7 +10971,7 @@ def quantize_320x200_mode_switch_lockstep_max(
     kernel = kernels.get(diffusion_name, kernels["Floyd-Steinberg"])
     intensity = max(0.0, min(3.0, float(diffusion_intensity)))
     n_writes = _CGA_FREE16_WRITES if free16 else _CGA_LOCKSTEP_MAX_WRITES
-    layouts = build_cga_lockstep_max_layouts(pattern, H=H, W=W, constant_fg=constant_fg_per_line,
+    layouts = build_cga_lockstep_max_layouts(pattern, H=H, W=W,
                                              free16=free16, free16_h_shift=(free16_h_shift if free16 else 0))
 
     def nearest_index(old_rgb, pal4):
@@ -11102,51 +11080,34 @@ def quantize_320x200_mode_switch_lockstep_max(
             zone_order = range(len(zones))
             k_use = kernel
 
-        # Per-zone palette pool. In constant-fg mode, first pick the single fg
-        # mode that best fits this whole line, then each zone picks its bg within
-        # that mode. (Selection uses current work[] without diffusion; the actual
-        # dither below applies diffusion with the chosen pool.)
         line_pool = slot_candidates
-        if constant_fg_per_line and fg_mode_groups:
-            best_group = fg_mode_groups[0]
-            best_group_err = float("inf")
-            for group in fg_mode_groups:
-                total = 0.0
-                for zi, zone in enumerate(zones):
-                    dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W, palette_delay_px)
-                    if dx1 <= dx0:
-                        continue
-                    total += choose_palette([(y, dx0, dx1)], group)[1]
-                    if total >= best_group_err:
-                        break
-                if total < best_group_err:
-                    best_group_err = total
-                    best_group = group
-            line_pool = best_group
 
         for zi in zone_order:
             zone = zones[zi]
             target_y = y + int(zone.get("line_delta", 0))
             slot = int(zone["slot"])
-            # The zone's palette is displayed shifted right by the measured delay,
-            # so choose/quantize against the display span it actually governs.
             dx0, dx1 = _cga_lockstep_max_display_span(zone, zi, W, palette_delay_px)
             if dx1 <= dx0:
-                # Shifted off the right edge (rightmost zone); never displayed.
+                # Rightmost zone clipped off the edge; never displayed.
                 zone["palette"] = entry_palette
                 continue
             # free16 wrap: this register (slot n, line_delta -1) ALSO paints the PREVIOUS line's
             # right tail [last_seam, W) -- the single 3D9 value persists across the line boundary
-            # until write 0 of the next line. Pick ONE palette as the BEST FIT across BOTH spans,
-            # weighting each region EQUALLY (per-span mean) rather than letting the larger 33px
-            # head dominate the small 7px tail. last_seam = _CGA_FREE16_BOUNDS[-2].
-            is_wrap_tail = (free16 and slot == n_writes
+            # until write 0 of the next line, AND it is the value showing in the horizontal border/
+            # overscan. Pick ONE palette as the BEST FIT across BOTH spans, weighting each region
+            # EQUALLY (per-span mean) so the larger 33px head doesn't dominate the small 7px tail.
+            # keep_border_black: restrict this wrap register to a BLACK background (bg nibble 0) so
+            # the border/overscan stays black while fg pixels still take the palette's fg colours.
+            is_border_reg = free16 and slot == n_writes        # write 7 paints the border/overscan
+            is_wrap_tail = (is_border_reg
                             and int(zone.get("line_delta", 0)) == -1 and target_y >= 0)
+            pool = (palettes_with_bg(line_pool, 0)
+                    if (is_border_reg and keep_border_black) else line_pool)
             if is_wrap_tail:
                 palette = choose_palette_balanced(
-                    [(y, dx0, dx1), (target_y, int(_CGA_FREE16_BOUNDS[-2]), W)], line_pool)
+                    [(y, dx0, dx1), (target_y, int(_CGA_FREE16_BOUNDS[-2]), W)], pool)
             else:
-                palette, _ = choose_palette([(y, dx0, dx1)], line_pool)
+                palette, _ = choose_palette([(y, dx0, dx1)], pool)
             mode_3d8, color_3d9 = palette_to_cga_regs(palette)
             if mode_3d8 != _CGA_MODE_3D8_MODE04:
                 raise ValueError("Dense lockstep quantizer selected a non-mode-04h palette")
@@ -11211,7 +11172,6 @@ def quantize_320x200_mode_switch_lockstep_max(
         "indices": out_indices,
         "lines": lines,
         "palette_delay_px": palette_delay_px,
-        "constant_fg_per_line": bool(constant_fg_per_line),
     }
     if free16:
         plan["free16_writes"] = n_writes          # builder emits the all-writes line
@@ -12095,13 +12055,13 @@ class CgaConverterApp(tk.Tk):
         )
         self.target_video_cb.grid(row=6, column=1, sticky="w", padx=4, pady=2)
 
-        # Mode Switch writes per scanline. These are fixed production profiles:
-        # one hblank write, or the calibrated dense 13-write lockstep schedule.
+        # Mode Switch writes per scanline. Two fixed production profiles: one hblank write,
+        # or the boot-stable 8-write FREE16 lockstep line (the multi-change-per-line default).
         ttk.Label(options, text="Mode Switch writes per line:").grid(row=6, column=3, sticky="e", padx=4, pady=2)
         self.ms_switches_var = tk.IntVar(value=1)
         self.ms_switches_spin = ttk.Spinbox(
             options,
-            values=(1, _CGA_LOCKSTEP_MAX_WRITES),
+            values=(1, _CGA_FREE16_WRITES),
             textvariable=self.ms_switches_var,
             width=5,
             state="readonly",
@@ -12161,36 +12121,6 @@ class CgaConverterApp(tk.Tk):
         )
         self.ms_stagger_mode_cb.grid(row=7, column=4, columnspan=2, sticky="w", padx=4, pady=2)
         self.ms_stagger_mode_cb.bind("<<ComboboxSelected>>", lambda e: self._on_mode_switch_options_changed())
-
-        # Dense 13-write sub-mode: hold one fg palette/intensity mode per line and
-        # vary only the background across the writes. This is the aligned profile
-        # (palette lands exactly at the bounds, no display delay); only meaningful
-        # when "writes per line" is the dense 13-write schedule.
-        self.ms_constant_fg_var = tk.BooleanVar(value=False)
-        self.ms_constant_fg_cb = ttk.Checkbutton(
-            options,
-            text="Dense: 1 FG palette/line, multi BG (aligned)",
-            variable=self.ms_constant_fg_var,
-            command=self._on_mode_switch_options_changed,
-        )
-        self.ms_constant_fg_cb.grid(row=10, column=0, columnspan=4, sticky="w", padx=4, pady=2)
-
-        # Dense palette display delay: how many pixels right of the calibrated zone
-        # bounds the palette actually lands on real CGA. -1 = auto (0 for the
-        # aligned const-fg sub-mode, 24 for vary-both). Dial against a MartyPC
-        # capture; the preview and the quantizer both honor it.
-        ttk.Label(options, text="Dense palette delay (px, -1=auto):").grid(row=11, column=0, sticky="w", padx=4, pady=2)
-        self.ms_palette_delay_var = tk.IntVar(value=-1)
-        self.ms_palette_delay_spin = ttk.Spinbox(
-            options,
-            from_=-1, to=48,
-            textvariable=self.ms_palette_delay_var,
-            width=5,
-            command=self._on_mode_switch_options_changed,
-        )
-        self.ms_palette_delay_spin.grid(row=11, column=1, sticky="w", padx=4, pady=2)
-        self.ms_palette_delay_spin.bind("<FocusOut>", lambda e: self._on_mode_switch_options_changed())
-        self.ms_palette_delay_spin.bind("<Return>", lambda e: self._on_mode_switch_options_changed())
 
         # Retained as an internal compatibility variable for older helper paths.
         self.ms_stagger_optimize_var = tk.BooleanVar(value=False)
@@ -12834,7 +12764,7 @@ class CgaConverterApp(tk.Tk):
         """Keep Mode Switch sub-options consistent with the selected profile."""
         try:
             seg_n = int(getattr(self, "ms_switches_var", tk.IntVar(value=1)).get())
-            seg_n = _CGA_LOCKSTEP_MAX_WRITES if seg_n == _CGA_LOCKSTEP_MAX_WRITES else 1
+            seg_n = _CGA_FREE16_WRITES if seg_n == _CGA_FREE16_WRITES else 1
             self.ms_switches_var.set(seg_n)
             in_ms_mode = self.is_any_mode_switch()
 
@@ -12843,18 +12773,17 @@ class CgaConverterApp(tk.Tk):
             else:
                 self.ms_switches_spin.state(["disabled"])
 
-            if in_ms_mode and seg_n == _CGA_LOCKSTEP_MAX_WRITES:
-                self.ms_stagger_mode_cb.state(["!disabled"])
-                self.ms_stagger_mode_var.set(
-                    normalize_mode_switch_max_pattern(self.ms_stagger_mode_var.get())
-                )
-            else:
-                self.ms_stagger_mode_cb.state(["disabled"])
+            # The 8-write FREE16 line is "Fixed" only -- the dispersed-pattern combobox
+            # no longer applies, so keep it pinned and disabled.
+            self.ms_stagger_mode_cb.state(["disabled"])
+            self.ms_stagger_mode_var.set("Fixed")
 
-            self.ms_black_border_cb.state(["disabled"])
+            # "Keep border black" is honoured by both the N=1 and the 8-write wrap paths.
+            self.ms_black_border_cb.state(["!disabled"] if in_ms_mode else ["disabled"])
 
             # Multi-write lockstep is mode-04h only: changing 3D8h inside the
-            # raster loop would alter the tested instruction cadence.
+            # raster loop would alter the tested instruction cadence. Tweaked
+            # palettes therefore stay available for the N=1 mode only.
             tweaked_allowed = self.is_mode_switch_mode() and seg_n == 1
             if not tweaked_allowed:
                 self.tweaked_mode_var.set("off")
@@ -14304,7 +14233,7 @@ class CgaConverterApp(tk.Tk):
 
             want_pal_strip = bool(getattr(self, 'ms_show_palette_var', tk.BooleanVar(value=False)).get())
             seg_n_320 = int(getattr(self, "ms_switches_var", tk.IntVar(value=1)).get())
-            seg_n_320 = _CGA_LOCKSTEP_MAX_WRITES if seg_n_320 == _CGA_LOCKSTEP_MAX_WRITES else 1
+            seg_n_320 = _CGA_FREE16_WRITES if seg_n_320 == _CGA_FREE16_WRITES else 1
 
             pattern_320 = normalize_mode_switch_max_pattern(
                 getattr(
@@ -14332,7 +14261,7 @@ class CgaConverterApp(tk.Tk):
             lockstep_n2_plan = None
             lockstep_n3_plan = None
             lockstep_max_plan = None
-            if seg_n_320 == _CGA_LOCKSTEP_MAX_WRITES:
+            if seg_n_320 == _CGA_FREE16_WRITES:
                 max_kwargs = {
                     # PRODUCTION DEFAULT: the boot-stable 8-write char-middle FREE16 line.
                     # This is THE multi-change-per-line mode (the old 16/13-write lines were
@@ -14343,14 +14272,6 @@ class CgaConverterApp(tk.Tk):
                     "pattern": pattern_320,
                     "keep_border_black": bool(
                         getattr(self, "ms_black_border_var", tk.BooleanVar(value=True)).get()
-                    ),
-                    "constant_fg_per_line": bool(
-                        getattr(self, "ms_constant_fg_var", tk.BooleanVar(value=False)).get()
-                    ),
-                    "palette_delay_override": (
-                        None
-                        if int(getattr(self, "ms_palette_delay_var", tk.IntVar(value=-1)).get()) < 0
-                        else int(self.ms_palette_delay_var.get())
                     ),
                     "progress_cb": (lambda frac: self.set_progress(int(30 + frac*65))),
                 }
@@ -15119,14 +15040,14 @@ class CgaConverterApp(tk.Tk):
             elif mode == "320x200 (4 Colors) Mode Switch":
                 # Per-scanline palette change (CGA mode 04h with timed 3D9h writes).
                 # N=1: simple builder (writes 3D8+3D9 once per line during hblank).
-                # N=13: calibrated dense fully-unrolled lockstep profile.
+                # N=8: boot-stable FREE16 fully-unrolled lockstep profile.
                 seg_n = int(getattr(self, "ms_seg_n", 1))
-                if seg_n not in (1, _CGA_LOCKSTEP_MAX_WRITES):
+                if seg_n not in (1, _CGA_FREE16_WRITES):
                     messagebox.showinfo(
                         "Export COM — N out of range",
-                        f"320x200 Mode Switch .COM export supports fixed 1 or {_CGA_LOCKSTEP_MAX_WRITES} writes per line. "
+                        f"320x200 Mode Switch .COM export supports fixed 1 or {_CGA_FREE16_WRITES} writes per line. "
                         f"You have N={seg_n} selected.\n\n"
-                        f"Set 'Mode Switch writes per line' to 1 or {_CGA_LOCKSTEP_MAX_WRITES} and click Convert again, "
+                        f"Set 'Mode Switch writes per line' to 1 or {_CGA_FREE16_WRITES} and click Convert again, "
                         f"then retry Export COM."
                     )
                     return
@@ -15138,7 +15059,7 @@ class CgaConverterApp(tk.Tk):
                     )
                     return
 
-                if seg_n == _CGA_LOCKSTEP_MAX_WRITES:
+                if seg_n == _CGA_FREE16_WRITES:
                     plan = getattr(self, "ms_lockstep_max_plan", None)
                     if not plan or plan.get("kind") != "cga-lockstep-max":
                         messagebox.showinfo(
