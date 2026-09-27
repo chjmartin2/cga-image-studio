@@ -1,0 +1,46 @@
+{
+  "profile": "startlock-mode4",
+  "status": "WITHDRAWN: measured with CPU wait states and effective refresh DMA disabled; corrected schedule in progress",
+  "validated_for_native_martypc": false,
+  "bounds": [
+    0,
+    33,
+    73,
+    113,
+    169,
+    201,
+    241,
+    281,
+    320
+  ],
+  "template_sha256": "766eb29f91e1b59e5525b46da676f027ef51814e00b7306c88f16a1215fa008a",
+  "source": "tools/imagelock.asm",
+  "source_sha256": "9658541261c47bd5e303769c47ad154d67430dd76445508483c6a3038ea31116",
+  "mode": 4,
+  "width": 320,
+  "height": 200,
+  "writes_per_line": 8,
+  "refresh_pit_divisor": 19,
+  "line_cpu_cycles": 304,
+  "frame_cpu_cycles": 79648,
+  "physical_hardware_validated": false,
+  "validation": "docs/research/imagelock_validation.md",
+  "entry_nops_tested": [
+    0,
+    1,
+    2,
+    3,
+    7,
+    13,
+    31,
+    127
+  ],
+  "pit_phases_tested": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "prior_validation_effective_cpu_wait_states": false,
+  "prior_validation_effective_dma_refresh": false
+}

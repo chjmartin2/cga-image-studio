@@ -1,0 +1,60 @@
+"""Standalone entry point and explicit packaged-runtime smoke check."""
+import json
+from pathlib import Path
+import sys
+import traceback
+
+RELEASE_VERSION = "0.3.0-alpha.1"
+
+
+def smoke_check():
+    import cga_v167 as cga
+    import cga_mode4_lock as lock
+    from PIL import Image
+    import numpy as np
+
+    app = cga.CgaConverterApp()
+    try:
+        app.withdraw()
+        app.update()
+        assert app.title() == "CGA Converter v167", app.title()
+        picture = Image.new("P", (320, 200), 1)
+        bitmap = cga.pack_cga_320x200_4color_vram(picture)
+        assert len(bitmap) == 16384
+        program = cga.build_com_static_cga(4, bitmap, 0x30)
+        assembly = cga.build_nasm_source_from_com(program, "320x200", "TEST.COM")
+        assert "bits 16" in assembly
+        disk = cga.build_bootable_dsk_from_com(program)
+        assert disk[510:512] == b"\x55\xaa"
+        assert b"TEST    COM" in disk
+        assert program in disk
+        preview, plan = cga.quantize_320x200_mode_switch_lockstep_max(
+            Image.new("RGB", (320, 200)), free16=True,
+            timing_backend=lock.PROFILE_ID, dither_family="None")
+        assert np.asarray(preview).shape == (200, 320, 3)
+        try:
+            lock.build_com(bytes(16384), plan)
+        except ValueError as error:
+            assert "withdrawn" in str(error)
+        else:
+            raise AssertionError("Withdrawn timing profile was exportable")
+        return {"status": "passed", "release": RELEASE_VERSION,
+                "frozen": bool(getattr(sys, "frozen", False)),
+                "checks": ["Tk GUI construction", "Pillow and NumPy", "CGA packing",
+                           "COM and ASM generation", "bundled boot disk export",
+                           "eight-write preview", "eight-write export guard"]}
+    finally:
+        app.destroy()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
+        try:
+            result = smoke_check()
+        except Exception:
+            Path(sys.argv[2]).write_text(traceback.format_exc(), encoding="utf-8")
+            raise SystemExit(1)
+        Path(sys.argv[2]).write_text(json.dumps(result, indent=2), encoding="utf-8")
+    else:
+        import cga_v167
+        cga_v167.main()

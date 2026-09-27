@@ -1,0 +1,37 @@
+{
+  "source": "C:\\Users\\chjmartin2\\Desktop\\CGAFUN\\cga_320_startlock.dsk",
+  "source_sha256": "05ae84a618e852b24896664f07685fff4c0fd05ab65af0d15a6a9db8f77dca35",
+  "test_com_sha256": "5ffd2e5ef829ae7d4b25d9aeced1b262ad8e21aa5db47d8b5078b1d53b264968",
+  "kernel": "IMGLK001",
+  "unexpected_kernel_byte_differences": 0,
+  "reconstructed_preview": "files/EXPORT_TEST_preview.png",
+  "emulator_capture": "files/EXPORT_TEST_marty.png",
+  "initial_all_four_phase_com_test_complete_frames": 269,
+  "manual_exact_disk_boot_complete_frames": 626,
+  "manual_boot_all_four_phases_zero_dot_mismatches": true,
+  "additional_reentry_batch_delay_cases": 17,
+  "additional_reentry_batch_delay_complete_frames": 4843,
+  "additional_reentry_batch_delay_zero_dot_mismatches": true,
+  "gui_conversion_export_setting_combinations": 12,
+  "gui_all_64000_pixels_match": true,
+  "user_native_failure_reproduced": true,
+  "status": "Root cause reproduced: validation harness omitted EnableWaitStates(true); native wait states plus DMA refresh make old row timing exceed304 cycles. Corrected kernel in progress.",
+  "disk_creation_time_local": "2026-09-14 21:42:31",
+  "marty_process_start_time_local": "2026-09-14 21:44:15",
+  "disk_last_write_time_local": "2026-09-14 21:44:30",
+  "timestamp_inference": "Disk was rewritten after current Marty process started. This does not establish which bytes were mounted or prove caching caused the failure.",
+  "fresh_native_launch_user_result": "still garbled",
+  "old_harness_effective_cpu_wait_states": false,
+  "old_harness_effective_dma_refresh": false,
+  "old_com_with_wait_states_on_wrong_dots_per_frame": {
+    "phases_0_1_2": 78398,
+    "phase_3": 78050
+  },
+  "old_com_with_wait_states_on_row_cycles": [
+    331,
+    332,
+    335,
+    336,
+    338
+  ]
+}

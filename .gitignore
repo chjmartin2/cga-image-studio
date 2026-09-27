@@ -5,3 +5,20 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Local MartyPC source build and its isolated Rust toolchain/cache.
+/external/martypc/
+/external/marty-toolchain/
+
+# Downloaded primary sources and raw hardware captures used by timing research.
+/external/research/
+
+# Local launch shortcuts and downloaded reference material.
+/*.lnk
+/Extras/
+
+# Standalone build and release artifacts.
+/build/
+/dist/
+/release/
+/smoke*.json

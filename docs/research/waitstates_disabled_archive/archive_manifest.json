@@ -1,0 +1,19 @@
+{
+  "archived_on": "2026-09-14",
+  "status": "INVALID for native wait-state-enabled timing validation",
+  "effective_enable_wait_states": false,
+  "requested_dram_refresh_simulation": true,
+  "effective_tick_dma_refresh_simulation": false,
+  "original_file_sha256": {
+    "docs/PROJECT_STATUS.md": "f10e3bf890d06504805611a22dc393a5a55fa8c9927416d87b4af95ce569c486",
+    "docs/STARTLCK.md": "df999f61b1695ab09bc76d6f84f96a3183ab6105a91b355b49f9e7e938d173c7",
+    "docs/CGA_TIMING_RESEARCH.md": "a944aa41a8f905062593a5eb19721fae76863f139dd9e68f4ba84eeeb630f2df",
+    "docs/research/startlock_validation.md": "b943a76d096dc1f4eb7adf57548dfb774755e9548a148d392b628d314ec1639b",
+    "docs/research/imagelock_validation.md": "c86685e56219856f4f21ea3773ba202ebcca5ad4117c3f5d4e9a16ef2a2724a6",
+    "docs/research/imagelock_kernel.md": "7c0cbebd6257199cede64f1d2fd31b6eeb8f20e96a98f242a2550c5e4b45a1da",
+    "docs/research/startlock_validation.json": "320a9bc7098eef98fb51e42f4ac447ee6125cac06c8077a04d367d510dca13df",
+    "docs/research/startlock_validation.json.sha256": "9bcd0a83cbe1eb203e369c593f9b4c068c22c62104ca91beaab9c9c6e7795c55",
+    "docs/research/imagelock_validation.json": "d76414f0c6373f64d2ea9497c877018dd3696d8778fc22ecf2bd0b97bdc94b99",
+    "docs/research/imagelock_validation.sha256": "9592abfcf4e8e15e6663c8997bd6f783cbe2a4ed6a14e8a23ee1196f804b471c"
+  }
+}

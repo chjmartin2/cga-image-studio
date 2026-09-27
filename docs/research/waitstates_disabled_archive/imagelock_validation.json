@@ -1,0 +1,9786 @@
+{
+  "date": "2026-09-14",
+  "marty_commit": "05c0d088e84ad6bbfac9b3f0d051e7eadefd9f44",
+  "core_modifications": "None; git status showed only untracked install/configs/machines/cga_studio_5160.toml.",
+  "machine": "IBM 5160, non-turbo 8088, CGA, GLaBIOS 0.2.6 XT, normal DRAM refresh simulation; monitor emulation enabled; ROM patches and title hacks disabled.",
+  "scope": "Unmodified emulator-core measurements. No physical hardware validation; the exposed PIT settings and entry perturbations are a finite startup sample. OUT positions are instruction boundaries, not separately instrumented hardware register-latch times. Exact RGBI output is measured independently from every completed visible graphics frame.",
+  "frame_period_cpu_cycles": 79648,
+  "line_period_cpu_cycles": 304,
+  "visible_palette_bounds": [
+    0,
+    33,
+    73,
+    113,
+    169,
+    201,
+    241,
+    281,
+    320
+  ],
+  "discarded_completed_graphics_frames": 0,
+  "run_methods": {
+    "picard_injection": "Four fresh machine instances; ROM runs for 20,000,000 cycles, COM loaded at 1000:0100, then 30,000,000 cycles.",
+    "registration_injection": "Same machine/COM injection, then 11,000,000 cycles.",
+    "independent_calibration": "Eight entry NOP counts (0,1,2,3,7,13,31,127), each with all four PIT phases; 11,000,000 cycles after injection. Four VRAM indices on alternating rows, independently computed per-row palette values, and explicit last-row-to-first-row leading-palette carry.",
+    "disk": "Four cold boots of the actual final 360 KiB DOS image, one for each PIT phase, each run for 400,000,000 CPU cycles. Normal DOS/AUTOEXEC loads the COM at 0C60:0100; no program injection."
+  },
+  "artifacts": {
+    "files/IMGLCK.COM": {
+      "bytes": 57088,
+      "sha256": "e70dd7e75f376b87ae450ca3a29820b5d7e4efad1744eb3d4d9d575ebf51281e"
+    },
+    "files/REGLOCK.COM": {
+      "bytes": 57088,
+      "sha256": "d87a375a8f9cbcb8c650e498d1fb044aa3602c47515c8c9ca187f41cc363fbf4"
+    },
+    "files/IMGLCK.DSK": {
+      "bytes": 368640,
+      "sha256": "de459c71bb87103cb187a62bdd5915452378169b7b6ef1f5494e2b4c965fbae6"
+    },
+    "files/IMGLCK_expected.bin": {
+      "bytes": 64000,
+      "sha256": "52eb77c951ac1419ddfb20dbe4e2aa7a571ac4125c7b7eef80b9f4032664c1e4"
+    },
+    "files/REGLOCK_expected.bin": {
+      "bytes": 64000,
+      "sha256": "facbb4d24dcf6445d993f92b885e1dfc636cec388770a7dcfa8d45a9baf9b4b6"
+    },
+    "files/IMGLCK_marty.png": {
+      "bytes": 20661,
+      "sha256": "3d6ed97b706514b8698bbf4c89373d5202992ddf526c9838e4573a76c9560392"
+    },
+    "assets/mode4_lock/template.bin": {
+      "bytes": 57088,
+      "sha256": "766eb29f91e1b59e5525b46da676f027ef51814e00b7306c88f16a1215fa008a"
+    },
+    "assets/mode4_lock/profile.json": {
+      "bytes": 862,
+      "sha256": "349472d755ee491480cd464cd7f702ea473207a2b3a6a8bc4e5e879b47fa5ca7"
+    },
+    "tools/imagelock.asm": {
+      "bytes": 10265,
+      "sha256": "9658541261c47bd5e303769c47ad154d67430dd76445508483c6a3038ea31116"
+    },
+    "tools/validate_imagelock.rs": {
+      "bytes": 8991,
+      "sha256": "123bd413466019b81dba09e5f4b939d0d08f6b844b410cc7cf9531504498b531"
+    },
+    "tools/validate_imagelock.py": {
+      "bytes": 9062,
+      "sha256": "ef4945fdf05730dcee14c0d8130f7dc533b3224966da5bd4565d6e8f2ad71494"
+    },
+    "tools/validate_imagelock.cmd": {
+      "bytes": 1511,
+      "sha256": "5ebe40bcf59f360e22da70503b9fcaec515e462bac2309d3710cd78e4c657935"
+    },
+    "tools/validate_imagelock.Cargo.toml": {
+      "bytes": 293,
+      "sha256": "12de469b7481ad37fd8c729a36e2f472c11477f06a2351a3d274f295b7fc3092"
+    },
+    "tools/make_imagelock_calibration.py": {
+      "bytes": 3216,
+      "sha256": "854e7a54a50a5d87bd50f2108a82842821a2d1399d1024af4766bbf2f8827055"
+    },
+    "docs/research/imagelock_dos_return.png": {
+      "bytes": 2776,
+      "sha256": "2d4122706f82e3ba030b0b2fa3fe4233a170686c06f8dd735e0186d5bb6576ac"
+    }
+  },
+  "picard": [
+    {
+      "phase": 0,
+      "kernel_writes": 491242,
+      "kernel_frame_periods": [
+        [
+          79648,
+          307
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          42,
+          1
+        ],
+        [
+          1600,
+          307
+        ]
+      ],
+      "complete_kernel_passes": 307,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              61400
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 307,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "E287927852D0F4D9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          307
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          307
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          307
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          307
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 491242,
+      "kernel_frame_periods": [
+        [
+          79648,
+          307
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          42,
+          1
+        ],
+        [
+          1600,
+          307
+        ]
+      ],
+      "complete_kernel_passes": 307,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              61400
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 307,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "E287927852D0F4D9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          307
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          307
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          307
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          307
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 491242,
+      "kernel_frame_periods": [
+        [
+          79648,
+          307
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          42,
+          1
+        ],
+        [
+          1600,
+          307
+        ]
+      ],
+      "complete_kernel_passes": 307,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              61093
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              61400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              61400
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 307,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "E287927852D0F4D9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          307
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          307
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          307
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          307
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 486400,
+      "kernel_frame_periods": [
+        [
+          79648,
+          303
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1600,
+          304
+        ]
+      ],
+      "complete_kernel_passes": 304,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              60496
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              60800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              60800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 304,
+      "first_completed_active_frame": {
+        "frame": "324",
+        "cpu_cycle": "25857299",
+        "fnv64": "9DFFF6D4AC7E11D9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          304
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          304
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          304
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          304
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    }
+  ],
+  "registration": [
+    {
+      "phase": 0,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "A6ADAB3FB53E5889",
+        "cropped_fnv64": "17A5DC159966BE1F",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "17A5DC159966BE1F",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "first_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "A6ADAB3FB53E5889",
+        "cropped_fnv64": "17A5DC159966BE1F",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "17A5DC159966BE1F",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "first_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "A6ADAB3FB53E5889",
+        "cropped_fnv64": "17A5DC159966BE1F",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "17A5DC159966BE1F",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "first_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 104935,
+      "kernel_frame_periods": [
+        [
+          79648,
+          65
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          935,
+          1
+        ],
+        [
+          1600,
+          65
+        ]
+      ],
+      "complete_kernel_passes": 65,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 65,
+      "first_completed_active_frame": {
+        "frame": "324",
+        "cpu_cycle": "25857299",
+        "fnv64": "62260F9C0EEB7589",
+        "cropped_fnv64": "17A5DC159966BE1F",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "17A5DC159966BE1F",
+          65
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          65
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          65
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          65
+        ]
+      ],
+      "first_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9d25081697cb1e55ae1a19250ce05f652dfb696e5cfea23cb4c78fa0981f87d4",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    }
+  ],
+  "disk": [
+    {
+      "phase": 0,
+      "kernel_writes": 5760000,
+      "kernel_frame_periods": [
+        [
+          79648,
+          3599
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1600,
+          3600
+        ]
+      ],
+      "complete_kernel_passes": 3600,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              720000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 3599,
+      "first_completed_active_frame": {
+        "frame": "1028",
+        "cpu_cycle": "81961799",
+        "fnv64": "9A522D4EBA472AD9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          3599
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          3599
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          3599
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          3599
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 5760000,
+      "kernel_frame_periods": [
+        [
+          79648,
+          3599
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1600,
+          3600
+        ]
+      ],
+      "complete_kernel_passes": 3600,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              720000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 3599,
+      "first_completed_active_frame": {
+        "frame": "1028",
+        "cpu_cycle": "81961799",
+        "fnv64": "9A522D4EBA472AD9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          3599
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          3599
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          3599
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          3599
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 5760000,
+      "kernel_frame_periods": [
+        [
+          79648,
+          3599
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1600,
+          3600
+        ]
+      ],
+      "complete_kernel_passes": 3600,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              720000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 3599,
+      "first_completed_active_frame": {
+        "frame": "1028",
+        "cpu_cycle": "81961799",
+        "fnv64": "9A522D4EBA472AD9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          3599
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          3599
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          3599
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          3599
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 5760000,
+      "kernel_frame_periods": [
+        [
+          79648,
+          3599
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1600,
+          3600
+        ]
+      ],
+      "complete_kernel_passes": 3600,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              716400
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              720000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              720000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 3599,
+      "first_completed_active_frame": {
+        "frame": "1028",
+        "cpu_cycle": "81961951",
+        "fnv64": "9DFFF6D4AC7E11D9",
+        "cropped_fnv64": "A1D9A0BF2A4A5D93",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "A1D9A0BF2A4A5D93",
+          3599
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          3599
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          3599
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          3599
+        ]
+      ],
+      "first_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "first_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      },
+      "last_visible_sha256": "9849eea387ea43c9d205ccd933c6e92cf91fe0630c501fbfcfd2896ab507e53d",
+      "last_visible_expected_comparison": {
+        "mismatching_dots": 0,
+        "mismatching_pixels": 0,
+        "first_mismatches": []
+      }
+    }
+  ],
+  "independent_calibration": [
+    {
+      "phase": 0,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 0,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 0,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616347",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 0,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 104935,
+      "kernel_frame_periods": [
+        [
+          79648,
+          65
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          935,
+          1
+        ],
+        [
+          1600,
+          65
+        ]
+      ],
+      "complete_kernel_passes": 65,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 65,
+      "first_completed_active_frame": {
+        "frame": "324",
+        "cpu_cycle": "25857299",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          65
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          65
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          65
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          65
+        ]
+      ],
+      "entry_nops": 0,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616356",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 1,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616356",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 1,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616356",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 1,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 109786,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          986,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616355",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 1,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 106529,
+      "kernel_frame_periods": [
+        [
+          79648,
+          66
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          929,
+          1
+        ],
+        [
+          1600,
+          66
+        ]
+      ],
+      "complete_kernel_passes": 66,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13200
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 66,
+      "first_completed_active_frame": {
+        "frame": "323",
+        "cpu_cycle": "25777799",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          66
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          66
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          66
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          66
+        ]
+      ],
+      "entry_nops": 2,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 106529,
+      "kernel_frame_periods": [
+        [
+          79648,
+          66
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          929,
+          1
+        ],
+        [
+          1600,
+          66
+        ]
+      ],
+      "complete_kernel_passes": 66,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13200
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 66,
+      "first_completed_active_frame": {
+        "frame": "323",
+        "cpu_cycle": "25777799",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          66
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          66
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          66
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          66
+        ]
+      ],
+      "entry_nops": 2,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 106529,
+      "kernel_frame_periods": [
+        [
+          79648,
+          66
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          929,
+          1
+        ],
+        [
+          1600,
+          66
+        ]
+      ],
+      "complete_kernel_passes": 66,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13200
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 66,
+      "first_completed_active_frame": {
+        "frame": "323",
+        "cpu_cycle": "25777799",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          66
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          66
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          66
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          66
+        ]
+      ],
+      "entry_nops": 2,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 108183,
+      "kernel_frame_periods": [
+        [
+          79648,
+          67
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          983,
+          1
+        ],
+        [
+          1600,
+          67
+        ]
+      ],
+      "complete_kernel_passes": 67,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13333
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13400
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13400
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 67,
+      "first_completed_active_frame": {
+        "frame": "322",
+        "cpu_cycle": "25696147",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          67
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          67
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          67
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          67
+        ]
+      ],
+      "entry_nops": 2,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 109793,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          993,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616071",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 3,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 109793,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          993,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616071",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 3,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 109793,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          993,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616071",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 3,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 109793,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          993,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616070",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 3,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 111394,
+      "kernel_frame_periods": [
+        [
+          79648,
+          69
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          994,
+          1
+        ],
+        [
+          1600,
+          69
+        ]
+      ],
+      "complete_kernel_passes": 69,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 69,
+      "first_completed_active_frame": {
+        "frame": "320",
+        "cpu_cycle": "25536407",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          69
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          69
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          69
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          69
+        ]
+      ],
+      "entry_nops": 7,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 111394,
+      "kernel_frame_periods": [
+        [
+          79648,
+          69
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          994,
+          1
+        ],
+        [
+          1600,
+          69
+        ]
+      ],
+      "complete_kernel_passes": 69,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 69,
+      "first_completed_active_frame": {
+        "frame": "320",
+        "cpu_cycle": "25536407",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          69
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          69
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          69
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          69
+        ]
+      ],
+      "entry_nops": 7,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 111394,
+      "kernel_frame_periods": [
+        [
+          79648,
+          69
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          994,
+          1
+        ],
+        [
+          1600,
+          69
+        ]
+      ],
+      "complete_kernel_passes": 69,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 69,
+      "first_completed_active_frame": {
+        "frame": "320",
+        "cpu_cycle": "25536407",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          69
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          69
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          69
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          69
+        ]
+      ],
+      "entry_nops": 7,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 106542,
+      "kernel_frame_periods": [
+        [
+          79648,
+          66
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          942,
+          1
+        ],
+        [
+          1600,
+          66
+        ]
+      ],
+      "complete_kernel_passes": 66,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13200
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 66,
+      "first_completed_active_frame": {
+        "frame": "323",
+        "cpu_cycle": "25777359",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          66
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          66
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          66
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          66
+        ]
+      ],
+      "entry_nops": 7,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 109791,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          991,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616219",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 13,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 109791,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          991,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616219",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 13,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 109791,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          991,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616219",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 13,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 104936,
+      "kernel_frame_periods": [
+        [
+          79648,
+          65
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          936,
+          1
+        ],
+        [
+          1600,
+          65
+        ]
+      ],
+      "complete_kernel_passes": 65,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 65,
+      "first_completed_active_frame": {
+        "frame": "324",
+        "cpu_cycle": "25857171",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          65
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          65
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          65
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          65
+        ]
+      ],
+      "entry_nops": 13,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 109791,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          991,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616219",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 31,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 109791,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          991,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616219",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 31,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 109791,
+      "kernel_frame_periods": [
+        [
+          79648,
+          68
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          991,
+          1
+        ],
+        [
+          1600,
+          68
+        ]
+      ],
+      "complete_kernel_passes": 68,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13532
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13600
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13600
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 68,
+      "first_completed_active_frame": {
+        "frame": "321",
+        "cpu_cycle": "25616219",
+        "fnv64": "2460BD6C64ED78D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          68
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          68
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          68
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          68
+        ]
+      ],
+      "entry_nops": 31,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 104936,
+      "kernel_frame_periods": [
+        [
+          79648,
+          65
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          936,
+          1
+        ],
+        [
+          1600,
+          65
+        ]
+      ],
+      "complete_kernel_passes": 65,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              12935
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13000
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13000
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 65,
+      "first_completed_active_frame": {
+        "frame": "324",
+        "cpu_cycle": "25857171",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          65
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          65
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          65
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          65
+        ]
+      ],
+      "entry_nops": 31,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 0,
+      "kernel_writes": 111442,
+      "kernel_frame_periods": [
+        [
+          79648,
+          69
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1042,
+          1
+        ],
+        [
+          1600,
+          69
+        ]
+      ],
+      "complete_kernel_passes": 69,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 69,
+      "first_completed_active_frame": {
+        "frame": "320",
+        "cpu_cycle": "25534583",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          69
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          69
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          69
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          69
+        ]
+      ],
+      "entry_nops": 127,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 1,
+      "kernel_writes": 111442,
+      "kernel_frame_periods": [
+        [
+          79648,
+          69
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1042,
+          1
+        ],
+        [
+          1600,
+          69
+        ]
+      ],
+      "complete_kernel_passes": 69,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 69,
+      "first_completed_active_frame": {
+        "frame": "320",
+        "cpu_cycle": "25534583",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          69
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          69
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          69
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          69
+        ]
+      ],
+      "entry_nops": 127,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 2,
+      "kernel_writes": 111442,
+      "kernel_frame_periods": [
+        [
+          79648,
+          69
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          1042,
+          1
+        ],
+        [
+          1600,
+          69
+        ]
+      ],
+      "complete_kernel_passes": 69,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13731
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13800
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              98,
+              13800
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 69,
+      "first_completed_active_frame": {
+        "frame": "320",
+        "cpu_cycle": "25534583",
+        "fnv64": "2ED51359A38368D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          69
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          69
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          69
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          69
+        ]
+      ],
+      "entry_nops": 127,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    },
+    {
+      "phase": 3,
+      "kernel_writes": 106590,
+      "kernel_frame_periods": [
+        [
+          79648,
+          66
+        ]
+      ],
+      "writes_in_each_observed_kernel_pass": [
+        [
+          990,
+          1
+        ],
+        [
+          1600,
+          66
+        ]
+      ],
+      "complete_kernel_passes": 66,
+      "line_periods_by_write_slot": [
+        {
+          "slot": 0,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "periods": [
+            [
+              304,
+              13134
+            ]
+          ]
+        }
+      ],
+      "boundary_instruction_end_positions": [
+        {
+          "slot": 0,
+          "x_dots": [
+            [
+              258,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 1,
+          "x_dots": [
+            [
+              338,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 2,
+          "x_dots": [
+            [
+              418,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 3,
+          "x_dots": [
+            [
+              530,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 4,
+          "x_dots": [
+            [
+              594,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 5,
+          "x_dots": [
+            [
+              674,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 6,
+          "x_dots": [
+            [
+              754,
+              13200
+            ]
+          ]
+        },
+        {
+          "slot": 7,
+          "x_dots": [
+            [
+              82,
+              13200
+            ]
+          ]
+        }
+      ],
+      "visible_frames": 66,
+      "first_completed_active_frame": {
+        "frame": "323",
+        "cpu_cycle": "25775535",
+        "fnv64": "DFD921C8BE9A95D7",
+        "cropped_fnv64": "FA18EBD3A4E6458D",
+        "width_dots": "640",
+        "height": "200",
+        "aperture_x": "192",
+        "aperture_y": "38",
+        "mismatching_dots": "0",
+        "mismatch_x_min": "18446744073709551615",
+        "mismatch_y_min": "18446744073709551615",
+        "mismatch_x_max": "0",
+        "mismatch_y_max": "0",
+        "unequal_pixel_pairs": "0"
+      },
+      "visible_frame_hashes": [
+        [
+          "FA18EBD3A4E6458D",
+          66
+        ]
+      ],
+      "expected_frame_mismatch_counts": [
+        [
+          "0",
+          66
+        ]
+      ],
+      "unequal_pixel_pairs": [
+        [
+          0,
+          66
+        ]
+      ],
+      "visible_geometry": [
+        [
+          [
+            640,
+            200,
+            192,
+            38
+          ],
+          66
+        ]
+      ],
+      "entry_nops": 127,
+      "first_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063",
+      "last_visible_sha256": "f7c0f30ad27297f7a39c5432568af2a65f368f4039d9da80c073b99c99729063"
+    }
+  ],
+  "dos_return": {
+    "verified": true,
+    "observed": "Phases 0 and 3 screenshots visually reviewed: IMGLCK finished, instructions to run IMGLCK or REGLOCK, A:\\> prompt. All four runs end in text mode after exactly 3,600 full kernel passes; no emulator errors.",
+    "screenshot": "docs/research/imagelock_dos_return.png",
+    "why_3599_frames": "The 3,600th full raster pass is followed by cleanup before another completed graphics frame is presented. All 3,599 completed visible graphics frames per boot are compared, including the first."
+  },
+  "raw_capture_directory": "external/research/imagelock-validation/ (ignored by git)",
+  "total_completed_visible_frames": 18052,
+  "total_startups": 44
+}

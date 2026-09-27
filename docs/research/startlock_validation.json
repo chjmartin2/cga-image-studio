@@ -1,0 +1,549 @@
+{
+  "date": "2026-09-14",
+  "marty_core_commit": "05c0d088e84ad6bbfac9b3f0d051e7eadefd9f44",
+  "artifacts": {
+    "files/STARTLCK.COM": {
+      "bytes": 36608,
+      "sha256": "3e0e514005cb41809a209ad1311e63bd1426d6a9f820411a8a0af9fdc2417537"
+    },
+    "files/STARTLCK.DSK": {
+      "bytes": 368640,
+      "sha256": "400eea02a0f257f82a634cfc2b6c2c35bca4e8b5678048ed466b8561bc7c7e7e"
+    },
+    "external/martypc/install/media/roms/GLaBIOS/GLABIOS_0.2.6_8X.ROM": {
+      "bytes": 8192,
+      "sha256": "c0befcd006ed3a78293900dc75ef290048219a25c83d78946c911556df344e3c"
+    },
+    "tools/validate_startlock.rs": {
+      "bytes": 7123,
+      "sha256": "877e3b74f1df4048105cf01bbd0109c124ce128f76db18a4dc1c5739745621d8"
+    }
+  },
+  "phase_sweep_method": "One independent machine per Marty frontend PIT phase setting 0,1,2,3; GLaBIOS first runs20M CPUcycles; real COM loaded using Machine::load_program at1000:0100, DS/ES/SS=1000 SP=FFFE FLAGS=0202; then30M CPUcycles. This is direct injection after BIOS initialization, not four DOS disk boots.",
+  "phase_sweep": {
+    "scope": "Emulated IBM 5160 + CGA + GLaBIOS 0.2.6, unmodified MartyPC core. Beam positions sampled after OUT instruction execution; these are not the exact register-latch instant or physical hardware measurements.",
+    "phases": [
+      {
+        "phase": 0,
+        "streams": [
+          {
+            "cs": "1000",
+            "ip": "0702",
+            "value": "3C",
+            "observations": 307,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25550692",
+              "cs": "1000",
+              "ip": "0702",
+              "port": "03D9",
+              "value": "3C",
+              "beam_x_before": "176",
+              "beam_y_before": "46",
+              "beam_x_after": "210",
+              "beam_y_after": "46",
+              "frame": "320",
+              "scanline": "46"
+            },
+            "instruction_end_beam_positions": [
+              [
+                210,
+                46,
+                307
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                306
+              ]
+            ]
+          },
+          {
+            "cs": "1000",
+            "ip": "0745",
+            "value": "30",
+            "observations": 307,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25550966",
+              "cs": "1000",
+              "ip": "0745",
+              "port": "03D9",
+              "value": "30",
+              "beam_x_before": "96",
+              "beam_y_before": "47",
+              "beam_x_after": "130",
+              "beam_y_after": "47",
+              "frame": "320",
+              "scanline": "47"
+            },
+            "instruction_end_beam_positions": [
+              [
+                130,
+                47,
+                307
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                306
+              ]
+            ]
+          }
+        ],
+        "frame_count": 307,
+        "first_completed_marked_frame": {
+          "frame": "321",
+          "cpu_cycle": "25616348",
+          "fnv64": "746090A91E876D44",
+          "red_pixels": "552",
+          "red_x_min": "128",
+          "red_y_min": "0",
+          "red_x_max": "911",
+          "red_y_max": "47",
+          "cropped_fnv64": "E50DA485F4B44E8F"
+        },
+        "cropped_visible_frame_hashes": {
+          "E50DA485F4B44E8F": 307
+        },
+        "steady_frame_hashes": {
+          "746090A91E876D44": 1,
+          "EEECE4FAA6C80FB2": 306
+        },
+        "steady_red_bounding_boxes": {
+          "128,0,911,47,552": 1,
+          "128,46,911,47,551": 306
+        },
+        "last_frame_sha256": "3c93d1bbc8da960e2981ce65fff8a0306b056074814759e665e2b87219b8b090",
+        "last_cropped_frame_sha256": "f04bd4d0e28b4a169174c0175ca8684b0d2b47efe213341753429584e40b61d9",
+        "visible_marker_onset_logical_xy": [
+          9,
+          8
+        ],
+        "source_csv_sha256": "0577afa71a4f971b9962ca1324dec1042399dba057b9fe1c6404390db6ecbbb3",
+        "source_frames_csv_sha256": "3ded8a6b647f7afc1dc7595249a595941e238cfc483cf342286d9981d18f90e3"
+      },
+      {
+        "phase": 1,
+        "streams": [
+          {
+            "cs": "1000",
+            "ip": "0702",
+            "value": "3C",
+            "observations": 307,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25550692",
+              "cs": "1000",
+              "ip": "0702",
+              "port": "03D9",
+              "value": "3C",
+              "beam_x_before": "176",
+              "beam_y_before": "46",
+              "beam_x_after": "210",
+              "beam_y_after": "46",
+              "frame": "320",
+              "scanline": "46"
+            },
+            "instruction_end_beam_positions": [
+              [
+                210,
+                46,
+                307
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                306
+              ]
+            ]
+          },
+          {
+            "cs": "1000",
+            "ip": "0745",
+            "value": "30",
+            "observations": 307,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25550966",
+              "cs": "1000",
+              "ip": "0745",
+              "port": "03D9",
+              "value": "30",
+              "beam_x_before": "96",
+              "beam_y_before": "47",
+              "beam_x_after": "130",
+              "beam_y_after": "47",
+              "frame": "320",
+              "scanline": "47"
+            },
+            "instruction_end_beam_positions": [
+              [
+                130,
+                47,
+                307
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                306
+              ]
+            ]
+          }
+        ],
+        "frame_count": 307,
+        "first_completed_marked_frame": {
+          "frame": "321",
+          "cpu_cycle": "25616348",
+          "fnv64": "746090A91E876D44",
+          "red_pixels": "552",
+          "red_x_min": "128",
+          "red_y_min": "0",
+          "red_x_max": "911",
+          "red_y_max": "47",
+          "cropped_fnv64": "E50DA485F4B44E8F"
+        },
+        "cropped_visible_frame_hashes": {
+          "E50DA485F4B44E8F": 307
+        },
+        "steady_frame_hashes": {
+          "746090A91E876D44": 1,
+          "EEECE4FAA6C80FB2": 306
+        },
+        "steady_red_bounding_boxes": {
+          "128,0,911,47,552": 1,
+          "128,46,911,47,551": 306
+        },
+        "last_frame_sha256": "3c93d1bbc8da960e2981ce65fff8a0306b056074814759e665e2b87219b8b090",
+        "last_cropped_frame_sha256": "f04bd4d0e28b4a169174c0175ca8684b0d2b47efe213341753429584e40b61d9",
+        "visible_marker_onset_logical_xy": [
+          9,
+          8
+        ],
+        "source_csv_sha256": "0577afa71a4f971b9962ca1324dec1042399dba057b9fe1c6404390db6ecbbb3",
+        "source_frames_csv_sha256": "3ded8a6b647f7afc1dc7595249a595941e238cfc483cf342286d9981d18f90e3"
+      },
+      {
+        "phase": 2,
+        "streams": [
+          {
+            "cs": "1000",
+            "ip": "0702",
+            "value": "3C",
+            "observations": 307,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25550692",
+              "cs": "1000",
+              "ip": "0702",
+              "port": "03D9",
+              "value": "3C",
+              "beam_x_before": "176",
+              "beam_y_before": "46",
+              "beam_x_after": "210",
+              "beam_y_after": "46",
+              "frame": "320",
+              "scanline": "46"
+            },
+            "instruction_end_beam_positions": [
+              [
+                210,
+                46,
+                307
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                306
+              ]
+            ]
+          },
+          {
+            "cs": "1000",
+            "ip": "0745",
+            "value": "30",
+            "observations": 307,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25550966",
+              "cs": "1000",
+              "ip": "0745",
+              "port": "03D9",
+              "value": "30",
+              "beam_x_before": "96",
+              "beam_y_before": "47",
+              "beam_x_after": "130",
+              "beam_y_after": "47",
+              "frame": "320",
+              "scanline": "47"
+            },
+            "instruction_end_beam_positions": [
+              [
+                130,
+                47,
+                307
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                306
+              ]
+            ]
+          }
+        ],
+        "frame_count": 307,
+        "first_completed_marked_frame": {
+          "frame": "321",
+          "cpu_cycle": "25616348",
+          "fnv64": "746090A91E876D44",
+          "red_pixels": "552",
+          "red_x_min": "128",
+          "red_y_min": "0",
+          "red_x_max": "911",
+          "red_y_max": "47",
+          "cropped_fnv64": "E50DA485F4B44E8F"
+        },
+        "cropped_visible_frame_hashes": {
+          "E50DA485F4B44E8F": 307
+        },
+        "steady_frame_hashes": {
+          "746090A91E876D44": 1,
+          "EEECE4FAA6C80FB2": 306
+        },
+        "steady_red_bounding_boxes": {
+          "128,0,911,47,552": 1,
+          "128,46,911,47,551": 306
+        },
+        "last_frame_sha256": "3c93d1bbc8da960e2981ce65fff8a0306b056074814759e665e2b87219b8b090",
+        "last_cropped_frame_sha256": "f04bd4d0e28b4a169174c0175ca8684b0d2b47efe213341753429584e40b61d9",
+        "visible_marker_onset_logical_xy": [
+          9,
+          8
+        ],
+        "source_csv_sha256": "0577afa71a4f971b9962ca1324dec1042399dba057b9fe1c6404390db6ecbbb3",
+        "source_frames_csv_sha256": "3ded8a6b647f7afc1dc7595249a595941e238cfc483cf342286d9981d18f90e3"
+      },
+      {
+        "phase": 3,
+        "streams": [
+          {
+            "cs": "1000",
+            "ip": "0702",
+            "value": "3C",
+            "observations": 304,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25791639",
+              "cs": "1000",
+              "ip": "0702",
+              "port": "03D9",
+              "value": "3C",
+              "beam_x_before": "176",
+              "beam_y_before": "46",
+              "beam_x_after": "210",
+              "beam_y_after": "46",
+              "frame": "323",
+              "scanline": "46"
+            },
+            "instruction_end_beam_positions": [
+              [
+                210,
+                46,
+                304
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                303
+              ]
+            ]
+          },
+          {
+            "cs": "1000",
+            "ip": "0745",
+            "value": "30",
+            "observations": 304,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "25791913",
+              "cs": "1000",
+              "ip": "0745",
+              "port": "03D9",
+              "value": "30",
+              "beam_x_before": "80",
+              "beam_y_before": "47",
+              "beam_x_after": "114",
+              "beam_y_after": "47",
+              "frame": "323",
+              "scanline": "47"
+            },
+            "instruction_end_beam_positions": [
+              [
+                114,
+                47,
+                304
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                303
+              ]
+            ]
+          }
+        ],
+        "frame_count": 304,
+        "first_completed_marked_frame": {
+          "frame": "324",
+          "cpu_cycle": "25857300",
+          "fnv64": "CAD5E5561215FAE4",
+          "red_pixels": "552",
+          "red_x_min": "112",
+          "red_y_min": "0",
+          "red_x_max": "911",
+          "red_y_max": "47",
+          "cropped_fnv64": "E50DA485F4B44E8F"
+        },
+        "cropped_visible_frame_hashes": {
+          "E50DA485F4B44E8F": 304
+        },
+        "steady_frame_hashes": {
+          "CAD5E5561215FAE4": 1,
+          "89E9D54B40A98052": 303
+        },
+        "steady_red_bounding_boxes": {
+          "112,0,911,47,552": 1,
+          "112,46,911,47,551": 303
+        },
+        "last_frame_sha256": "986352541eb81ee783e96e1233e35587d21f2e45f82e37078ef3e232ef9c9249",
+        "last_cropped_frame_sha256": "f04bd4d0e28b4a169174c0175ca8684b0d2b47efe213341753429584e40b61d9",
+        "visible_marker_onset_logical_xy": [
+          9,
+          8
+        ],
+        "source_csv_sha256": "a6cf7d3fd9378f0d9894d50a8db1f0aff2ead3a379d75702181d3e000e462c39",
+        "source_frames_csv_sha256": "ebe04ae6165b9756ddb37b5b5890cbacf34f1b4c3f08acde4bec1d18b347b1de"
+      }
+    ]
+  },
+  "disk_method": "Cold start of same unmodified core, PIT phase0, actual STARTLCK.DSK mounted write-protected, boot ROM and DOS run normally. No COM injection.420M CPUcycles total. COM observedat0C60:0100. Exactly3600 markers followed by automatic text-mode restoration and DOS A:\\> prompt. Framecapture endswhen graphicsmodeends;3599 fullmarkedframes precede teardown.",
+  "disk": {
+    "scope": "Emulated IBM 5160 + CGA + GLaBIOS 0.2.6, unmodified MartyPC core. Beam positions sampled after OUT instruction execution; these are not the exact register-latch instant or physical hardware measurements.",
+    "phases": [
+      {
+        "phase": 0,
+        "streams": [
+          {
+            "cs": "0C60",
+            "ip": "0702",
+            "value": "3C",
+            "observations": 3600,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "79030304",
+              "cs": "0C60",
+              "ip": "0702",
+              "port": "03D9",
+              "value": "3C",
+              "beam_x_before": "192",
+              "beam_y_before": "46",
+              "beam_x_after": "210",
+              "beam_y_after": "46",
+              "frame": "991",
+              "scanline": "46"
+            },
+            "instruction_end_beam_positions": [
+              [
+                210,
+                46,
+                3600
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                3599
+              ]
+            ]
+          },
+          {
+            "cs": "0C60",
+            "ip": "0745",
+            "value": "30",
+            "observations": 3600,
+            "discarded_initial": 0,
+            "first_observation": {
+              "cpu_cycle": "79030578",
+              "cs": "0C60",
+              "ip": "0745",
+              "port": "03D9",
+              "value": "30",
+              "beam_x_before": "96",
+              "beam_y_before": "47",
+              "beam_x_after": "130",
+              "beam_y_after": "47",
+              "frame": "991",
+              "scanline": "47"
+            },
+            "instruction_end_beam_positions": [
+              [
+                130,
+                47,
+                3600
+              ]
+            ],
+            "cpu_cycle_periods": [
+              [
+                79648,
+                3599
+              ]
+            ]
+          }
+        ],
+        "frame_count": 3599,
+        "first_completed_marked_frame": {
+          "frame": "992",
+          "cpu_cycle": "79095960",
+          "fnv64": "746090A91E876D44",
+          "red_pixels": "552",
+          "red_x_min": "128",
+          "red_y_min": "0",
+          "red_x_max": "911",
+          "red_y_max": "47",
+          "cropped_fnv64": "E50DA485F4B44E8F"
+        },
+        "cropped_visible_frame_hashes": {
+          "E50DA485F4B44E8F": 3599
+        },
+        "steady_frame_hashes": {
+          "746090A91E876D44": 1,
+          "EEECE4FAA6C80FB2": 3598
+        },
+        "steady_red_bounding_boxes": {
+          "128,0,911,47,552": 1,
+          "128,46,911,47,551": 3598
+        },
+        "last_frame_sha256": "7d2711c913c3923c3bcd0a3a77e982f453361a55e404b8b203762d1d7bbd69c9"
+      }
+    ]
+  },
+  "limitations": [
+    "Emulator observation, not physical hardware proof. One independent startup per exposed Marty phase setting; not an exhaustive startup-phase or hardware matrix.",
+    "Beam coordinates are samples at instruction boundaries, not an independently instrumented I/O latch timestamp. Raw framebuffer independently gives black-to-red onset at master-dot x210,y46, relative to active aperture(192,38): CGA logical pixel(9,8).",
+    "Phase3 restores black16masterdots earlier in horizontal blanking. The visible frame is identical in all four phases.",
+    "First full marked frame differs by one red pixel in row0 outside visible aperture; no marker observations or full visible marked frames were discarded."
+  ],
+  "disk_return_screenshot": "external/research/startlock-validation/disk/phase0-frame.png",
+  "delivery_disk": {
+    "path": "files/STARTLCK.DSK",
+    "sha256": "b2c4fd5f9f3eab8bacf78417e1e88c48aa35eef12de3388eeda277d9dbe32db6",
+    "note": "After runtime validation, the parent task rebuilt bundled README.TXT and FAT timestamps. Parent build verification confirmed identical boot sector, DOS components, AUTOEXEC.BAT, and final COM; the image was not rerun for that text-only packaging change."
+  }
+}

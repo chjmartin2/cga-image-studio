@@ -1,0 +1,268 @@
+{
+  "capture_source": "https://github.com/dbalsom/marty_tools/tree/23d99544ebf8aaf009bf2a551f048bb4b68a39a7/bus_sniffer/captures/area5150",
+  "binary_sha256": "1192f22cb6dd3fa668acf8cfc221347438f599e8d006621e3ead2dc6f7aae0fe",
+  "binary_size": 60050,
+  "capture_csv_sha256": "9a39cf60d8646dd8efa4fc23b795eb58a06cb12d6fec378b382ba518c33dfc63",
+  "capture_sr_sha256": "4c0a38b1a21969c3a54746c2ad5ccd0d7e9e0433b66f1e16de2955c8828f93f4",
+  "detected_file_load_address": "0x15990",
+  "inferred_cs_for_com_origin_0100": "0x1589",
+  "alignment_votes_from_unique_32_byte_windows": {
+    "0x15990": 90
+  },
+  "initializer": {
+    "com_address_range_inclusive": "0100-03FF",
+    "fetched_byte_events": 20445,
+    "distinct_fetched_offsets": 733,
+    "mismatched_events": 0
+  },
+  "all_captured_code": {
+    "fetched_byte_events": 53054,
+    "distinct_fetched_offsets": 11766,
+    "events_matching_static_release_bytes": 53050,
+    "static_mismatch_events": 4,
+    "static_mismatch_offsets": 2,
+    "mismatches_after_replaying_captured_memory_writes": []
+  },
+  "observed_self_modifications": [
+    {
+      "file_offset": "0x301",
+      "com_offset": "0x401",
+      "physical_address": "0x15c91",
+      "release_byte": "0x0",
+      "events": [
+        {
+          "cycle": 536077,
+          "kind": "CODE",
+          "value": "0x0"
+        },
+        {
+          "cycle": 536259,
+          "kind": "MEMW",
+          "value": "0x2"
+        },
+        {
+          "cycle": 615725,
+          "kind": "CODE",
+          "value": "0x2"
+        },
+        {
+          "cycle": 615907,
+          "kind": "MEMW",
+          "value": "0x4"
+        },
+        {
+          "cycle": 695373,
+          "kind": "CODE",
+          "value": "0x4"
+        },
+        {
+          "cycle": 695555,
+          "kind": "MEMW",
+          "value": "0x6"
+        }
+      ]
+    },
+    {
+      "file_offset": "0x24f0",
+      "com_offset": "0x25f0",
+      "physical_address": "0x17e80",
+      "release_byte": "0x6",
+      "events": [
+        {
+          "cycle": 602377,
+          "kind": "CODE",
+          "value": "0x6"
+        },
+        {
+          "cycle": 602531,
+          "kind": "MEMW",
+          "value": "0xa"
+        },
+        {
+          "cycle": 682025,
+          "kind": "CODE",
+          "value": "0xa"
+        },
+        {
+          "cycle": 682179,
+          "kind": "MEMW",
+          "value": "0xe"
+        },
+        {
+          "cycle": 761673,
+          "kind": "CODE",
+          "value": "0xe"
+        },
+        {
+          "cycle": 761827,
+          "kind": "MEMW",
+          "value": "0x12"
+        }
+      ]
+    }
+  ],
+  "interrupt_handler_entries": [
+    {
+      "first_ack_cycle": 455940,
+      "first_fetch_cycle": 456007,
+      "physical_address": "0x15bbc",
+      "opcode": "0xb0",
+      "com_offset": "0x32c"
+    },
+    {
+      "first_ack_cycle": 456132,
+      "first_fetch_cycle": 456199,
+      "physical_address": "0x15bd0",
+      "opcode": "0xec",
+      "com_offset": "0x340"
+    },
+    {
+      "first_ack_cycle": 456291,
+      "first_fetch_cycle": 456358,
+      "physical_address": "0x15bd0",
+      "opcode": "0xec",
+      "com_offset": "0x340"
+    },
+    {
+      "first_ack_cycle": 456488,
+      "first_fetch_cycle": 456555,
+      "physical_address": "0x15be4",
+      "opcode": "0x2e",
+      "com_offset": "0x354"
+    },
+    {
+      "first_ack_cycle": 456788,
+      "first_fetch_cycle": 456855,
+      "physical_address": "0x15bfd",
+      "opcode": "0xc7",
+      "com_offset": "0x36d"
+    },
+    {
+      "first_ack_cycle": 457064,
+      "first_fetch_cycle": 457131,
+      "physical_address": "0x15c0c",
+      "opcode": "0xb0",
+      "com_offset": "0x37c"
+    },
+    {
+      "first_ack_cycle": 476655,
+      "first_fetch_cycle": 476724,
+      "physical_address": "0x15c46",
+      "opcode": "0xec",
+      "com_offset": "0x3b6"
+    },
+    {
+      "first_ack_cycle": 496072,
+      "first_fetch_cycle": 496142,
+      "physical_address": "0x15c5a",
+      "opcode": "0x2e",
+      "com_offset": "0x3ca"
+    },
+    {
+      "first_ack_cycle": 515524,
+      "first_fetch_cycle": 515596,
+      "physical_address": "0x15c73",
+      "opcode": "0xb8",
+      "com_offset": "0x3e3"
+    },
+    {
+      "first_ack_cycle": 535992,
+      "first_fetch_cycle": 536065,
+      "physical_address": "0x15c90",
+      "opcode": "0xbb",
+      "com_offset": "0x400"
+    },
+    {
+      "first_ack_cycle": 615640,
+      "first_fetch_cycle": 615713,
+      "physical_address": "0x15c90",
+      "opcode": "0xbb",
+      "com_offset": "0x400"
+    },
+    {
+      "first_ack_cycle": 695288,
+      "first_fetch_cycle": 695361,
+      "physical_address": "0x15c90",
+      "opcode": "0xbb",
+      "com_offset": "0x400"
+    }
+  ],
+  "interrupt_handler_entry_counts": {
+    "0x32c": 1,
+    "0x340": 2,
+    "0x354": 1,
+    "0x36d": 1,
+    "0x37c": 1,
+    "0x3b6": 1,
+    "0x3ca": 1,
+    "0x3e3": 1,
+    "0x400": 3
+  },
+  "acquisition_status_tests": [
+    {
+      "handler_com_offset": "0x340",
+      "cycle": 456217,
+      "status_value": "0xf6",
+      "status_bit_0": 0
+    },
+    {
+      "handler_com_offset": "0x340",
+      "cycle": 456376,
+      "status_value": "0xf7",
+      "status_bit_0": 1
+    },
+    {
+      "handler_com_offset": "0x3b6",
+      "cycle": 476747,
+      "status_value": "0xf7",
+      "status_bit_0": 1
+    }
+  ],
+  "acquisition_parameter_reads": [
+    {
+      "cycle": 455559,
+      "com_offset": "0x45e8",
+      "value": "0x0"
+    },
+    {
+      "cycle": 456583,
+      "com_offset": "0x45e6",
+      "value": "0x45"
+    },
+    {
+      "cycle": 456587,
+      "com_offset": "0x45e7",
+      "value": "0x0"
+    },
+    {
+      "cycle": 496170,
+      "com_offset": "0x45e4",
+      "value": "0xfd"
+    },
+    {
+      "cycle": 496174,
+      "com_offset": "0x45e5",
+      "value": "0x13"
+    }
+  ],
+  "csv_to_sr_signal_comparison": {
+    "csv_rows": 770891,
+    "sr_samples": 1541781,
+    "mapping": "CSV row n corresponds to SR sample 2*n for these six shared signals",
+    "mismatched_samples": {
+      "VS": 0,
+      "HS": 0,
+      "DEN": 0,
+      "INTR": 0,
+      "DR0": 0,
+      "CLK0": 0
+    }
+  },
+  "limitations": [
+    "This is compatibility of observed instruction-fetch bytes, not equality of every byte of an unarchived capture executable.",
+    "Instruction fetch includes prefetch; a fetched byte is not by itself proof that its instruction executed.",
+    "The capture does not cover every path, every initial phase, or multiple power cycles.",
+    "A19 was not physically captured according to the publisher; these addresses use the published decoder's reconstruction.",
+    "No physical hardware was operated for this comparison."
+  ]
+}

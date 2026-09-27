@@ -1,0 +1,24 @@
+{
+  "com": "files\\STARTLCK.COM",
+  "com_bytes": 36608,
+  "com_sha256": "3e0e514005cb41809a209ad1311e63bd1426d6a9f820411a8a0af9fdc2417537",
+  "disk": "files\\STARTLCK.DSK",
+  "disk_bytes": 368640,
+  "disk_sha256": "b2c4fd5f9f3eab8bacf78417e1e88c48aa35eef12de3388eeda277d9dbe32db6",
+  "reference_start": 386,
+  "reference_end_exclusive": 1024,
+  "reference_sha256": "5cd473609b38a30aeb1bb415677bcf476ab35d48f69fea158608dbc050a30956",
+  "reference_bytes_equal": true,
+  "marker_ticks": 3496,
+  "display_frames": 3600,
+  "entry_nops": 0,
+  "disk_files": {
+    "IO.SYS": 22357,
+    "MSDOS.SYS": 30128,
+    "COMMAND.COM": 25276,
+    "STARTLCK.COM": 36608,
+    "AUTOEXEC.BAT": 267,
+    "README.TXT": 6466
+  },
+  "validation": "NASM assembly, unchanged reference bytes, boot sector/system files and FAT file round trips; see STARTLCK.md for runtime results"
+}

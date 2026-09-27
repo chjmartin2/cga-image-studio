@@ -10242,26 +10242,16 @@ _CGA_LOCKSTEP_MAX_RING_PIXELS = (
     + sum(_CGA_LOCKSTEP_MAX_FIXED_INTERVALS) * _CGA_LOCKSTEP_MAX_PIXELS_PER_NOP
 )
 
-# FREE16 profile (the robust build_hlt_pit line): 16 back-to-back palette writes per
-# scanline, NO nops / NO lodsb comp -> 16*19 = 304 cyc, writes on a dead-uniform 57-hdot
-# grid. Calibrated 2026-06-20 from F16Z.COM (phase_lock 7, ramp 0..15, VRAM=0) full-field
-# capture (screenshot0116) + cycle trace: line=304 exact, writes exactly 19 cyc apart.
-# Active window (hdot 192..832 = lo-res px 0..320) shows 12 zones straddling the loop wrap
-# at px 73 (write 15 -> write 0). BOUNDS = active-window zone edges (lo-res px); SLOTS =
-# 1-based write index (write#+1); DELTAS = -1 for the pre-wrap writes (13,14,15 = previous
-# emitted line), 0 for the post-wrap writes (0..8 = current line). Measured at palette-
-# delay 0 (all-bg ZONE), like the 13-write bounds; the per-image fg delay is applied on top.
-# BOOT-STABLE FREE16 = 8 writes/line, NOT 16. The 16-write line at 19cyc precesses through
-# every character phase, so some seams ALWAYS sit on a char-clock knife-edge and the lock's
-# +-1cyc residual flips them by a whole char boot-to-boot (proven bistable). 8 writes spaced
-# 27cyc (inter_nops=2) make the seams CLUSTER (+1 char-phase/write), and lead_nops parks that
-# cluster mid-character where +-1cyc can't reach an edge -> ROCK STABLE across cold boots
-# (NW8L2: 4/4 identical). See [[hlt-pit-feedback]].
+# Legacy phase-7 FREE16 profile: eight writes per scanline. Its geometry came
+# from earlier emulator captures; the name survives from the abandoned
+# sixteen-write experiment. These constants do not describe the STARTLCK
+# backend, which uses its own measured layout and keeps DRAM refresh active.
+# Neither emulator profile is a claim of physical-hardware qualification.
 _CGA_FREE16_WRITES = 8
 _CGA_FREE16_INTER_NOPS = 2     # nops between image writes: 2 -> 27cyc spacing -> seams cluster
 _CGA_FREE16_LEAD_NOPS = 2      # per-line lead: parks the cluster in the safe mid-char window
 _CGA_FREE16_HBLANK_AFTER = 6   # nops AFTER the moved (HBLANK) write so it lands in the overscan
-# HBLANK-LEADING structure (HBLEAD, proven 2026-06-21): of the 8 writes, the last is MOVED out of
+# Legacy HBLANK-leading structure: of the 8 writes, the last is moved out of
 # the active area into the horizontal-blank pad, where it sets the NEXT line's LEADING [0,33)
 # palette independently of the trailing write -- killing the old write-7 wrap conflict at ZERO
 # cycle cost (still 8 writes = exactly 304). So 7 image writes land on the measured 40px grid at
@@ -10272,6 +10262,7 @@ _CGA_FREE16_HBLANK_AFTER = 6   # nops AFTER the moved (HBLANK) write so it lands
 _CGA_FREE16_BOUNDS = (0, 33, 73, 113, 153, 193, 233, 273, 320)
 _CGA_FREE16_SLOTS = (8, 1, 2, 3, 4, 5, 6, 7)
 _CGA_FREE16_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0)
+_CGA_STARTLOCK_TIMING_BACKEND = "startlock-mode4"
 
 
 def normalize_mode_switch_max_pattern(pattern):
@@ -10322,7 +10313,7 @@ def _cga_lockstep_max_events_for_logical_line(line, pattern="Fixed"):
     return events
 
 
-def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320, constant_fg=True, free16=False, free16_h_shift=0):
+def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320, constant_fg=True, free16=False, free16_h_shift=0, timing_backend=None):
     """Active-area zones for the calibrated 13-write profile.
 
     The visible scanline straddles two emitted palette lines. The left/middle
@@ -10333,8 +10324,15 @@ def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320, constant_fg=True
     aligned mode, or the content-dependent vary-both mapping when the fg palette
     also changes mid-line (the two were measured to differ; see the bounds defs).
 
-    free16: the robust 16-write all-writes profile (uniform 57-hdot grid).
+    free16: the legacy eight-write profile, unless timing_backend is supplied.
     """
+    if timing_backend is not None:
+        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+            raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
+        if not free16 or free16_h_shift or normalize_mode_switch_max_pattern(pattern) != "Fixed":
+            raise ValueError("STARTLCK requires the fixed eight-write layout without a horizontal shift")
+        from cga_mode4_lock import make_layouts
+        return make_layouts(H=1, W=W)[0]
     if free16 and W == 320:
         # HARD-WIRED measured seams (the char-snapped 32/24px bars from the FR registration
         # test). These are exact, so free16_h_shift defaults to 0; it remains only as a
@@ -10422,8 +10420,15 @@ def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320, constant_fg=True
     return {"zones": zones, "intervals": cga_lockstep_max_intervals_for_line(y, pattern)}
 
 
-def build_cga_lockstep_max_layouts(pattern="Fixed", H=200, W=320, constant_fg=True, free16=False, free16_h_shift=0):
-    return [cga_lockstep_max_layout_for_line(y, pattern, W=W, constant_fg=constant_fg, free16=free16, free16_h_shift=free16_h_shift) for y in range(H)]
+def build_cga_lockstep_max_layouts(pattern="Fixed", H=200, W=320, constant_fg=True, free16=False, free16_h_shift=0, timing_backend=None):
+    if timing_backend is not None:
+        # Validate the same restrictions as the single-line helper before
+        # requesting the complete geometry from the backend in one call.
+        cga_lockstep_max_layout_for_line(0, pattern, W=W, free16=free16,
+                                       free16_h_shift=free16_h_shift, timing_backend=timing_backend)
+        from cga_mode4_lock import make_layouts
+        return make_layouts(H=H, W=W)
+    return [cga_lockstep_max_layout_for_line(y, pattern, W=W, constant_fg=constant_fg, free16=free16, free16_h_shift=free16_h_shift, timing_backend=timing_backend) for y in range(H)]
 
 
 def cga_mode04_palette_from_3d9(value):
@@ -10543,7 +10548,13 @@ def derive_indices_320_from_rgb_lockstep_max(out_image, plan, W=320, H=200):
 
 
 def build_com_320_mode_switch_lockstep_max(vram16k, plan):
-    """Build the calibrated dense 13-write CGA Mode Switch COM."""
+    """Build the timing backend selected by the image's conversion plan."""
+    timing_backend = plan.get("timing_backend")
+    if timing_backend is not None:
+        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+            raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
+        from cga_mode4_lock import build_com
+        return build_com(vram16k, plan)
     if len(vram16k) != 16384:
         raise ValueError(f"vram16k must be 16384 bytes, got {len(vram16k)}")
     lines = plan.get("lines", [])
@@ -10979,13 +10990,23 @@ def quantize_320x200_mode_switch_lockstep_max(
     free16_h_shift=0,
     free16_preroll_lines=None,
     dither_aware=False,
+    timing_backend=None,
 ):
-    """Quantize for the multi-write lockstep COM profile (free16 = the 8-write
-    production line; otherwise the legacy 13-write dense schedule).
+    """Quantize using the geometry belonging to the selected timing backend.
+
+    free16 selects eight writes; its default timing remains the legacy phase-7
+    schedule for existing callers. The GUI explicitly selects STARTLCK.
 
     keep_border_black: restrict the wrap register (the one that paints the
     horizontal border/overscan) to a black background so the border stays black.
     """
+    if timing_backend is not None:
+        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+            raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
+        if not free16 or free16_h_shift or free16_preroll_lines is not None:
+            raise ValueError("STARTLCK requires eight writes and uses a fixed acquisition schedule")
+        if normalize_mode_switch_max_pattern(pattern) != "Fixed":
+            raise ValueError("STARTLCK supports the Fixed palette pattern only")
     img = image_rgb_320x200.convert("RGB")
     if img.size != (320, 200):
         img = img.resize((320, 200), Image.LANCZOS)
@@ -11040,7 +11061,8 @@ def quantize_320x200_mode_switch_lockstep_max(
     intensity = max(0.0, min(3.0, float(diffusion_intensity)))
     n_writes = _CGA_FREE16_WRITES if free16 else _CGA_LOCKSTEP_MAX_WRITES
     layouts = build_cga_lockstep_max_layouts(pattern, H=H, W=W,
-                                             free16=free16, free16_h_shift=(free16_h_shift if free16 else 0))
+                                             free16=free16, free16_h_shift=(free16_h_shift if free16 else 0),
+                                             timing_backend=timing_backend)
 
     def nearest_index(old_rgb, pal4):
         r, g, b = old_rgb
@@ -11223,11 +11245,17 @@ def quantize_320x200_mode_switch_lockstep_max(
     }
     if free16:
         plan["free16_writes"] = n_writes          # builder emits the all-writes line
-        plan["phase_lock"] = 7                     # FREE16 is the pl7 HLT+PIT lock path
-        # pl7 starts the draw at the vsync falling edge -> 16 fewer preroll lines (the
-        # measured 16px-down offset). Tunable via free16_preroll_lines.
-        plan["preroll_lines"] = int(free16_preroll_lines) if free16_preroll_lines is not None \
-            else _CGA_LOCKSTEP_MAX_PREROLL_LINES - 16
+        if timing_backend == _CGA_STARTLOCK_TIMING_BACKEND:
+            plan["timing_backend"] = timing_backend
+            plan["drain_writes"] = 0
+            # The final blanking write supplies row zero on every later frame;
+            # the bridge handler supplies this same value for the first frame.
+            plan["lines"][-1]["values_3d9"][-1] = preline_values[-1]
+        else:
+            plan["phase_lock"] = 7
+            # Legacy phase-7 frame entry uses the VSYNC falling edge.
+            plan["preroll_lines"] = int(free16_preroll_lines) if free16_preroll_lines is not None \
+                else _CGA_LOCKSTEP_MAX_PREROLL_LINES - 16
     return render_cga_lockstep_max_physical_preview(plan, W=W, H=H), plan
 
 
@@ -11485,6 +11513,48 @@ def quantize_640x200_2color_mode_switch(
     return pimg
 
 
+def _8088_instruction_length(d, i):
+    """Find an instruction boundary even when its mnemonic isn't supported.
+
+    Unknown instructions are emitted as one db block so operand bytes aren't
+    accidentally interpreted as branches, labels, or palette writes.
+    """
+    start = i
+    while i < len(d) and d[i] in (0x26, 0x2E, 0x36, 0x3E, 0xF0, 0xF2, 0xF3):
+        i += 1
+    if i == len(d):
+        return i - start
+    b = d[i]
+    i += 1
+    modrm = ((b < 0x40 and b & 7 < 4) or 0x80 <= b <= 0x8F
+             or b in (0xC4, 0xC5, 0xC6, 0xC7, 0xF6, 0xF7, 0xFE, 0xFF)
+             or 0xD0 <= b <= 0xD3 or 0xD8 <= b <= 0xDF)
+    if modrm:
+        if i == len(d):
+            return i - start
+        m = d[i]
+        i += 1
+        mod, reg, rm = m >> 6, (m >> 3) & 7, m & 7
+        if mod == 0 and rm == 6 or mod == 2:
+            i += 2
+        elif mod == 1:
+            i += 1
+        if b in (0x80, 0x82, 0x83, 0xC6) or b == 0xF6 and reg <= 1:
+            i += 1
+        elif b in (0x81, 0xC7) or b == 0xF7 and reg <= 1:
+            i += 2
+    elif (b < 0x40 and b & 7 == 4 or 0x70 <= b <= 0x7F
+          or 0xB0 <= b <= 0xB7 or 0xE0 <= b <= 0xE7
+          or b in (0xA8, 0xCD, 0xD4, 0xD5, 0xEB)):
+        i += 1
+    elif (b < 0x40 and b & 7 == 5 or 0xA0 <= b <= 0xA3
+          or 0xB8 <= b <= 0xBF or b in (0xA9, 0xC2, 0xCA, 0xE8, 0xE9)):
+        i += 2
+    elif b in (0x9A, 0xEA):
+        i += 4
+    return min(i, len(d)) - start
+
+
 def _disasm_8088_instr(d, i):
     """Decode one 8088 instruction from the small set the COM exporters emit.
 
@@ -11498,6 +11568,14 @@ def _disasm_8088_instr(d, i):
     rel16 = lambda: (i + 3 + ((w16(i + 1) ^ 0x8000) - 0x8000)) & 0xFFFF
     imm16 = {0xB8: "ax", 0xB9: "cx", 0xBA: "dx", 0xBB: "bx",
              0xBE: "si", 0xBF: "di", 0xBD: "bp"}
+    # Truncated instructions (including data mistaken for code) must remain
+    # exportable. Keep the available bytes rather than reading past the buffer.
+    needed = 3 if b in imm16 or b in (0xE8, 0xE9) else 2 if b in (
+        0xB0, 0xB4, 0xCD, 0x8E, 0x31, 0xE6, 0xA8, 0x3C,
+        0x75, 0x74, 0xEB,
+    ) else 1
+    if i + needed > len(d):
+        return (f"db 0{b:02X}h", 1, 0, None)
     if b in imm16:
         return (f"mov {imm16[b]}, 0{w16(i+1):04X}h", 3, 4, None)
     if b == 0xB0: return (f"mov al, 0{d[i+1]:02X}h", 2, 4, None)
@@ -11519,122 +11597,310 @@ def _disasm_8088_instr(d, i):
     if b == 0x74: return ("jz", 2, 16, rel8())
     if b == 0xEB: return ("jmp short", 2, 15, rel8())
     if b == 0xE9: return ("jmp near", 3, 15, rel16())
+    if b == 0xE8: return ("call", 3, 19, rel16())
     if b == 0xFA: return ("cli", 1, 2, None)
     if b == 0xFB: return ("sti", 1, 2, None)
+    if b == 0xF4: return ("hlt", 1, 2, None)
     if b == 0x90: return ("nop", 1, 3, None)
     if b == 0xC3: return ("ret", 1, 16, None)
-    return (f"db 0{b:02X}h", 1, 0, None)
+    length = _8088_instruction_length(d, i)
+    raw = ", ".join(f"0{x:02X}h" for x in d[i:i + length])
+    return (f"db {raw}", length, 0, None)
 
 
-def build_nasm_source_from_com(com_bytes: bytes, mode_label: str, binary_name: str) -> str:
-    """Return readable, reassemblable NASM source for a generated COM.
+def _lockstep_label_names(d, code_end, targets, frame_off=None):
+    """Rename jump-target labels (in place) to debugger-friendly names based on
+    the instruction each one points at, for the dense Mode Switch family. Targets
+    that aren't recognised keep their generic L_xxxx name."""
+    used = set()
+    for off in sorted(targets):
+        mn = _disasm_8088_instr(d, off)[0]
+        name = targets[off]
+        if off == frame_off:
+            name = "frame_loop"
+        elif d[off:off + 5] == b"\xEC\xA8\x08\x75\xFB":
+            name = "wait_vblank_end"
+        elif d[off:off + 5] == b"\xEC\xA8\x08\x74\xFB":
+            name = "wait_vblank_start"
+        elif mn == "mov ah, 000h":
+            name = "read_keypress"
+        elif mn == "mov al, 054h":
+            name = "teardown"
+        # Some profiles synchronize once at startup and again every frame.
+        # NASM labels must stay unique even when the instruction is identical.
+        if name in used:
+            name = f"{name}_{off + 0x100:04X}"
+        targets[off] = name
+        used.add(name)
 
-    Emits real mnemonics (not a hex dump) with 8088 EU cycle annotations, and for
-    the dense Mode Switch palette loop, per-emitted-line headers plus the model's
-    expected beam column for each `out dx,al` -- so the timing can be debugged by
-    reading the assembly. Trailing framebuffer/VRAM data is emitted as db.
+
+def _lockstep_instr_doc(mn, prev):
+    """One-line purpose comment for a non-write instruction in the dense Mode
+    Switch program, or None if there is no special annotation. `prev` is the
+    previous instruction's mnemonic (used to disambiguate the BIOS calls)."""
+    if mn == "mov ax, 00004h": return "AH=00 set-video-mode, AL=04h -> CGA 320x200 4-colour graphics"
+    if mn == "mov ax, 00003h": return "AL=03h -> standard 80x25 colour text mode"
+    if mn == "mov ax, 04C00h": return "AX=4C00h -> DOS terminate-with-exit-code, code 00"
+    if mn == "mov ax, 0B800h": return "B800h = CGA graphics framebuffer segment"
+    if mn == "int 010h":
+        if prev == "mov ax, 00004h": return "BIOS video service: enter mode 04h (also clears VRAM)"
+        if prev == "mov ax, 00003h": return "BIOS video service: restore text mode"
+        return "BIOS video service"
+    if mn == "int 021h": return "DOS service call: the program ends here"
+    if mn == "int 016h":
+        if prev == "mov ah, 001h": return "(ZF=0 if a key is waiting in the buffer)"
+        if prev == "mov ah, 000h": return "fetch the waiting key into AL"
+        return "BIOS keyboard service"
+    if mn == "push cs": return ".COM model: CS=DS=ES=PSP. Copy CS..."
+    if mn == "pop ds": return "...into DS so DS:SI can read the bitmap embedded below"
+    if mn == "mov es, ax" and prev == "mov ax, 0B800h": return "ES = B800h : destination of the blit"
+    if mn == "xor di, di": return "ES:DI = B800:0000 -> top-left of video RAM"
+    if mn == "mov cx, 02000h": return "word count for the blit = one full CGA frame"
+    if mn == "rep movsw": return "blit the entire static picture into VRAM in one burst"
+    if mn == "mov dx, 003DAh": return "DX = CGA Status Register; bit 3 (08h) = vertical retrace"
+    if mn == "mov dx, 003D9h": return "DX = CGA Colour-Select port; stays 3D9h for the whole frame"
+    if mn == "in al, dx": return "read the I/O port selected by DX"
+    if mn == "test al, 008h": return "isolate the vertical-retrace bit (08h)"
+    if mn == "cli": return "disable maskable interrupts"
+    if mn == "sti": return "enable maskable interrupts"
+    if mn == "hlt": return "wait for an interrupt (HLT+PIT timing acquisition / frame lock)"
+    if mn.startswith("out 043h"): return "write to the 8253/8254 PIT command port"
+    if mn.startswith("out 041h"): return "PIT channel-1 count -> DRAM-refresh divisor"
+    if mn == "mov ah, 001h": return "AH=01 BIOS keyboard: peek -- is a key waiting?"
+    if mn == "mov ah, 000h": return "AH=00 BIOS keyboard: read the waiting key"
+    if mn == "cmp al, 01Bh": return "ESC (1Bh) pressed?"
+    if mn == "mov al, 054h": return "PIT control word 54h: channel 1, LSB-only, mode 2 (rate gen)"
+    if mn == "mov al, 050h": return "PIT channel 1: mode 0 without reload, disabling refresh requests"
+    if mn == "mov al, 013h": return "refresh divisor = 19 (BIOS default 18) -> locks CPU<->CGA phase"
+    if mn == "mov al, 012h": return "restore the BIOS default refresh divisor (18)"
+    return None
+
+
+def _lockstep_jump_doc(mn, label):
+    """Purpose comment for a branch in the dense Mode Switch program, keyed on
+    the destination label."""
+    if label.startswith("wait_vblank_end"): return "spin while bit 3 is set: wait for vertical retrace to end"
+    if label.startswith("wait_vblank_start"): return "spin while bit 3 is clear: wait for vertical retrace to start"
+    if label == "read_keypress": return "a key is waiting -> go read it"
+    if label == "teardown": return "ESC -> exit"
+    if label == "frame_loop": return "synchronize and repaint the frame"
+    return None
+
+
+def build_nasm_source_from_com(com_bytes: bytes, mode_label: str, binary_name: str,
+                               *, mode_switch_plan=None) -> str:
+    """Return annotated NASM source that reassembles to the original COM bytes.
+
+    A matching Mode Switch plan enables scanline/slot and preview annotations.
+    Without a plan, keep the listing generic: bytes alone don't identify a
+    calibrated profile, its preroll count, or its visible palette geometry.
     """
     if not isinstance(com_bytes, (bytes, bytearray)) or not com_bytes:
         raise ValueError("COM export did not produce any bytes")
-    safe_mode = str(mode_label).replace("\r", " ").replace("\n", " ")
-    safe_name = Path(binary_name).name
+    if mode_switch_plan is not None and mode_switch_plan.get("timing_backend") is not None:
+        timing_backend = mode_switch_plan["timing_backend"]
+        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+            raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
+        from cga_mode4_lock import build_nasm_source
+        return build_nasm_source(com_bytes, mode_label, binary_name, mode_switch_plan)
+
+    def comment_text(value):
+        return str(value).replace('\r', ' ').replace('\n', ' ').encode(
+            'ascii', errors='replace').decode('ascii')
+
+    safe_mode = comment_text(mode_label)
+    safe_name = comment_text(Path(binary_name).name)
     d = bytes(com_bytes)
 
-    # Split code from trailing data: the lockstep/framebuffer exporters do
-    # `mov si, <fb>` ... `rep movsw`; the framebuffer image starts at <fb>-0x100.
-    # The mov si is followed by `mov cx,count` before `rep movsw` (F3 A5), so find
-    # the rep movsw and take the nearest preceding `mov si` immediate.
+    # Locate the initial framebuffer copy on instruction boundaries. Raw byte
+    # searches can mistake an immediate or framebuffer byte for MOV SI/REP MOVSW.
     code_end = len(d)
-    rep = d.find(b"\xF3\xA5")
-    if rep != -1:
-        for j in range(rep - 2, max(-1, rep - 10), -1):
-            if d[j] == 0xBE:
-                fb = (d[j + 1] | (d[j + 2] << 8)) - 0x100
-                if 0 < fb <= len(d):
-                    code_end = fb
+    pending_si = None
+    i = 0
+    while i < code_end:
+        mn, ln, _, _ = _disasm_8088_instr(d, i)
+        if d[i] == 0xBE and ln == 3:
+            pending_si = (i, int.from_bytes(d[i + 1:i + 3], 'little') - 0x100)
+        elif mn == 'rep movsw' and pending_si is not None:
+            si_off, fb = pending_si
+            if i - si_off <= 9 and i + ln <= fb <= len(d):
+                code_end = fb
                 break
+        i += ln
 
-    # Pass 1: decode code, collect jump-target labels.
-    targets = {}
+    code = d[:code_end]
+    instructions = {}
     i = 0
     while i < code_end:
-        mn, ln, ts, tgt = _disasm_8088_instr(d, i)
-        if tgt is not None and tgt < code_end:
-            targets.setdefault(tgt, f"L_{tgt + 0x100:04X}")
-        i += ln if ln > 0 else 1
+        instruction = _disasm_8088_instr(code, i)
+        instructions[i] = instruction
+        i += instruction[1]
 
-    # Detect the dense Mode Switch palette write loop (long run of B0 ib EE).
-    def is_write(o):
-        return o + 2 < code_end and d[o] == 0xB0 and d[o + 2] == 0xEE
-    dense_writes = sum(1 for o in range(code_end) if is_write(o))
-    is_dense = dense_writes >= _CGA_LOCKSTEP_MAX_WRITES * 4
+    # Only name targets that can actually get a label definition. A branch into
+    # an operand or trailing data keeps its numeric ORG-relative destination.
+    targets = {tgt: f'L_{tgt + 0x100:04X}'
+               for _, _, _, tgt in instructions.values()
+               if tgt is not None and tgt in instructions}
+    writes = [off for off, (mn, ln, _, _) in instructions.items()
+              if code[off] == 0xB0 and ln == 2 and off + 2 in instructions
+              and instructions[off + 2][0] == 'out dx, al']
+    is_palette_program = len(writes) >= 52
+    frame_off = None
+    if is_palette_program:
+        # The final backward jump before support routines returns to frame sync.
+        loops = [tgt for off, (mn, _, _, tgt) in instructions.items()
+                 if mn == 'jmp near' and tgt is not None and tgt < writes[0] < off
+                 and tgt in targets]
+        frame_off = loops[-1] if loops else None
+        _lockstep_label_names(code, code_end, targets, frame_off)
 
+    plan = mode_switch_plan
+    write_notes = {}
+    nw = preroll = visible = drain = phase_lock = None
+    if plan is not None:
+        # Comments must describe this exact binary, including experimental knobs.
+        if (len(d) - code_end != 16384 or
+                build_com_320_mode_switch_lockstep_max(d[code_end:], plan) != d):
+            raise ValueError('Mode Switch annotation plan does not match the COM bytes')
+        nw = int(plan.get('free16_writes', 0) or _CGA_LOCKSTEP_MAX_WRITES)
+        preroll = int(plan.get('preroll_lines', _CGA_LOCKSTEP_MAX_PREROLL_LINES))
+        visible = min(_CGA_LOCKSTEP_MAX_VISIBLE_BLOCKS, len(plan['lines']))
+        drain = _CGA_LOCKSTEP_MAX_DRAIN_WRITES
+        phase_lock = int(plan.get('phase_lock', 0) or 0)
+        timed_count = (preroll + visible) * nw + drain
+        # Diagnostic fillers may contain extra MOV/OUT pairs. Do not assign
+        # scanline ownership unless the schedule accounts for every pair.
+        if len(writes) == timed_count + 1:
+            for index, off in enumerate(writes[:timed_count]):
+                emitted_line, slot0 = divmod(index, nw)
+                y = emitted_line - preroll
+                tag = f'preroll {emitted_line}' if y < 0 else (
+                    f'visible y={y}' if y < visible else 'drain tail')
+                write_notes[off] = (emitted_line, y, slot0 + 1, tag)
+
+    bar = '; ' + '=' * 77
     out = [
-        f"; Generated by CGA Image Studio {__version__}",
-        f"; Output mode: {safe_mode}",
-        f"; Reassembles to: {safe_name}   (nasm -f bin this.asm -o {safe_name})",
-        "; 't' annotations are 8088 execution-unit cycles (prefetch/bus stalls",
-        "; not included). In 320-line mode the CGA runs ~1.5 lo-res px per CPU",
-        "; cycle. The dense palette loop is annotated per emitted line.",
-        "",
-        "bits 16",
-        "org 100h",
-        "",
+        bar,
+        f'; Generated by CGA Image Studio {__version__}',
+        f'; Output mode: {safe_mode}',
+        f'; Reassembles to: {safe_name}',
+        f'; Assemble: nasm -f bin -O0 "{Path(safe_name).with_suffix(".asm").name}" -o "{safe_name}"',
+        '; -O0 preserves the original instruction layout; do not edit timed code.',
+        "; 't' annotations are 8088 execution-unit cycles, excluding prefetch,",
+        '; bus stalls, and hardware wait time. They are not absolute beam timing.',
+        '; Unsupported instructions are preserved as complete db byte sequences.',
     ]
+    if is_palette_program:
+        out.extend([
+            ';',
+            '; PER-SCANLINE PALETTE PROGRAM',
+            '; The static bitmap is copied to CGA VRAM. Timed writes to port 3D9h',
+            '; select different four-colour palettes while scanlines are drawn.',
+            '; Port 3D9h: bits 0-3 = background/border colour (including intensity);',
+            '; bit 4 = foreground intensity; bit 5 = foreground palette family.',
+        ])
+        if plan is None:
+            out.extend([
+                '; No conversion plan was supplied: write numbers below are sequential,',
+                '; with no inferred scanline count, timing profile, or beam columns.',
+            ])
+        else:
+            profile = 'FREE16' if plan.get('free16_writes') else 'dense lockstep'
+            out.extend([
+                f'; Profile: {profile}, {nw} palette writes per emitted scanline.',
+                f'; Schedule: {preroll} preroll lines + {visible} visible blocks + {drain} drain writes.',
+                f'; Phase-lock setting: {phase_lock}.',
+            ])
+            if phase_lock == 7:
+                out.extend([
+                    '; HLT+PIT acquires a repeatable frame phase using IRQ0 and a delay routine.',
+                    '; PIT channel 1 refresh is disabled. Interrupts stay enabled so HLT wakes.',
+                    '; The current phase-7 program repeats indefinitely; reset the emulator to exit.',
+                ])
+            else:
+                out.append('; Frame entry polls vertical retrace; CLI protects the timed region.')
+                out.append('; ESC restores PIT channel 1, text mode, and returns to DOS.')
+                if phase_lock == 6:
+                    out.append('; PIT channel 1 refresh is disabled; filler instructions repay its timing cost.')
+                else:
+                    out.append('; PIT channel 1 is programmed to divisor 19 for scanline timing.')
+            if plan.get('free16_writes'):
+                out.append(f'; Slots 1-{nw - 1} write image palettes; slot {nw} is the HBLANK leading-palette write.')
+                out.append('; The HBLANK write supplies the next visible line\'s leftmost zone.')
+            if not write_notes:
+                out.append('; Extra diagnostic writes prevent assigning per-line annotations.')
+        if code_end < len(d):
+            out.extend([
+                ';',
+                '; MEMORY MAP',
+                f'; 0100h .. {code_end + 0xFF:04X}h: program and embedded support data',
+                f'; {code_end + 0x100:04X}h .. {len(d) + 0xFF:04X}h: framebuffer (fb_data)',
+                '; B800:0000: runtime CGA video RAM',
+            ])
+    out.extend([bar, '', 'bits 16', 'org 100h', ''])
 
-    # Pass 2: emit. Track dense-loop line/slot state for annotations.
-    slots = _CGA_LOCKSTEP_MAX_FIXED_SLOTS
-    base_x = _CGA_LOCKSTEP_MAX_BASE_WRITE_X
-    write_idx = 0          # global palette-write counter (0-based)
-    preroll = _CGA_LOCKSTEP_MAX_PREROLL_LINES
+    first_write = writes[0] if is_palette_program else None
+    write_numbers = {off: index + 1 for index, off in enumerate(writes)}
+    prev_mn = ''
     i = 0
     while i < code_end:
+        mn, ln, ts, tgt = instructions[i]
+        if i == 0:
+            out.append('start:')
         if i in targets:
-            out.append(f"{targets[i]}:")
-        mn, ln, ts, tgt = _disasm_8088_instr(d, i)
-        raw = " ".join(f"{x:02X}" for x in d[i:i + ln])
-
-        # Dense palette loop: header at each emitted line, beam column per write.
-        if is_dense and is_write(i):
-            slot_in_line = write_idx % _CGA_LOCKSTEP_MAX_WRITES
-            if slot_in_line == 0:
-                emitted_line = write_idx // _CGA_LOCKSTEP_MAX_WRITES
-                vis = emitted_line - preroll
-                tag = f"visible y={vis}" if vis >= 0 else f"preroll {emitted_line}"
-                out.append("")
-                out.append(f"  ; ---- emitted line {emitted_line} ({tag}) : "
-                           f"{_CGA_LOCKSTEP_MAX_WRITES} palette writes ----")
-            slot = slots[slot_in_line] if slot_in_line < len(slots) else slot_in_line + 1
-            col = base_x.get(slot)
-            colnote = f" model x~{col}" if col is not None else ""
-            out.append(f"    mov al, 0{d[i+1]:02X}h")
-            out.append(f"    out dx, al        ; slot {slot:<2}{colnote}  [4+8t]")
-            write_idx += 1
-            i += 3  # consume B0 ib EE (mov al,imm8 ; out dx,al)
+            out.append(f'{targets[i]}:')
+        if is_palette_program and mn == 'mov ax, 0B800h' and i < first_write:
+            out.append('copy_bitmap:')
+        if i == first_write:
+            out.extend(['', '  ; PAINT LOOP -- do not insert, remove, or reorder instructions.',
+                        'paint_frame:'])
+        if is_palette_program and i in write_numbers and i + 2 not in targets:
+            note = f'palette write {write_numbers[i]}'
+            if i in write_notes:
+                emitted_line, y, slot, tag = write_notes[i]
+                if slot == 1:
+                    out.extend(['', f'  ; ---- emitted line {emitted_line} ({tag}): {nw} palette writes ----'])
+                note = f'slot {slot}'
+                if plan.get('free16_writes') and slot == nw:
+                    note += ' / HBLANK: next line leading palette'
+                elif 0 <= y < len(plan['lines']):
+                    # Describe the preview plan, not a guessed hardware beam time.
+                    zones = [z for z in plan['lines'][y].get('zones', [])
+                             if z.get('slot') == slot and z.get('line_delta', 0) == 0]
+                    if zones:
+                        note += ' / preview ' + ', '.join(f'x={z["x0"]}..{z["x1"] - 1}' for z in zones)
+            elif write_notes and i == writes[-1]:
+                note = 'post-frame border/background reset'
+            out.append(f'    mov al, 0{code[i + 1]:02X}h')
+            out.append(f'    out dx, al'.ljust(40) + f'; {note} [4+8t for MOV/OUT]')
+            prev_mn = 'out dx, al'
+            i += 3
             continue
 
+        raw = ' '.join(f'{x:02X}' for x in code[i:i + ln])
         if tgt is not None:
-            label = targets.get(tgt, f"0{tgt + 0x100:04X}h")
-            kind = mn  # 'jnz'/'jz'/'jmp near'/'jmp short'
-            out.append(f"    {kind} {label}".ljust(36) + f"; [{ts}t] {raw}")
-        elif mn.startswith("db 0"):
-            out.append(f"    {mn}".ljust(36) + f"; {raw}")
+            label = targets.get(tgt, f'0{(tgt + 0x100) & 0xFFFF:04X}h')
+            # NASM -O0 otherwise promotes numeric Jcc targets to near branches.
+            branch = f'{mn} short' if mn in ('jz', 'jnz') else mn
+            doc = _lockstep_jump_doc(mn, label) if is_palette_program else None
+            out.append(f'    {branch} {label}'.ljust(40) + f'; {doc or raw} [{ts}t]')
         else:
-            note = f"; [{ts}t]" if ts else ";"
-            out.append(f"    {mn}".ljust(36) + f"{note}")
-        i += ln if ln > 0 else 1
+            doc = _lockstep_instr_doc(mn, prev_mn) if is_palette_program else None
+            if mn.startswith('db '):
+                note = 'raw instruction/data bytes'
+            else:
+                note = doc or (f'[{ts}t]' if ts else '')
+            out.append(f'    {mn}'.ljust(40) + f'; {note}')
+        prev_mn = mn
+        i += ln
 
-    # Trailing framebuffer / VRAM as data.
     if code_end < len(d):
-        out.append("")
-        out.append(f"; ---- framebuffer / VRAM data ({len(d) - code_end} bytes) ----")
-        out.append("fb_data:")
+        out.extend(['', f'; ---- framebuffer / VRAM data ({len(d) - code_end} bytes) ----', 'fb_data:'])
         for off in range(code_end, len(d), 16):
-            chunk = d[off:off + 16]
-            enc = ", ".join(f"0{v:02X}h" for v in chunk)
-            out.append(f"    db {enc}    ; {off:04X}h")
-    out.append("")
-    return "\n".join(out)
+            enc = ', '.join(f'0{v:02X}h' for v in d[off:off + 16])
+            out.append(f'    db {enc}    ; {off:04X}h')
+    out.append('')
+    return '\n'.join(out)
 
 
 def build_bootable_dsk_from_com(com_bytes: bytes, image_name: str = "TEST.COM") -> bytes:
@@ -11739,7 +12005,7 @@ class CgaConverterApp(tk.Tk):
         ttk.Button(controls, text="Convert", command=self.on_convert).pack(side=tk.LEFT, padx=4)
         ttk.Button(controls, text="Optimize Palette", command=self.on_optimize).pack(side=tk.LEFT, padx=4)
         ttk.Button(controls, text="Save GIF...", command=self.on_save).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Export ASM...", command=self.on_export_asm).pack(side=tk.LEFT, padx=4)
+        ttk.Button(controls, text="Save .ASM...", command=self.on_export_asm).pack(side=tk.LEFT, padx=4)
         ttk.Button(controls, text="Export COM...", command=self.on_export_com).pack(side=tk.LEFT, padx=4)
         ttk.Button(controls, text="Export Bootable DSK...", command=self.on_export_dsk).pack(side=tk.LEFT, padx=4)
 
@@ -12103,8 +12369,8 @@ class CgaConverterApp(tk.Tk):
         )
         self.target_video_cb.grid(row=6, column=1, sticky="w", padx=4, pady=2)
 
-        # Mode Switch writes per scanline. Two fixed production profiles: one hblank write,
-        # or the boot-stable 8-write FREE16 lockstep line (the multi-change-per-line default).
+        # Mode Switch writes per scanline: one hblank write, or the eight-write
+        # mode-4 profile using STARTLCK acquisition and active DRAM refresh.
         ttk.Label(options, text="Mode Switch writes per line:").grid(row=6, column=3, sticky="e", padx=4, pady=2)
         self.ms_switches_var = tk.IntVar(value=1)
         self.ms_switches_spin = ttk.Spinbox(
@@ -12833,7 +13099,7 @@ class CgaConverterApp(tk.Tk):
             else:
                 self.ms_switches_spin.state(["disabled"])
 
-            # The 8-write FREE16 line is "Fixed" only -- the dispersed-pattern combobox
+            # The eight-write timing profile is Fixed only -- the dispersed-pattern combobox
             # no longer applies, so keep it pinned and disabled.
             self.ms_stagger_mode_cb.state(["disabled"])
             self.ms_stagger_mode_var.set("Fixed")
@@ -14329,10 +14595,10 @@ class CgaConverterApp(tk.Tk):
             lockstep_max_plan = None
             if seg_n_320 == _CGA_FREE16_WRITES:
                 max_kwargs = {
-                    # PRODUCTION DEFAULT: the boot-stable 8-write char-middle FREE16 line.
-                    # This is THE multi-change-per-line mode (the old 16/13-write lines were
-                    # bistable boot-to-boot; free16 is bit-identical across cold boots).
+                    # Conversion and export share the STARTLCK mode-4 geometry.
+                    # Hardware qualification is separate from emulator validation.
                     "free16": True,
+                    "timing_backend": _CGA_STARTLOCK_TIMING_BACKEND,
                     "forced_bg_idx": forced_bg_idx,
                     "serpentine": serpentine,
                     "pattern": pattern_320,
@@ -15063,7 +15329,7 @@ class CgaConverterApp(tk.Tk):
                     "Export COM",
                     "COM export is supported for:\n"
                     "- 320x200 (4-color)\n"
-                    f"- 320x200 (4-color) Mode Switch (fixed 1 or {_CGA_LOCKSTEP_MAX_WRITES} writes per line)\n"
+                    f"- 320x200 (4-color) Mode Switch (fixed 1 or {_CGA_FREE16_WRITES} writes per line)\n"
                     "- 640x200 (2-color)\n"
                     "- 160x200 Composite (16-color)\n"
                     "- 160x100 (16-color)\n"
@@ -15093,6 +15359,7 @@ class CgaConverterApp(tk.Tk):
                 return build_com_text_80x100_char16(buf16000)
             return build_com_cga_160x100x16(buf16000)
 
+        asm_plan = None
         try:
             if mode == "320x200 (4 Colors)":
                 vram = pack_cga_320x200_4color_vram(self.output_pimage)
@@ -15112,7 +15379,7 @@ class CgaConverterApp(tk.Tk):
             elif mode == "320x200 (4 Colors) Mode Switch":
                 # Per-scanline palette change (CGA mode 04h with timed 3D9h writes).
                 # N=1: simple builder (writes 3D8+3D9 once per line during hblank).
-                # N=8: boot-stable FREE16 fully-unrolled lockstep profile.
+                # N=8: use the timing backend retained in the conversion plan.
                 seg_n = int(getattr(self, "ms_seg_n", 1))
                 if seg_n not in (1, _CGA_FREE16_WRITES):
                     messagebox.showinfo(
@@ -15143,11 +15410,14 @@ class CgaConverterApp(tk.Tk):
                         self.output_pimage, plan
                     )
                     vram = pack_cga_320_vram_from_indices(idx_arr)
-                    # phase_lock 7 = HLT+PIT bit-exact lock (pixel-identical every cold boot).
-                    # Default to it; a plan that already pins phase_lock is respected.
-                    plan = {**plan, "phase_lock": int(plan.get("phase_lock") or 7)}
+                    # Retain the plan's acquisition method and geometry as a unit.
+                    # Only historical plans without a backend use phase 7.
+                    if plan.get("timing_backend") is None:
+                        plan = {**plan, "phase_lock": int(plan.get("phase_lock") or 7)}
                     com = build_com_320_mode_switch_lockstep_max(vram, plan)
-                    default_name = "cga_320_modeswitch_lockstep_n13.com"
+                    asm_plan = plan
+                    default_name = ("cga_320_startlock.com" if plan.get("timing_backend") == _CGA_STARTLOCK_TIMING_BACKEND
+                                    else f"cga_320_modeswitch_lockstep_n{seg_n}.com")
                 elif seg_n == 1:
                     # Simple N=1 path
                     idx_arr = derive_indices_320_from_rgb(self.output_pimage, pals_by_y)
@@ -15467,7 +15737,10 @@ class CgaConverterApp(tk.Tk):
             return
         try:
             if export_kind == "asm":
-                asm = build_nasm_source_from_com(com, mode, Path(default_name).with_suffix(".com").name)
+                asm = build_nasm_source_from_com(
+                    com, mode, Path(path).with_suffix(".com").name,
+                    mode_switch_plan=asm_plan,
+                )
                 Path(path).write_text(asm, encoding="ascii", newline="\n")
                 messagebox.showinfo("Export ASM", f"Saved NASM source:\n{path}")
             elif export_kind == "dsk":

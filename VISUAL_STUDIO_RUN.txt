@@ -1,4 +1,4 @@
-CGA Converter v166 - Visual Studio run settings
+CGA Converter v167 - Visual Studio run settings
 
 Open folder:
 This repository folder
@@ -7,10 +7,10 @@ Python interpreter:
 .venv\Scripts\python.exe
 
 Startup file:
-cga_v166.py
+cga_v167.py
 
 Quick manual launch:
-Double-click run_cga_v166.cmd from this folder.
+Double-click run_cga_v167.cmd from this folder.
 
 If the app starts correctly, the window title is:
-CGA Converter v166
+CGA Converter v167

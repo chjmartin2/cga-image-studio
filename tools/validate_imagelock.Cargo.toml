@@ -1,0 +1,13 @@
+[package]
+name = "validate_imagelock"
+version = "0.1.0"
+edition = "2021"
+[workspace]
+[dependencies]
+marty_core = { path = "../../martypc/crates/lib/marty_core", default-features = false }
+marty_common = { path = "../../martypc/crates/lib/marty_common" }
+[profile.release]
+opt-level = 2
+
+
+

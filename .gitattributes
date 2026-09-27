@@ -1,0 +1,4 @@
+# Preserve exact research evidence and generated artifacts, including hashes.
+/docs/research/** -text
+/files/** -text
+/assets/** -text

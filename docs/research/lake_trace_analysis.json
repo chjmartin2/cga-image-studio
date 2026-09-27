@@ -1,0 +1,96 @@
+{
+  "source_url": "https://github.com/dbalsom/marty_tools/blob/23d99544ebf8aaf009bf2a551f048bb4b68a39a7/bus_sniffer/captures/area5150/area5150_lake_effect_final_02.sr",
+  "source_commit": "23d99544ebf8aaf009bf2a551f048bb4b68a39a7",
+  "capture_sha256": "4c0a38b1a21969c3a54746c2ad5ccd0d7e9e0433b66f1e16de2955c8828f93f4",
+  "capture_size_bytes": 1515475,
+  "normalized_samples": 1541781,
+  "captured_cpu_rising_edges": 770890,
+  "metadata_samplerate": "9.52381 MHz",
+  "samples_per_cpu_cycle": 2,
+  "selection": "Two final complete CRTC-VSYNC-to-VSYNC intervals in one published capture",
+  "frame_boundaries_samples": [
+    1208944,
+    1368240,
+    1527536
+  ],
+  "frames": [
+    {
+      "frame": 1,
+      "vs_start_sample": 1208944,
+      "vs_end_sample": 1368240,
+      "duration_cpu_cycles": 79648.0,
+      "vs_start_cpu_edge_coordinate": 604472,
+      "irq_cpu_edge_coordinate": 615633,
+      "irq_after_vs_rise_cpu_cycles": 11161.0,
+      "irq_after_vs_fall_cpu_cycles": 6297.0,
+      "irq_after_previous_hs_rise_cpu_cycles": 281.0,
+      "irq_after_previous_hs_fall_cpu_cycles": 241.0,
+      "next_den_rise_after_irq_cpu_cycles": 626.0
+    },
+    {
+      "frame": 2,
+      "vs_start_sample": 1368240,
+      "vs_end_sample": 1527536,
+      "duration_cpu_cycles": 79648.0,
+      "vs_start_cpu_edge_coordinate": 684120,
+      "irq_cpu_edge_coordinate": 695281,
+      "irq_after_vs_rise_cpu_cycles": 11161.0,
+      "irq_after_vs_fall_cpu_cycles": 6297.0,
+      "irq_after_previous_hs_rise_cpu_cycles": 281.0,
+      "irq_after_previous_hs_fall_cpu_cycles": 241.0,
+      "next_den_rise_after_irq_cpu_cycles": 626.0
+    }
+  ],
+  "signal_comparisons": {
+    "VS": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 1,
+      "second_frame_rising_edges": 1
+    },
+    "HS": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 262,
+      "second_frame_rising_edges": 262
+    },
+    "DEN": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 400,
+      "second_frame_rising_edges": 400
+    },
+    "INTR": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 1,
+      "second_frame_rising_edges": 1
+    },
+    "CLK0": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 19912,
+      "second_frame_rising_edges": 19912
+    },
+    "DR0": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 1048,
+      "second_frame_rising_edges": 1048
+    },
+    "RDY": {
+      "mismatched_samples": 0,
+      "first_frame_rising_edges": 4243,
+      "second_frame_rising_edges": 4243
+    }
+  },
+  "io_write_status_comparison": {
+    "first_frame_bus_status_entries": 3669,
+    "second_frame_bus_status_entries": 3669,
+    "relative_entry_samples_identical": true,
+    "interpretation": "I/O-write status entries; no electrical palette-latch edge is captured"
+  },
+  "limitations": [
+    "This is a published real-hardware Area 5150 capture, not a new measurement of CGA Image Studio.",
+    "Only two consecutive final frames from one selected machine/boot are compared.",
+    "No cold-boot or all-phase acquisition success rate is measured.",
+    "HS, VS and DEN were probed at the CRTC; RGBI output and palette-latch pins were not captured.",
+    "The author downsampled an original 50 MHz recording; normalize to CPU cycles, not absolute nanoseconds.",
+    "Zero differences at retained sample points cannot exclude sub-sample analog transitions or jitter.",
+    "DEN rises twice per visible physical scanline in this effect; next DEN rise is not a general screen-origin definition."
+  ]
+}
