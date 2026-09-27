@@ -1,0 +1,2268 @@
+{
+  "status": "passed",
+  "scope": "Unmodified MartyPC core; native UI and hardware are separate checks",
+  "template_sha256": "de4b9d8153407f845834c50e5ee0596f78e7b698ab5996e37f3703975c15ca23",
+  "source_sha256": "7eabb23324136fe684e6c4fdfc0531772c21e044095fdf75422577f37b5803f3",
+  "validator_sha256": "0aa4f0508636303ad9e1b36c69ccaf62e36e155dade2ac387b29692603056926",
+  "bounds": [
+    0,
+    25,
+    65,
+    113,
+    161,
+    209,
+    249,
+    289,
+    320
+  ],
+  "row_bounds": [
+    [
+      0,
+      25,
+      65,
+      113,
+      161,
+      209,
+      249,
+      289,
+      320
+    ],
+    [
+      0,
+      49,
+      97,
+      137,
+      185,
+      233,
+      273,
+      313,
+      320
+    ]
+  ],
+  "cases": [
+    {
+      "case": "registration-e0-p0",
+      "phase": 0,
+      "program_sha256": "b19242ed69d9d2fcf32ef35058c3cb04a7f511506cf521bb960456dd7b07483d",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616558,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "04d95e9cb31e066f499de53e6aa5ac43c6dd27859cade1d1a14c9973ec8f8967"
+    },
+    {
+      "case": "registration-e0-p1",
+      "phase": 1,
+      "program_sha256": "b19242ed69d9d2fcf32ef35058c3cb04a7f511506cf521bb960456dd7b07483d",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616558,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "04d95e9cb31e066f499de53e6aa5ac43c6dd27859cade1d1a14c9973ec8f8967"
+    },
+    {
+      "case": "registration-e0-p2",
+      "phase": 2,
+      "program_sha256": "b19242ed69d9d2fcf32ef35058c3cb04a7f511506cf521bb960456dd7b07483d",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616558,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "04d95e9cb31e066f499de53e6aa5ac43c6dd27859cade1d1a14c9973ec8f8967"
+    },
+    {
+      "case": "registration-e0-p3",
+      "phase": 3,
+      "program_sha256": "b19242ed69d9d2fcf32ef35058c3cb04a7f511506cf521bb960456dd7b07483d",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27219341,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000006,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11034,
+        "288": 10924
+      },
+      "frame_periods": {
+        "79648": 110
+      },
+      "frame_log_sha256": "cca29c592dd855933dd6244075fdb5c54d07e282821ad22617249ae1659437d1"
+    },
+    {
+      "case": "registration-e1-p0",
+      "phase": 0,
+      "program_sha256": "1a7308ac4b945c3503b87946bfda6febbf12244761cd5f16920a8807d6d8f1c6",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616562,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "e1d63eb9dcb154411be506b5c9530efa3b4478bd3ce77014804d63529583be71"
+    },
+    {
+      "case": "registration-e1-p1",
+      "phase": 1,
+      "program_sha256": "1a7308ac4b945c3503b87946bfda6febbf12244761cd5f16920a8807d6d8f1c6",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616562,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "e1d63eb9dcb154411be506b5c9530efa3b4478bd3ce77014804d63529583be71"
+    },
+    {
+      "case": "registration-e1-p2",
+      "phase": 2,
+      "program_sha256": "1a7308ac4b945c3503b87946bfda6febbf12244761cd5f16920a8807d6d8f1c6",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616562,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "e1d63eb9dcb154411be506b5c9530efa3b4478bd3ce77014804d63529583be71"
+    },
+    {
+      "case": "registration-e1-p3",
+      "phase": 3,
+      "program_sha256": "1a7308ac4b945c3503b87946bfda6febbf12244761cd5f16920a8807d6d8f1c6",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26582301,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11834,
+        "288": 11716
+      },
+      "frame_periods": {
+        "79648": 118
+      },
+      "frame_log_sha256": "39ceb37a503536d4a6a2fb1fcf3f18ffaeabac6b64c082a5369723ca269e3a96"
+    },
+    {
+      "case": "registration-e2-p0",
+      "phase": 0,
+      "program_sha256": "9f016180e8c738fa261273185147054702e9d1afd9eedc51944f1ebd01205f54",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26613454,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000003,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "a2e611938aa23abb979983b90ec8c8d0fc936dbac2aa027b2543c1433f24ee09"
+    },
+    {
+      "case": "registration-e2-p1",
+      "phase": 1,
+      "program_sha256": "9f016180e8c738fa261273185147054702e9d1afd9eedc51944f1ebd01205f54",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26613454,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000003,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "a2e611938aa23abb979983b90ec8c8d0fc936dbac2aa027b2543c1433f24ee09"
+    },
+    {
+      "case": "registration-e2-p2",
+      "phase": 2,
+      "program_sha256": "9f016180e8c738fa261273185147054702e9d1afd9eedc51944f1ebd01205f54",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26613454,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000003,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "a2e611938aa23abb979983b90ec8c8d0fc936dbac2aa027b2543c1433f24ee09"
+    },
+    {
+      "case": "registration-e2-p3",
+      "phase": 3,
+      "program_sha256": "9f016180e8c738fa261273185147054702e9d1afd9eedc51944f1ebd01205f54",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26980689,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 113,
+      "cpu_cycles": 16000006,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11334,
+        "288": 11220
+      },
+      "frame_periods": {
+        "79648": 113
+      },
+      "frame_log_sha256": "6d854c4c6e93db84abb637af3e47cc9556e4a1abc33d3850a3147f5ce4d685a8"
+    },
+    {
+      "case": "registration-e3-p0",
+      "phase": 0,
+      "program_sha256": "2764b05a4794660b29bc6a068cd8348f83fb82fffe80591b4e84f03c2c084351",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251626,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "89dc92c7a18cf3b7aa7058fc525c9252e172d3d1683628351738b00ff125cf71"
+    },
+    {
+      "case": "registration-e3-p1",
+      "phase": 1,
+      "program_sha256": "2764b05a4794660b29bc6a068cd8348f83fb82fffe80591b4e84f03c2c084351",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251626,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "89dc92c7a18cf3b7aa7058fc525c9252e172d3d1683628351738b00ff125cf71"
+    },
+    {
+      "case": "registration-e3-p2",
+      "phase": 2,
+      "program_sha256": "2764b05a4794660b29bc6a068cd8348f83fb82fffe80591b4e84f03c2c084351",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251626,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000001,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "89dc92c7a18cf3b7aa7058fc525c9252e172d3d1683628351738b00ff125cf71"
+    },
+    {
+      "case": "registration-e3-p3",
+      "phase": 3,
+      "program_sha256": "2764b05a4794660b29bc6a068cd8348f83fb82fffe80591b4e84f03c2c084351",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27219641,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11034,
+        "288": 10923
+      },
+      "frame_periods": {
+        "79648": 110
+      },
+      "frame_log_sha256": "99a26a3de66dcea056979d1b56ab773a6a2920968bc96aeb6ce5bdb85aea657e"
+    },
+    {
+      "case": "registration-e7-p0",
+      "phase": 0,
+      "program_sha256": "fdd1fd1125049c9b7b0ed4beca8551bebf2fb7471b2578d3721147f79dc1d1ec",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251498,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000003,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "deaa77d44e9438d21e1b98e864f4f7a6f690336a1adcb4d941fde95670430265"
+    },
+    {
+      "case": "registration-e7-p1",
+      "phase": 1,
+      "program_sha256": "fdd1fd1125049c9b7b0ed4beca8551bebf2fb7471b2578d3721147f79dc1d1ec",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251498,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000003,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "deaa77d44e9438d21e1b98e864f4f7a6f690336a1adcb4d941fde95670430265"
+    },
+    {
+      "case": "registration-e7-p2",
+      "phase": 2,
+      "program_sha256": "fdd1fd1125049c9b7b0ed4beca8551bebf2fb7471b2578d3721147f79dc1d1ec",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251498,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000003,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "deaa77d44e9438d21e1b98e864f4f7a6f690336a1adcb4d941fde95670430265"
+    },
+    {
+      "case": "registration-e7-p3",
+      "phase": 3,
+      "program_sha256": "fdd1fd1125049c9b7b0ed4beca8551bebf2fb7471b2578d3721147f79dc1d1ec",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27219513,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11034,
+        "288": 10923
+      },
+      "frame_periods": {
+        "79648": 110
+      },
+      "frame_log_sha256": "eca16a518970b51347fad11a6d8354c677fa06262d5e83944499dd5e7b8ee68a"
+    },
+    {
+      "case": "registration-e13-p0",
+      "phase": 0,
+      "program_sha256": "59ab716d379e3d32667deeae873b38ec57dcf18ba8ef2f3abd702d7cba6292de",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251770,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "d9ad495d99f3315acf8938a96654dfa9a6dd893dc61ed7d3715540ea382db1e3"
+    },
+    {
+      "case": "registration-e13-p1",
+      "phase": 1,
+      "program_sha256": "59ab716d379e3d32667deeae873b38ec57dcf18ba8ef2f3abd702d7cba6292de",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251770,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "d9ad495d99f3315acf8938a96654dfa9a6dd893dc61ed7d3715540ea382db1e3"
+    },
+    {
+      "case": "registration-e13-p2",
+      "phase": 2,
+      "program_sha256": "59ab716d379e3d32667deeae873b38ec57dcf18ba8ef2f3abd702d7cba6292de",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27251770,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11000,
+        "288": 10890
+      },
+      "frame_periods": {
+        "79648": 109
+      },
+      "frame_log_sha256": "d9ad495d99f3315acf8938a96654dfa9a6dd893dc61ed7d3715540ea382db1e3"
+    },
+    {
+      "case": "registration-e13-p3",
+      "phase": 3,
+      "program_sha256": "59ab716d379e3d32667deeae873b38ec57dcf18ba8ef2f3abd702d7cba6292de",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26980689,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 113,
+      "cpu_cycles": 16000006,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11334,
+        "288": 11220
+      },
+      "frame_periods": {
+        "79648": 113
+      },
+      "frame_log_sha256": "6d854c4c6e93db84abb637af3e47cc9556e4a1abc33d3850a3147f5ce4d685a8"
+    },
+    {
+      "case": "registration-e31-p0",
+      "phase": 0,
+      "program_sha256": "6d6748f626cd18a34652dee4ce297d8b7c09bf627b7139c7c06ad71197aa4ece",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26613710,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000004,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "9bda86d48366c811dfab0b7c91301517b99e2c568c7b7c4f5fcf20eabf1dff0d"
+    },
+    {
+      "case": "registration-e31-p1",
+      "phase": 1,
+      "program_sha256": "6d6748f626cd18a34652dee4ce297d8b7c09bf627b7139c7c06ad71197aa4ece",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26613710,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000004,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "9bda86d48366c811dfab0b7c91301517b99e2c568c7b7c4f5fcf20eabf1dff0d"
+    },
+    {
+      "case": "registration-e31-p2",
+      "phase": 2,
+      "program_sha256": "6d6748f626cd18a34652dee4ce297d8b7c09bf627b7139c7c06ad71197aa4ece",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26613710,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000004,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "9bda86d48366c811dfab0b7c91301517b99e2c568c7b7c4f5fcf20eabf1dff0d"
+    },
+    {
+      "case": "registration-e31-p3",
+      "phase": 3,
+      "program_sha256": "6d6748f626cd18a34652dee4ce297d8b7c09bf627b7139c7c06ad71197aa4ece",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26978737,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 113,
+      "cpu_cycles": 16000005,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11337,
+        "288": 11224
+      },
+      "frame_periods": {
+        "79648": 113
+      },
+      "frame_log_sha256": "ff0baa1113d6d65d87f899b26f24b3b59fb8378fc7770d8e933287e91517ce2d"
+    },
+    {
+      "case": "registration-e127-p0",
+      "phase": 0,
+      "program_sha256": "536a888a65b849b68a9d6b8cdefd4edcf0b0f59eb6083648084c9a95a27ac9e9",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26614306,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "422e9b44911f880d68bf4e861113033e944468b32c693e198e96d8f07be7871b"
+    },
+    {
+      "case": "registration-e127-p1",
+      "phase": 1,
+      "program_sha256": "536a888a65b849b68a9d6b8cdefd4edcf0b0f59eb6083648084c9a95a27ac9e9",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26614306,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "422e9b44911f880d68bf4e861113033e944468b32c693e198e96d8f07be7871b"
+    },
+    {
+      "case": "registration-e127-p2",
+      "phase": 2,
+      "program_sha256": "536a888a65b849b68a9d6b8cdefd4edcf0b0f59eb6083648084c9a95a27ac9e9",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26614306,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "422e9b44911f880d68bf4e861113033e944468b32c693e198e96d8f07be7871b"
+    },
+    {
+      "case": "registration-e127-p3",
+      "phase": 3,
+      "program_sha256": "536a888a65b849b68a9d6b8cdefd4edcf0b0f59eb6083648084c9a95a27ac9e9",
+      "expected_sha256": "90ad20f04df1dd2f784269042e96edd200794ad2a1898f2614f5e9156fffc3e7",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26580333,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 118,
+      "cpu_cycles": 16000006,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11837,
+        "288": 11719
+      },
+      "frame_periods": {
+        "79648": 118
+      },
+      "frame_log_sha256": "aa933c8941a9996b8b010a3e270a52aef4cd31f10dc5e5ed6df25db3aef507e6"
+    },
+    {
+      "case": "STAGGER-p0",
+      "phase": 0,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616558,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "9917737e0d2c961cc02d8b5a825ece758916fa9cc7ca0f779837abd95346905c"
+    },
+    {
+      "case": "STAGGER-p1",
+      "phase": 1,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616558,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "9917737e0d2c961cc02d8b5a825ece758916fa9cc7ca0f779837abd95346905c"
+    },
+    {
+      "case": "STAGGER-p2",
+      "phase": 2,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 26616558,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 117,
+      "cpu_cycles": 16000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11800,
+        "288": 11682
+      },
+      "frame_periods": {
+        "79648": 117
+      },
+      "frame_log_sha256": "9917737e0d2c961cc02d8b5a825ece758916fa9cc7ca0f779837abd95346905c"
+    },
+    {
+      "case": "STAGGER-p3",
+      "phase": 3,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 27219341,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": 15880
+      },
+      "activations": 1,
+      "visible_frames": 110,
+      "cpu_cycles": 16000006,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 11034,
+        "288": 10924
+      },
+      "frame_periods": {
+        "79648": 110
+      },
+      "frame_log_sha256": "d82452fd8fc338c9f876a780b245c4638d7795ad32db929ca458f8ecfbc91f54"
+    },
+    {
+      "case": "boot-p0",
+      "phase": 0,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 83162894,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 1,
+      "visible_frames": 3599,
+      "cpu_cycles": 400000020,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 360000,
+        "288": 356400
+      },
+      "frame_periods": {
+        "79648": 3599
+      },
+      "frame_log_sha256": "d6968e859a89ed52b290cb7426bd211f0e6ceb757010192e12a32637626f1611"
+    },
+    {
+      "case": "boot-p1",
+      "phase": 1,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 83162894,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 1,
+      "visible_frames": 3599,
+      "cpu_cycles": 400000020,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 360000,
+        "288": 356400
+      },
+      "frame_periods": {
+        "79648": 3599
+      },
+      "frame_log_sha256": "d6968e859a89ed52b290cb7426bd211f0e6ceb757010192e12a32637626f1611"
+    },
+    {
+      "case": "boot-p2",
+      "phase": 2,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 83162894,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 1,
+      "visible_frames": 3599,
+      "cpu_cycles": 400000020,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 360000,
+        "288": 356400
+      },
+      "frame_periods": {
+        "79648": 3599
+      },
+      "frame_log_sha256": "d6968e859a89ed52b290cb7426bd211f0e6ceb757010192e12a32637626f1611"
+    },
+    {
+      "case": "boot-p3",
+      "phase": 3,
+      "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 83879769,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 1,
+      "visible_frames": 3599,
+      "cpu_cycles": 400000027,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 360000,
+        "288": 356400
+      },
+      "frame_periods": {
+        "79648": 3599
+      },
+      "frame_log_sha256": "98f51d6c2a7aea11246ecaa821638244b916938ae48ffea40752f7dcf85b01c6"
+    },
+    {
+      "case": "reentry-p0",
+      "phase": 0,
+      "program_sha256": "a1734eed777ab0c2c208acfcacb31690486fe2d2af8fc96e4f818fb3c7499bcd",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 160587442,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 5,
+      "visible_frames": 55,
+      "cpu_cycles": 400000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 6000,
+        "288": 5940
+      },
+      "frame_periods": {
+        "79648": 55
+      },
+      "frame_log_sha256": "2ddd23308ccabd63d53b6b08489970572a06d4acc2756e57ef1114eda5c33e4c"
+    },
+    {
+      "case": "reentry-p1",
+      "phase": 1,
+      "program_sha256": "a1734eed777ab0c2c208acfcacb31690486fe2d2af8fc96e4f818fb3c7499bcd",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 160587442,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 5,
+      "visible_frames": 55,
+      "cpu_cycles": 400000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 6000,
+        "288": 5940
+      },
+      "frame_periods": {
+        "79648": 55
+      },
+      "frame_log_sha256": "2ddd23308ccabd63d53b6b08489970572a06d4acc2756e57ef1114eda5c33e4c"
+    },
+    {
+      "case": "reentry-p2",
+      "phase": 2,
+      "program_sha256": "a1734eed777ab0c2c208acfcacb31690486fe2d2af8fc96e4f818fb3c7499bcd",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 160587442,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 5,
+      "visible_frames": 55,
+      "cpu_cycles": 400000002,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 6000,
+        "288": 5940
+      },
+      "frame_periods": {
+        "79648": 55
+      },
+      "frame_log_sha256": "2ddd23308ccabd63d53b6b08489970572a06d4acc2756e57ef1114eda5c33e4c"
+    },
+    {
+      "case": "reentry-p3",
+      "phase": 3,
+      "program_sha256": "a1734eed777ab0c2c208acfcacb31690486fe2d2af8fc96e4f818fb3c7499bcd",
+      "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+      "cpu_options": {
+        "enable_wait_states": true,
+        "dram_refresh_schedule_enabled_at_first_out": true,
+        "pit1_reload_at_first_out": 19,
+        "pit1_current_at_first_out": 7,
+        "pit1_counting_at_first_out": true,
+        "pit1_retrigger_at_first_out": true,
+        "pit1_mode_at_first_out": "RateGenerator",
+        "first_out_cpu_cycle": 161492129,
+        "first_visible_out_ip": 4583,
+        "raster_end_ip": null
+      },
+      "activations": 5,
+      "visible_frames": 55,
+      "cpu_cycles": 400000000,
+      "mismatching_dots": 0,
+      "first_and_last_frames_match": true,
+      "row_periods": {
+        "320": 6000,
+        "288": 5940
+      },
+      "frame_periods": {
+        "79648": 55
+      },
+      "frame_log_sha256": "d5a97856b2ea57aa9866698af954c6ca69597fdc6633dc30cc674bff577ff3d7"
+    }
+  ],
+  "visible_frames": 18736,
+  "marty_core_commit": "05c0d088e84ad6bbfac9b3f0d051e7eadefd9f44",
+  "native_visual_confirmation": false,
+  "physical_hardware_validated": false,
+  "demo_disk_sha256": "f121a7c567df24f2d43cad9e0127817a23ece94873b615a3319ed4f5dbd66b24",
+  "gui_exports": {
+    "status": "passed",
+    "cases": [
+      {
+        "case": "gui00",
+        "dithering": "None",
+        "dither_aware": false,
+        "black_border": false,
+        "phase": 0,
+        "program_sha256": "15f30b9a711ec4790147ac71bff9715d95ab16253c1ae84704c5727621076a51",
+        "expected_sha256": "861fde942c308da6944ddd4e591ad1b4983ed736ea16e40f0fa514ba40ff6d64",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "2dcbcca1ce2d4727df644d8e2b90c3badbc0172a99dc81756b3a46d893611cf2",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui01",
+        "dithering": "None",
+        "dither_aware": false,
+        "black_border": true,
+        "phase": 1,
+        "program_sha256": "fd4c3a4003b924fa74857907014ba16b94aa162366bf30146ff349c4262d80ed",
+        "expected_sha256": "42a41c10f896d5926cf3c85888983dc199aa50ebfd2c0d830a4af64852681de7",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "ae74a2cd213082f8b0f90307522abdc3917ff89185ad62f49c49bb4f95d97197",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui02",
+        "dithering": "None",
+        "dither_aware": true,
+        "black_border": false,
+        "phase": 2,
+        "program_sha256": "3b33955339724618213e41d956f7432a61e06bf85fb70c6ef0b34c905d5775ab",
+        "expected_sha256": "118c3c4eb566ae6ad349b6398407376c1ce7065a10acc622fea06ba36946beec",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "80e1f8b14c96b2a21cf20e60745e3a7e755d4941a5c86019016e1664e9d2b0a3",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui03",
+        "dithering": "None",
+        "dither_aware": true,
+        "black_border": true,
+        "phase": 3,
+        "program_sha256": "d7dede0daa8bfdf568780693dca9b290b2057ad874445b0713968dec1b25c05f",
+        "expected_sha256": "00928042064c87b5be21d4ce936caf632ca6bbfb5e2a2aa7eaa2f5d5a94dc64c",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 27219341,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 110,
+        "cpu_cycles": 16000006,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11034,
+          "288": 10924
+        },
+        "frame_periods": {
+          "79648": 110
+        },
+        "frame_log_sha256": "7c70a63a4d8359addc30980f75111add147444da51625db203f42e547414d168",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui04",
+        "dithering": "Ordered",
+        "dither_aware": false,
+        "black_border": false,
+        "phase": 0,
+        "program_sha256": "fcf8732ea5860edcc12dc54121941856fab3cb86a5fd9c2915701a64e249c6f7",
+        "expected_sha256": "ce926cc2c555f6bf503d0dbd564001c45cde8a6886e006f5aaaac6ab69988b07",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "e4e2897cb82d7bc8bf6fa751a5bf07f6270cbaaf14c7e1b1c8fbef1a95c8749c",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui05",
+        "dithering": "Ordered",
+        "dither_aware": false,
+        "black_border": true,
+        "phase": 1,
+        "program_sha256": "3125073ab99867b12b748de91b2b51bfe3e7953ef9d85d5fe8a652226822d0c7",
+        "expected_sha256": "131e4dc56245840daee3abef49450b07107a24eb60fc2245564bc6882f17c940",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "5e70d78cd876b9a3b064f214a389ec50b07409974809824cea82e28b159e9ef2",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui06",
+        "dithering": "Ordered",
+        "dither_aware": true,
+        "black_border": false,
+        "phase": 2,
+        "program_sha256": "7fe4e6052e3f72747c0dcac54916e3ef1be19d9831bfff9b12e3d6a6d307ff32",
+        "expected_sha256": "94370445cda548c949e3b532573dc5fc3f556696b9707ff038644b490dd0a81f",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "e6faf9c369144d5a690e000120b5e1ecb84c68ec065986b2ce90af363e130e5d",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui07",
+        "dithering": "Ordered",
+        "dither_aware": true,
+        "black_border": true,
+        "phase": 3,
+        "program_sha256": "308b01b0994fa8bed7babcc7b4aa660564b2baf8b56e37ac4057b8633400da6d",
+        "expected_sha256": "081ae51ea085ad2f7b365961821469239251c489e3af6816c963cbc8154f646a",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 27219341,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 110,
+        "cpu_cycles": 16000006,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11034,
+          "288": 10924
+        },
+        "frame_periods": {
+          "79648": 110
+        },
+        "frame_log_sha256": "a70103fb7c20c233174c9bd0e976967551bc926c1dfd9f8a73094362609ab2c5",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui08",
+        "dithering": "Error diffusion",
+        "dither_aware": false,
+        "black_border": false,
+        "phase": 0,
+        "program_sha256": "bf7a7a380c584db2ea5416d19f7f73c557289874125b7d1f23cd0069c1491b61",
+        "expected_sha256": "33c8dde802fad3093f001c304c3f2ad1ccd0d035bb541f6410044de8a5467ea3",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "9ebc927bc5021fa0f050d76efc7f97abad3bf00278686641fd05bd902da57220",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui09",
+        "dithering": "Error diffusion",
+        "dither_aware": false,
+        "black_border": true,
+        "phase": 1,
+        "program_sha256": "49130bd9ddf705c5dc940472c64d4dc31a6207e0bedd28cd46157a430b7a3acb",
+        "expected_sha256": "299f56c2957c5288ba80251cffd5de04975bb2af62590ccedc752814f71bc6e1",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "9917737e0d2c961cc02d8b5a825ece758916fa9cc7ca0f779837abd95346905c",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui10",
+        "dithering": "Error diffusion",
+        "dither_aware": true,
+        "black_border": false,
+        "phase": 2,
+        "program_sha256": "bc8150761156baa641341a1f88c023fb0e26779bc89bbf7f95a26e3754393369",
+        "expected_sha256": "2e51df18ab0fce81a3ea768d955f4bf2cdbf32769231ae20fde08ec9cff0a47f",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11800,
+          "288": 11682
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "ccb552e54b6fb82c8f395d1a087b71e79ee7598648f99c4c4d30cd3c09bb91f7",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui11",
+        "dithering": "Error diffusion",
+        "dither_aware": true,
+        "black_border": true,
+        "phase": 3,
+        "program_sha256": "d050c395ad9418f181d22d802cc7a52c2ab3bb328790a5b70460a7155086b722",
+        "expected_sha256": "e2f9f3a35bc62f429a44f7c5dd1abbf9a241b29a9c070d1b62d923a28b19d9ec",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 27219341,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15880
+        },
+        "activations": 1,
+        "visible_frames": 110,
+        "cpu_cycles": 16000006,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "320": 11034,
+          "288": 10924
+        },
+        "frame_periods": {
+          "79648": 110
+        },
+        "frame_log_sha256": "503d46c83572c74a644f1955a013f1bc13be23305b9c48a94786ae020194a963",
+        "asm_roundtrip": true
+      }
+    ],
+    "visible_frames": 1383
+  },
+  "aligned_gui_regression": {
+    "status": "passed",
+    "cases": [
+      {
+        "case": "gui00",
+        "dithering": "None",
+        "dither_aware": false,
+        "black_border": false,
+        "phase": 0,
+        "program_sha256": "b7f34b7a2829b1564ad8c49a21754b65bd26fd6b16d27ec4a8b71b4b0095df52",
+        "expected_sha256": "459231b987a1fd46fb74ca96816c036170aaca7c8eb7775766370543087447b4",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "6076c7667331196cb0cc1780c1703986ea7e6314b9fdd1bfb9bfc6c3e18ecb70",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui01",
+        "dithering": "None",
+        "dither_aware": false,
+        "black_border": true,
+        "phase": 1,
+        "program_sha256": "8efdf8d5062f8921343bd69c3f7cea4d0032054337909e9d5252fad31119e7a2",
+        "expected_sha256": "aa15c1f657f7d41ded46c5c32ea3b2f523130dbe4310351a9c6033b294f53656",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "2c8bcec8bf1a6d29ed724439b49ae53aff9e162ca5d8ffccea5bca6013d3c4b5",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui02",
+        "dithering": "None",
+        "dither_aware": true,
+        "black_border": false,
+        "phase": 2,
+        "program_sha256": "539500755189258da4826caff190e7566eaa406fcac1c2c2a1bf519dfa10c61a",
+        "expected_sha256": "9cc22489e71e33ffb08e92393bcf7eda2313f014f412a60ad4e95b05693fb40f",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "cdadbcc03de512fafbb881cc14b8d8c004b7cd49f944853f0e54ea81f376faca",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui03",
+        "dithering": "None",
+        "dither_aware": true,
+        "black_border": true,
+        "phase": 3,
+        "program_sha256": "0ac4597a5d250a894e214536456bffa8b4f4f64f946abafb02314043142c2d44",
+        "expected_sha256": "c3ef4db3ef01a8232c0ae4ca25533975c78527588284e818db63c5045b37a700",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 27219341,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 110,
+        "cpu_cycles": 16000006,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 21958
+        },
+        "frame_periods": {
+          "79648": 110
+        },
+        "frame_log_sha256": "d9e83de89d0101503d846371657616b820838cf4e8378017e17ee318b9163085",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui04",
+        "dithering": "Ordered",
+        "dither_aware": false,
+        "black_border": false,
+        "phase": 0,
+        "program_sha256": "c616509b84e8b64f8483dcae4bde1ac1f8857c1fde3fdcd34ba8d2b3dc679385",
+        "expected_sha256": "ec43b866bc55ac94086c6504644def9d196de61dfe55e3c02f7a7e1155066ae5",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "1f4eaa7cfb948a0afc954efa79f4a1afd0e5e19935a476e05ffb1d9d0860f876",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui05",
+        "dithering": "Ordered",
+        "dither_aware": false,
+        "black_border": true,
+        "phase": 1,
+        "program_sha256": "eedd31a3fea4d8701ae81927ec84ef842dd93779c1fc71479e05f79a82dc2b87",
+        "expected_sha256": "48b0bf3fe86d48c3914fd80937f33fe13acfc60e5dbe1691a7df6dfb42a7fac1",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "4fe010d41f857510a52bdca7d268daad7fd46f218b2242bfd401113f48297d5e",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui06",
+        "dithering": "Ordered",
+        "dither_aware": true,
+        "black_border": false,
+        "phase": 2,
+        "program_sha256": "e55c93940c4f2445c978982d2427e8e1de6d5c8be23ddf071ac6f7008a0d02a6",
+        "expected_sha256": "922229250fdd2fc52e1198897edf2cf86efdd82ffda603a4574c08dc1770661b",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "7c2253efc5331326683c18ac128506e1bc35e7b4fcc27fb7064bf7412d210f7d",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui07",
+        "dithering": "Ordered",
+        "dither_aware": true,
+        "black_border": true,
+        "phase": 3,
+        "program_sha256": "853d9ce8871b4359b992554a6042c045f78d32d1f7bf37a32221e5f000f8ad60",
+        "expected_sha256": "c4c2f0a9972189286fb04a01643b907a5f94aead1e87b86ab2474f73012c217e",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 27219341,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 110,
+        "cpu_cycles": 16000006,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 21958
+        },
+        "frame_periods": {
+          "79648": 110
+        },
+        "frame_log_sha256": "9c550f4bf2e95f080fb893abce8fe773d8a038574a9d6475ddfa3c2dc927f669",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui08",
+        "dithering": "Error diffusion",
+        "dither_aware": false,
+        "black_border": false,
+        "phase": 0,
+        "program_sha256": "a871c1ef47f596e7330e745790f69a5e652ce662b80e0a522bf88458990a4dbf",
+        "expected_sha256": "c2c0aaa7ab93a6a9aa27e1cea32cc7e938929b92eccfdb77feff63a032bcfa64",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "99b81f66e1504122d8758b1ecb9b45878f23b3751a4ea99c03f5022354198f2a",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui09",
+        "dithering": "Error diffusion",
+        "dither_aware": false,
+        "black_border": true,
+        "phase": 1,
+        "program_sha256": "295e7b5416df3d70776f9e704bc9160bead495f840a574a7a5a9a6efcc0a11c0",
+        "expected_sha256": "3a7d0634693e2c3229baeed16cf001586fd6b639482a291d2596fe5ef95d72aa",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "8ea63b672224831044c4ff1e3975ee31d47035c7719ce360fa4063ddf186d6bb",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui10",
+        "dithering": "Error diffusion",
+        "dither_aware": true,
+        "black_border": false,
+        "phase": 2,
+        "program_sha256": "234c044783be4c7577bd8904a7024e0c7a7baa4d93c11c693ca1dfd27e8a44c9",
+        "expected_sha256": "90f04d98c4df3a48f9e15f3fea366f6625f98b8e16df500efa0c8d39b85642b1",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 26616558,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 117,
+        "cpu_cycles": 16000002,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 23482
+        },
+        "frame_periods": {
+          "79648": 117
+        },
+        "frame_log_sha256": "f9b218728ca4c3b55f3dae2fbf3d3f16907a1a5ae43de8cef3d70eeb9b4149f2",
+        "asm_roundtrip": true
+      },
+      {
+        "case": "gui11",
+        "dithering": "Error diffusion",
+        "dither_aware": true,
+        "black_border": true,
+        "phase": 3,
+        "program_sha256": "20762967c0d910d1e4ab6e80a50f42fb9ca0ad1d5fbffbb702020264d944c181",
+        "expected_sha256": "192ff45145fc6f92db54916dee974e02f37b81eb12f68d7e3ca657410493309b",
+        "cpu_options": {
+          "enable_wait_states": true,
+          "dram_refresh_schedule_enabled_at_first_out": true,
+          "pit1_reload_at_first_out": 19,
+          "pit1_current_at_first_out": 7,
+          "pit1_counting_at_first_out": true,
+          "pit1_retrigger_at_first_out": true,
+          "pit1_mode_at_first_out": "RateGenerator",
+          "first_out_cpu_cycle": 27219341,
+          "first_visible_out_ip": 4583,
+          "raster_end_ip": 15980
+        },
+        "activations": 1,
+        "visible_frames": 110,
+        "cpu_cycles": 16000006,
+        "mismatching_dots": 0,
+        "first_and_last_frames_match": true,
+        "row_periods": {
+          "304": 21958
+        },
+        "frame_periods": {
+          "79648": 110
+        },
+        "frame_log_sha256": "6e461ff5f23fbc8991a6f38759199dc8e86fea97e1515fec5f11158959147a1c",
+        "asm_roundtrip": true
+      }
+    ],
+    "visible_frames": 1383
+  },
+  "windows_smoke": {
+    "status": "passed",
+    "release": "0.3.0-alpha.3",
+    "frozen": true,
+    "checks": [
+      "Tk GUI construction",
+      "Pillow and NumPy",
+      "CGA packing",
+      "COM and ASM generation",
+      "bundled boot disk export",
+      "eight-write preview",
+      "eight-write COM/ASM/DSK exports",
+      "8 staggered selection, preview and COM/ASM/DSK exports"
+    ]
+  }
+}

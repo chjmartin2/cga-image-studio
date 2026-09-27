@@ -1,0 +1,119 @@
+{
+  "profile": "startlock-mode4-staggered",
+  "status": "Validated fixed stagger in wait-state-enabled MartyPC core; native visual check pending",
+  "validated_for_native_martypc": false,
+  "bounds": [
+    0,
+    25,
+    65,
+    113,
+    161,
+    209,
+    249,
+    289,
+    320
+  ],
+  "template_sha256": "de4b9d8153407f845834c50e5ee0596f78e7b698ab5996e37f3703975c15ca23",
+  "source": "tools/imagelock.asm",
+  "source_sha256": "7eabb23324136fe684e6c4fdfc0531772c21e044095fdf75422577f37b5803f3",
+  "mode": 4,
+  "width": 320,
+  "height": 200,
+  "writes_per_line": 8,
+  "refresh_pit_divisor": 19,
+  "line_cpu_cycles": 304,
+  "frame_cpu_cycles": 79648,
+  "physical_hardware_validated": false,
+  "validation": "docs/research/staggered_validation.md",
+  "entry_nops_tested": [
+    0,
+    1,
+    2,
+    3,
+    7,
+    13,
+    31,
+    127
+  ],
+  "pit_phases_tested": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "validated_for_marty_core": true,
+  "acquisition": "paired PREP/MAIN; brief PIT1 mode-0 quiet windows; mode 2/count 19 during raster",
+  "line_nops": 33,
+  "lead_nops": 1,
+  "gap_nops": [
+    2,
+    2,
+    3,
+    2,
+    2,
+    2
+  ],
+  "hblank_after_nops": 6,
+  "image_ticks": 2241,
+  "validation_effective_cpu_wait_states": true,
+  "validation_effective_dma_refresh": true,
+  "row_lead_nop_adjustments": [
+    0,
+    4
+  ],
+  "row_tail_nops": [
+    6,
+    3
+  ],
+  "row_bounds": [
+    [
+      0,
+      25,
+      65,
+      113,
+      161,
+      209,
+      249,
+      289,
+      320
+    ],
+    [
+      0,
+      49,
+      97,
+      137,
+      185,
+      233,
+      273,
+      313,
+      320
+    ]
+  ],
+  "row_nops": [
+    33,
+    30
+  ],
+  "blanking_jump_on_odd_rows": true,
+  "row_gap_nops": [
+    [
+      2,
+      2,
+      3,
+      2,
+      2,
+      2
+    ],
+    [
+      2,
+      2,
+      3,
+      2,
+      2,
+      1
+    ]
+  ],
+  "first_write_intervals_cpu": [
+    320,
+    288
+  ]
+}

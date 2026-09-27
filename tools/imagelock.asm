@@ -493,7 +493,25 @@ image_irq:
 %assign raster_row 0
 %rep 200+PREROLL_LINES
 row_%+raster_row:
-    times LEAD_NOPS nop
+    ; Fixed alternating stagger; measured row geometry is in its own profile.
+    ; Odd rows use a blanking jump to reset instruction prefetch, replacing
+    ; three NOPs. No runtime randomness or palette-table reads are involved.
+%assign row_shift 0
+%assign row_tail HBLANK_AFTER_NOPS
+%assign row_gap6 GAP6_NOPS
+%assign row_deficit 0
+%ifdef STAGGERED
+%if raster_row >= PREROLL_LINES
+%assign row_choice ((raster_row-PREROLL_LINES) % 2)
+%if row_choice == 1
+%assign row_shift 4
+%assign row_tail 3
+%assign row_gap6 1
+%assign row_deficit 3
+%endif
+%endif
+%endif
+    times (LEAD_NOPS+row_shift) nop
 %rep 7
 %if raster_row >= PREROLL_LINES
 palette_%+palette_index:
@@ -517,10 +535,10 @@ palette_%+palette_index:
     times GAP5_NOPS nop
 %endif
 %if (palette_index % 8) == 6
-    times GAP6_NOPS nop
+    times row_gap6 nop
 %endif
 %endrep
-    times (LINE_NOPS - LEAD_NOPS - GAP1_NOPS - GAP2_NOPS - GAP3_NOPS - GAP4_NOPS - GAP5_NOPS - GAP6_NOPS - HBLANK_AFTER_NOPS) nop
+    times (LINE_NOPS - LEAD_NOPS - GAP1_NOPS - GAP2_NOPS - GAP3_NOPS - GAP4_NOPS - GAP5_NOPS - row_gap6 - row_tail - row_shift - row_deficit) nop
 %if raster_row >= PREROLL_LINES
 palette_%+palette_index:
 %endif
@@ -530,7 +548,10 @@ first_line_palette:
     mov al,30h
     out dx,al
 %assign palette_index palette_index+1
-    times HBLANK_AFTER_NOPS nop
+%if row_deficit != 0
+    jmp short $+2
+%endif
+    times row_tail nop
 %assign raster_row raster_row+1
 %if raster_row == PREROLL_LINES
 %assign palette_index 0

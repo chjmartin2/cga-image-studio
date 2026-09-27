@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import traceback
 
-RELEASE_VERSION = "0.3.0-alpha.2"
+RELEASE_VERSION = "0.3.0-alpha.3"
 
 
 def smoke_check():
@@ -39,11 +39,25 @@ def smoke_check():
         assert "row_199" in raster_asm
         raster_disk = cga.build_bootable_dsk_from_com(raster)
         assert read_files(bytearray(raster_disk))["TEST.COM"] == raster
+        app.mode_var.set("320x200 (4 Colors) Mode Switch")
+        app.on_mode_changed()
+        assert "8 staggered" in app.ms_switches_spin.cget("values")
+        app.ms_switches_var.set("8 staggered")
+        app._on_mode_switch_options_changed()
+        assert app.ms_switches_var.get() == "8 staggered"
+        stagger_preview, stagger_plan = cga.quantize_320x200_mode_switch_lockstep_max(
+            Image.new("RGB", (320, 200)), free16=True,
+            timing_backend=lock.STAGGERED_PROFILE_ID, dither_family="None")
+        stagger = lock.build_com(cga.pack_cga_320_vram_from_indices(stagger_plan["indices"]), stagger_plan)
+        assert stagger_plan["lines"][0]["zones"] != stagger_plan["lines"][1]["zones"]
+        assert "row_199" in cga.build_nasm_source_from_com(stagger, "8 staggered", "TEST.COM", mode_switch_plan=stagger_plan)
+        assert read_files(bytearray(cga.build_bootable_dsk_from_com(stagger)))["TEST.COM"] == stagger
         return {"status": "passed", "release": RELEASE_VERSION,
                 "frozen": bool(getattr(sys, "frozen", False)),
                 "checks": ["Tk GUI construction", "Pillow and NumPy", "CGA packing",
                            "COM and ASM generation", "bundled boot disk export",
-                           "eight-write preview", "eight-write COM/ASM/DSK exports"]}
+                           "eight-write preview", "eight-write COM/ASM/DSK exports",
+                           "8 staggered selection, preview and COM/ASM/DSK exports"]}
     finally:
         app.destroy()
 

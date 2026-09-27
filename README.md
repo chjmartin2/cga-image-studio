@@ -1,10 +1,12 @@
 # CGA Image Studio
 
-**Eight-write prerelease: v0.3.0-alpha.2.** A standalone Windows x64 executable is
+**Staggered-write prerelease: v0.3.0-alpha.3.** A standalone Windows x64 executable is
 available on the [releases page](https://github.com/chjmartin2/cga-image-studio/releases).
-Eight-write conversion and COM/ASM/DSK exports are enabled with corrected timing.
+Mode Switch offers **1**, **8**, and **8 staggered** writes for 320x200 conversion
+and COM/ASM/DSK export. The staggered selection uses a fixed alternating pattern;
+every visible palette boundary moves between adjacent rows without animation.
 See [Windows build and use](docs/WINDOWS_BUILD.md) and
-[release notes](docs/RELEASE_v0.3.0-alpha.2.md).
+[release notes](docs/RELEASE_v0.3.0-alpha.3.md).
 
 CGA Image Studio is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
 
@@ -14,7 +16,10 @@ This repository starts from the historical manually versioned source file `cga_v
 
 This project is in early active development. The current version is buggy, some features are incomplete, and several planned features are not implemented yet. Expect rough edges while the app is being cleaned up, refactored, and prepared for more stable releases.
 
-The current production Mode Switch controls offer **1 or 8 writes per scanline**.
+The current 320x200 Mode Switch controls offer **1, 8 or 8 staggered writes per scanline**.
+The [staggered profile](docs/research/staggered_validation.md) has independent
+geometry and timing assets. Region widths vary slightly between alternating rows;
+the pattern is identical every frame and for every image.
 The corrected eight-write profile passes the wait-state-enabled MartyPC core
 acceptance suite, and the user confirmed the native MartyPC picture. See the
 [validation report](docs/research/eight_write_validation.md). Physical CGA

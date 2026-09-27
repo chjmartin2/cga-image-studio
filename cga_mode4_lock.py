@@ -13,9 +13,11 @@ from pathlib import Path
 import struct
 
 PROFILE_ID = "startlock-mode4"
+STAGGERED_PROFILE_ID = "startlock-mode4-staggered"
 WRITES_PER_LINE = 8
 _ASSETS = Path(__file__).resolve().parent / "assets" / "mode4_lock"
 _PROFILE = json.loads((_ASSETS / "profile.json").read_text(encoding="utf-8"))
+_STAGGERED_PROFILE = json.loads((_ASSETS / "staggered/profile.json").read_text(encoding="utf-8"))
 BOUNDS = tuple(_PROFILE["bounds"])
 SLOTS = (8, 1, 2, 3, 4, 5, 6, 7)
 LINE_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0)
@@ -48,14 +50,21 @@ def descriptor(payload: bytes) -> dict:
     return result
 
 
-def make_layouts(H=200, W=320):
+def make_layouts(H=200, W=320, timing_backend=PROFILE_ID, start_y=0):
     if W != 320 or not isinstance(H, int) or H <= 0:
         raise ValueError("The acquired mode-4 layout requires width 320 and positive height")
     if len(BOUNDS) != 9 or BOUNDS[0] != 0 or BOUNDS[-1] != W or any(b <= a for a, b in zip(BOUNDS, BOUNDS[1:])):
         raise ValueError("Invalid acquired mode-4 geometry")
-    return [{"zones": [{"x0": BOUNDS[i], "x1": BOUNDS[i+1],
+    if timing_backend not in (PROFILE_ID, STAGGERED_PROFILE_ID):
+        raise ValueError(f"Unknown acquired mode-4 profile: {timing_backend}")
+    patterns = _STAGGERED_PROFILE["row_bounds"] if timing_backend == STAGGERED_PROFILE_ID else [BOUNDS]
+    for bounds in patterns:
+        if len(bounds) != 9 or bounds[0] != 0 or bounds[-1] != W or any(b <= a for a, b in zip(bounds, bounds[1:])):
+            raise ValueError("Invalid acquired mode-4 row geometry")
+    bounds_by_row = [patterns[(start_y+y) % len(patterns)] for y in range(H)]
+    return [{"zones": [{"x0": bounds[i], "x1": bounds[i+1],
                         "slot": SLOTS[i], "line_delta": LINE_DELTAS[i]}
-                       for i in range(8)], "intervals": None} for _ in range(H)]
+                       for i in range(8)], "intervals": None} for bounds in bounds_by_row]
 
 
 def _palette_values(values, name):
@@ -70,9 +79,12 @@ def _palette_values(values, name):
 def build_com(vram16k, plan):
     if len(vram16k) != 16384:
         raise ValueError("vram16k must be 16384 bytes")
-    if not isinstance(plan, dict) or plan.get("timing_backend") != PROFILE_ID:
+    if not isinstance(plan, dict) or plan.get("timing_backend") not in (PROFILE_ID, STAGGERED_PROFILE_ID):
         raise ValueError("Expected a startlock-mode4 conversion plan")
-    if not _PROFILE.get("validated_for_marty_core", False):
+    staggered = plan["timing_backend"] == STAGGERED_PROFILE_ID
+    profile = _STAGGERED_PROFILE if staggered else _PROFILE
+    assets = _ASSETS / "staggered" if staggered else _ASSETS
+    if not profile.get("validated_for_marty_core", False):
         raise ValueError(
             "The installed mode-4 timing profile is withdrawn or unvalidated. "
             "Install a profile that passes the wait-state-enabled MartyPC validator and restart "
@@ -82,7 +94,7 @@ def build_com(vram16k, plan):
         raise ValueError("The acquired mode-4 backend requires 200 lines with eight writes")
     if plan.get("palette_delay_px", 0) != 0:
         raise ValueError("Acquired mode-4 geometry already includes the displayed palette boundaries")
-    for actual, expected in zip(plan["lines"], make_layouts()):
+    for actual, expected in zip(plan["lines"], make_layouts(timing_backend=plan["timing_backend"])):
         if actual.get("zones") is not None:
             geometry = [{key: zone.get(key) for key in ("x0", "x1", "slot", "line_delta")} for zone in actual["zones"]]
             if geometry != expected["zones"]:
@@ -92,8 +104,8 @@ def build_com(vram16k, plan):
     # The last blanking write persists through vertical blanking to row zero.
     # The declared startup operand supplies the same palette before row zero.
     values[-1][-1] = preline[-1]
-    payload = bytearray((_ASSETS / "template.bin").read_bytes())
-    if hashlib.sha256(payload).hexdigest() != _PROFILE["template_sha256"]:
+    payload = bytearray((assets / "template.bin").read_bytes())
+    if hashlib.sha256(payload).hexdigest() != profile["template_sha256"]:
         raise ValueError("IMAGELOCK template differs from its calibrated profile; rebuild or restore the assets")
     meta = descriptor(payload)
     for offset, value in zip(meta["palette_offsets"], (value for row in values for value in row)):
@@ -112,7 +124,7 @@ def build_nasm_source(com_bytes, mode_label, binary_name, plan):
     filename = str(binary_name).replace("\\", "/").rsplit("/", 1)[-1]
     filename = filename.replace("\r", " ").replace("\n", " ").encode("ascii", errors="replace").decode("ascii")
     label = str(mode_label).replace("\r", " ").replace("\n", " ").encode("ascii", errors="replace").decode("ascii")
-    lines = [f"; {label}: acquired mode-4 raster, profile {PROFILE_ID}",
+    lines = [f"; {label}: acquired mode-4 raster, profile {plan['timing_backend']}",
              f'; Assemble: nasm -f bin "image.asm" -o "{filename}"',
              "; 320x200 packed 2-bit CGA VRAM; seven visible palette switches per line.",
              "; Slot 8 in horizontal blanking supplies the next row's leading palette.",

@@ -1,6 +1,6 @@
 # Version
 
-Current eight-write prerelease: `0.3.0-alpha.2` (2026-09-27).
+Current staggered-write prerelease: `0.3.0-alpha.3` (2026-09-27).
 The application retains its historical `v167` window title and source filename.
 
 Current GitHub baseline: `0.1.0`

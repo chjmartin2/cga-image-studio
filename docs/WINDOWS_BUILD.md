@@ -1,6 +1,6 @@
 # Standalone Windows build
 
-The v0.3.0-alpha.2 release includes a single-file Windows x64 executable.
+The v0.3.0-alpha.3 release includes a single-file Windows x64 executable.
 Download `CGAImageStudio.exe` from the GitHub release and double-click it.
 Python, NASM, and MartyPC are not required to run the converter. A DOS computer
 or emulator is required to run exported COM programs. The executable includes
@@ -8,7 +8,10 @@ the mode-4 profile and DOS disk template. It is not code-signed.
 
 Eight-write conversion and COM, ASM, and DSK exports use the corrected, validated
 MartyPC timing profile. Choose **320x200 (4 Colors) Mode Switch**, **8 writes**,
-then convert and export. Full studio feature validation and physical CGA hardware
+or **8 staggered**, then convert and export. Staggered uses fixed alternating
+palette boundaries shared by the preview and exports, with no frame-to-frame
+movement. Change the selection and click Convert again before exporting.
+Full studio feature validation and physical CGA hardware
 qualification remain outstanding. Restart older running copies before testing.
 
 Build on Windows x64 with Python 3.12, including Tcl/Tk:

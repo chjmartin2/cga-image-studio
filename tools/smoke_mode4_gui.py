@@ -1,5 +1,6 @@
 """Exercise the real Tk conversion/export callbacks for all eight-write options."""
 from pathlib import Path
+import argparse
 import json
 import sys
 from unittest.mock import patch
@@ -13,7 +14,10 @@ from PIL import Image
 
 
 def main():
-    work = ROOT / "external/research/mode4-gui"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--staggered", action="store_true")
+    args = parser.parse_args()
+    work = ROOT / "external/research" / ("staggered-gui" if args.staggered else "mode4-gui")
     work.mkdir(parents=True, exist_ok=True)
     app = cga.CgaConverterApp()
     app.withdraw()
@@ -26,7 +30,9 @@ def main():
         app.src_image = Image.open(ROOT / "test_images/picard_input_copy.bmp").convert("RGB")
         app.mode_var.set("320x200 (4 Colors) Mode Switch")
         app.on_mode_changed()
-        app.ms_switches_var.set(8)
+        app.ms_switches_var.set("8 staggered" if args.staggered else "8")
+        app._on_mode_switch_options_changed()
+        assert app.ms_switches_var.get() == ("8 staggered" if args.staggered else "8")
         with patch.object(cga.messagebox, "showerror", side_effect=error), patch.object(cga.messagebox, "showinfo"):
             for family in ("None", "Ordered", "Error diffusion"):
                 for aware in (False, True):
@@ -37,6 +43,8 @@ def main():
                         app.ms_black_border_var.set(border)
                         app.on_convert()
                         assert app.ms_seg_n == 8
+                        assert app.ms_lockstep_max_plan["timing_backend"] == (
+                            cga._CGA_STAGGERED_TIMING_BACKEND if args.staggered else cga._CGA_STARTLOCK_TIMING_BACKEND)
                         prefix = work / f"gui{case:02d}"
                         expected = prefix.with_suffix(".bin")
                         expected.write_bytes(expected_rgbi(app.output_pimage.convert("RGB")))

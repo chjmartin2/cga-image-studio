@@ -10263,6 +10263,14 @@ _CGA_FREE16_BOUNDS = (0, 33, 73, 113, 153, 193, 233, 273, 320)
 _CGA_FREE16_SLOTS = (8, 1, 2, 3, 4, 5, 6, 7)
 _CGA_FREE16_DELTAS = (-1, 0, 0, 0, 0, 0, 0, 0)
 _CGA_STARTLOCK_TIMING_BACKEND = "startlock-mode4"
+_CGA_STAGGERED_TIMING_BACKEND = "startlock-mode4-staggered"
+_CGA_ACQUIRED_TIMING_BACKENDS = (_CGA_STARTLOCK_TIMING_BACKEND, _CGA_STAGGERED_TIMING_BACKEND)
+
+
+def mode_switch_write_count(selection):
+    """Both eight-write choices use eight writes, with separate timing profiles."""
+    return 8 if str(selection) in ("8", "8 staggered") else 1
+
 
 
 def normalize_mode_switch_max_pattern(pattern):
@@ -10327,12 +10335,12 @@ def cga_lockstep_max_layout_for_line(y, pattern="Fixed", W=320, constant_fg=True
     free16: the legacy eight-write profile, unless timing_backend is supplied.
     """
     if timing_backend is not None:
-        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+        if timing_backend not in _CGA_ACQUIRED_TIMING_BACKENDS:
             raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
         if not free16 or free16_h_shift or normalize_mode_switch_max_pattern(pattern) != "Fixed":
             raise ValueError("STARTLCK requires the fixed eight-write layout without a horizontal shift")
         from cga_mode4_lock import make_layouts
-        return make_layouts(H=1, W=W)[0]
+        return make_layouts(H=1, W=W, timing_backend=timing_backend, start_y=y)[0]
     if free16 and W == 320:
         # HARD-WIRED measured seams (the char-snapped 32/24px bars from the FR registration
         # test). These are exact, so free16_h_shift defaults to 0; it remains only as a
@@ -10427,7 +10435,7 @@ def build_cga_lockstep_max_layouts(pattern="Fixed", H=200, W=320, constant_fg=Tr
         cga_lockstep_max_layout_for_line(0, pattern, W=W, free16=free16,
                                        free16_h_shift=free16_h_shift, timing_backend=timing_backend)
         from cga_mode4_lock import make_layouts
-        return make_layouts(H=H, W=W)
+        return make_layouts(H=H, W=W, timing_backend=timing_backend)
     return [cga_lockstep_max_layout_for_line(y, pattern, W=W, constant_fg=constant_fg, free16=free16, free16_h_shift=free16_h_shift, timing_backend=timing_backend) for y in range(H)]
 
 
@@ -10551,7 +10559,7 @@ def build_com_320_mode_switch_lockstep_max(vram16k, plan):
     """Build the timing backend selected by the image's conversion plan."""
     timing_backend = plan.get("timing_backend")
     if timing_backend is not None:
-        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+        if timing_backend not in _CGA_ACQUIRED_TIMING_BACKENDS:
             raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
         from cga_mode4_lock import build_com
         return build_com(vram16k, plan)
@@ -11001,7 +11009,7 @@ def quantize_320x200_mode_switch_lockstep_max(
     horizontal border/overscan) to a black background so the border stays black.
     """
     if timing_backend is not None:
-        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+        if timing_backend not in _CGA_ACQUIRED_TIMING_BACKENDS:
             raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
         if not free16 or free16_h_shift or free16_preroll_lines is not None:
             raise ValueError("STARTLCK requires eight writes and uses a fixed acquisition schedule")
@@ -11245,7 +11253,7 @@ def quantize_320x200_mode_switch_lockstep_max(
     }
     if free16:
         plan["free16_writes"] = n_writes          # builder emits the all-writes line
-        if timing_backend == _CGA_STARTLOCK_TIMING_BACKEND:
+        if timing_backend in _CGA_ACQUIRED_TIMING_BACKENDS:
             plan["timing_backend"] = timing_backend
             plan["drain_writes"] = 0
             # The final blanking write supplies row zero on every later frame;
@@ -11699,7 +11707,7 @@ def build_nasm_source_from_com(com_bytes: bytes, mode_label: str, binary_name: s
         raise ValueError("COM export did not produce any bytes")
     if mode_switch_plan is not None and mode_switch_plan.get("timing_backend") is not None:
         timing_backend = mode_switch_plan["timing_backend"]
-        if timing_backend != _CGA_STARTLOCK_TIMING_BACKEND:
+        if timing_backend not in _CGA_ACQUIRED_TIMING_BACKENDS:
             raise ValueError(f"Unknown CGA timing backend: {timing_backend}")
         from cga_mode4_lock import build_nasm_source
         return build_nasm_source(com_bytes, mode_label, binary_name, mode_switch_plan)
@@ -12372,12 +12380,12 @@ class CgaConverterApp(tk.Tk):
         # Mode Switch writes per scanline: one hblank write, or the eight-write
         # mode-4 profile using STARTLCK acquisition and active DRAM refresh.
         ttk.Label(options, text="Mode Switch writes per line:").grid(row=6, column=3, sticky="e", padx=4, pady=2)
-        self.ms_switches_var = tk.IntVar(value=1)
+        self.ms_switches_var = tk.StringVar(value="1")
         self.ms_switches_spin = ttk.Spinbox(
             options,
-            values=(1, _CGA_FREE16_WRITES),
+            values=("1", "8", "8 staggered"),
             textvariable=self.ms_switches_var,
-            width=5,
+            width=12,
             state="readonly",
             command=self._on_mode_switch_options_changed,
         )
@@ -13089,9 +13097,16 @@ class CgaConverterApp(tk.Tk):
     def _on_mode_switch_options_changed(self):
         """Keep Mode Switch sub-options consistent with the selected profile."""
         try:
-            seg_n = int(getattr(self, "ms_switches_var", tk.IntVar(value=1)).get())
+            seg_n = mode_switch_write_count(getattr(self, "ms_switches_var", tk.StringVar(value="1")).get())
             seg_n = _CGA_FREE16_WRITES if seg_n == _CGA_FREE16_WRITES else 1
-            self.ms_switches_var.set(seg_n)
+            selection = str(self.ms_switches_var.get())
+            if selection not in ("1", "8", "8 staggered"):
+                self.ms_switches_var.set("1")
+            # The staggered kernel is calibrated for 320x200 mode 4 only.
+            choices = ("1", "8", "8 staggered") if self.is_mode_switch_mode() else ("1", "8")
+            self.ms_switches_spin.configure(values=choices)
+            if selection == "8 staggered" and not self.is_mode_switch_mode():
+                self.ms_switches_var.set("8")
             in_ms_mode = self.is_any_mode_switch()
 
             if in_ms_mode:
@@ -14448,7 +14463,7 @@ class CgaConverterApp(tk.Tk):
             toned_ms640 = scaled
 
             want_pal_strip = bool(getattr(self, 'ms_show_palette_var', tk.BooleanVar(value=False)).get())
-            seg_n = int(getattr(self, "ms_switches_var", tk.IntVar(value=1)).get())
+            seg_n = mode_switch_write_count(getattr(self, "ms_switches_var", tk.StringVar(value="1")).get())
 
             pattern_label = getattr(
                 self, "ms_stagger_mode_var", tk.StringVar(value="Horizontal Striped")
@@ -14564,7 +14579,7 @@ class CgaConverterApp(tk.Tk):
                 forced_bg_idx = CGA_COLOR_NAMES.index(bg_sel)
 
             want_pal_strip = bool(getattr(self, 'ms_show_palette_var', tk.BooleanVar(value=False)).get())
-            seg_n_320 = int(getattr(self, "ms_switches_var", tk.IntVar(value=1)).get())
+            seg_n_320 = mode_switch_write_count(getattr(self, "ms_switches_var", tk.StringVar(value="1")).get())
             seg_n_320 = _CGA_FREE16_WRITES if seg_n_320 == _CGA_FREE16_WRITES else 1
 
             pattern_320 = normalize_mode_switch_max_pattern(
@@ -14598,7 +14613,9 @@ class CgaConverterApp(tk.Tk):
                     # Conversion and export share the STARTLCK mode-4 geometry.
                     # Hardware qualification is separate from emulator validation.
                     "free16": True,
-                    "timing_backend": _CGA_STARTLOCK_TIMING_BACKEND,
+                    "timing_backend": (_CGA_STAGGERED_TIMING_BACKEND
+                                       if self.ms_switches_var.get() == "8 staggered"
+                                       else _CGA_STARTLOCK_TIMING_BACKEND),
                     "forced_bg_idx": forced_bg_idx,
                     "serpentine": serpentine,
                     "pattern": pattern_320,
@@ -15406,6 +15423,12 @@ class CgaConverterApp(tk.Tk):
                             "No dense lockstep plan is available. Please click Convert first."
                         )
                         return
+                    selected_backend = (_CGA_STAGGERED_TIMING_BACKEND
+                                        if self.ms_switches_var.get() == "8 staggered"
+                                        else _CGA_STARTLOCK_TIMING_BACKEND)
+                    if plan.get("timing_backend") in _CGA_ACQUIRED_TIMING_BACKENDS and plan["timing_backend"] != selected_backend:
+                        messagebox.showinfo("Export", "The palette-write selection changed. Click Convert again before exporting.")
+                        return
                     idx_arr = derive_indices_320_from_rgb_lockstep_max(
                         self.output_pimage, plan
                     )
@@ -15416,7 +15439,8 @@ class CgaConverterApp(tk.Tk):
                         plan = {**plan, "phase_lock": int(plan.get("phase_lock") or 7)}
                     com = build_com_320_mode_switch_lockstep_max(vram, plan)
                     asm_plan = plan
-                    default_name = ("cga_320_startlock.com" if plan.get("timing_backend") == _CGA_STARTLOCK_TIMING_BACKEND
+                    default_name = ("cga_320_staggered.com" if plan.get("timing_backend") == _CGA_STAGGERED_TIMING_BACKEND
+                                    else "cga_320_startlock.com" if plan.get("timing_backend") == _CGA_STARTLOCK_TIMING_BACKEND
                                     else f"cga_320_modeswitch_lockstep_n{seg_n}.com")
                 elif seg_n == 1:
                     # Simple N=1 path

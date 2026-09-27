@@ -1,5 +1,6 @@
 """Check saved GUI exports against NASM and the wait-state-enabled core."""
 from concurrent.futures import ThreadPoolExecutor
+import argparse
 import json
 from pathlib import Path
 import subprocess
@@ -12,7 +13,10 @@ import cga_mode4_lock as lock
 
 
 def main():
-    work = ROOT / "external/research/mode4-gui"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--staggered", action="store_true")
+    args = parser.parse_args()
+    work = ROOT / "external/research" / ("staggered-gui" if args.staggered else "mode4-gui")
     exe = ROOT / "external/research/imagelock-validation/target/release/validate_imagelock.exe"
     nasm = Path.home() / "AppData/Local/bin/NASM/nasm.exe"
     cases = json.loads((work / "gui-results.json").read_text())
@@ -32,7 +36,7 @@ def main():
                                  str(folder), f"{ip:X}", str(expected)], capture_output=True, text=True, timeout=600)
         (folder / "run.log").write_text(result.stdout + result.stderr)
         assert result.returncode == 0, result.stderr
-        record = {**item, **inspect_run(folder, phase, program, expected, 1), "asm_roundtrip": True}
+        record = {**item, **inspect_run(folder, phase, program, expected, 1, staggered=args.staggered), "asm_roundtrip": True}
         print(f"PASS {name}: {record['visible_frames']} exact frames; ASM byte-exact", flush=True)
         return record
 

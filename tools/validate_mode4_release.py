@@ -31,7 +31,7 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def inspect_run(folder, phase, program, expected, activations):
+def inspect_run(folder, phase, program, expected, activations, staggered=False):
     options = json.loads((folder / f"phase{phase}-cpu-options.json").read_text())
     assert options["enable_wait_states"] and options["dram_refresh_schedule_enabled_at_first_out"]
     assert options["pit1_reload_at_first_out"] == 19
@@ -66,9 +66,11 @@ def inspect_run(folder, phase, program, expected, activations):
                 frame_start = cycle
             elif previous is not None:
                 assert line == previous[0] + 1
+                period = (320 if line % 2 else 288) if staggered else 304
+                assert cycle - previous[1] == period, (line, cycle - previous[1], period)
                 line_periods[cycle - previous[1]] += 1
             previous = line, cycle
-    assert set(line_periods) == {304}, line_periods
+    assert set(line_periods) == ({288, 320} if staggered else {304}), line_periods
     assert set(frame_periods) == {79648}, frame_periods
     return {"case": folder.name, "phase": phase, "program_sha256": sha(program),
             "expected_sha256": sha(expected), "cpu_options": options, **summary,
@@ -80,9 +82,12 @@ def inspect_run(folder, phase, program, expected, activations):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--quick", action="store_true")
+    parser.add_argument("--staggered", action="store_true")
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--directory", type=Path, default=ROOT / "external/research/mode4-release")
     args = parser.parse_args()
+    if args.staggered and args.directory == ROOT / "external/research/mode4-release":
+        args.directory = ROOT / "external/research/staggered-release"
     work = args.directory.resolve()
     work.mkdir(parents=True, exist_ok=True)
     exe = ROOT / "external/research/imagelock-validation/target/release/validate_imagelock.exe"
@@ -94,6 +99,12 @@ def main():
     blank = work / "blank.bin"
     blank.write_bytes(bytes(16384))
     plan = registration_plan()
+    if args.staggered:
+        # Explicit test-only approval while qualifying a new template.
+        lock._STAGGERED_PROFILE["validated_for_marty_core"] = True
+        plan["timing_backend"] = lock.STAGGERED_PROFILE_ID
+        for line, layout in zip(plan["lines"], lock.make_layouts(timing_backend=lock.STAGGERED_PROFILE_ID)):
+            line["zones"] = layout["zones"]
     # Exercise every bitmap index on every row, including rows zero and 199.
     plan["indices"] = np.tile(np.arange(320, dtype=np.uint16) % 4, (200, 1)).astype(np.uint8)
     preview = cga.render_cga_lockstep_max_physical_preview(plan)
@@ -103,11 +114,23 @@ def main():
     registration = lock.build_com(cga.pack_cga_320_vram_from_indices(plan["indices"]), plan)
     photo = ROOT / "files/IMGLCK.COM"
     photo_expected = ROOT / "files/IMGLCK_expected.bin"
+    if args.staggered:
+        from PIL import Image
+        preview, photo_plan = cga.quantize_320x200_mode_switch_lockstep_max(
+            Image.open(ROOT / "test_images/picard_input_copy.bmp"), free16=True,
+            timing_backend=lock.STAGGERED_PROFILE_ID, keep_border_black=True)
+        photo = work / "STAGGER.COM"
+        photo_expected = work / "STAGGER-expected.bin"
+        photo.write_bytes(lock.build_com(cga.pack_cga_320_vram_from_indices(photo_plan["indices"]), photo_plan))
+        photo_expected.write_bytes(expected_rgbi(preview))
+        preview.save(work / "STAGGER-preview.png")
+        (work / "STAGGER.DSK").write_bytes(cga.build_bootable_dsk_from_com(photo.read_bytes()))
 
     def variant(name, base, entry=0, frames=3600):
         path = work / f"{name}.COM"
         subprocess.run([str(nasm), "-f", "bin", f'-DBITMAP_PATH="{blank.as_posix()}"',
                         f"-DENTRY_NOPS={entry}", f"-DDISPLAY_FRAMES={frames}",
+                        *(["-DSTAGGERED=1"] if args.staggered else []),
                         "-o", str(path), "tools/imagelock.asm"], cwd=ROOT, check=True)
         raw = bytearray(path.read_bytes())
         meta = lock.descriptor(raw)
@@ -143,16 +166,17 @@ def main():
                                 capture_output=True, text=True, timeout=600)
         (folder / "run.log").write_text(result.stdout + result.stderr)
         assert result.returncode == 0, result.stderr
-        record = inspect_run(folder, phase, program, expected_path, activations)
+        record = inspect_run(folder, phase, program, expected_path, activations, staggered=args.staggered)
         print(f"PASS {folder.name}: {record['visible_frames']} exact frames", flush=True)
         return record
 
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
         records = list(pool.map(run, jobs))
     report = {"status": "passed", "scope": "Unmodified MartyPC core; native UI and hardware are separate checks",
-              "template_sha256": sha(ROOT / "assets/mode4_lock/template.bin"),
+              "template_sha256": sha(ROOT / "assets/mode4_lock" / ("staggered/template.bin" if args.staggered else "template.bin")),
               "source_sha256": sha(ROOT / "tools/imagelock.asm"),
               "validator_sha256": sha(exe), "bounds": lock.BOUNDS,
+              "row_bounds": lock._STAGGERED_PROFILE["row_bounds"] if args.staggered else [lock.BOUNDS],
               "cases": records, "visible_frames": sum(r["visible_frames"] for r in records)}
     (work / "validation.json").write_text(json.dumps(report, indent=2) + "\n")
     print(f"Passed {len(records)} cases / {report['visible_frames']} exact frames")

@@ -15,7 +15,7 @@
   ],
   "template_sha256": "3866d092a169a128ed7d7ab8fbe9038d8991c770ebed9476bb056633e8e9ed89",
   "source": "tools/imagelock.asm",
-  "source_sha256": "d0201ed28d76114b0962645eff7fec588662a93356859cecc9bc0a930d0e3ca4",
+  "source_sha256": "7eabb23324136fe684e6c4fdfc0531772c21e044095fdf75422577f37b5803f3",
   "mode": 4,
   "width": 320,
   "height": 200,
@@ -61,5 +61,6 @@
     "date": "2026-09-27",
     "method": "User visual confirmation: The visualization in Marty was perfect.",
     "com_sha256": "67c94210dbe7177c0a57b7b19741debb766ab1f551a7112f2fc8e536a2bee65f"
-  }
+  },
+  "source_note": "Optional staggered path added; default aligned template is byte-identical to v0.3.0-alpha.2."
 }

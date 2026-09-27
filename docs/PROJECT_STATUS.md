@@ -1,6 +1,20 @@
 # Project Status
 
-Current release: **v0.3.0-alpha.2**, 2026-09-27. Eight-write conversion and
+Latest release: **v0.3.0-alpha.3**, 2026-09-27. The 320x200 palette-write selection
+is now **1 / 8 / 8 staggered**. Staggered uses a fixed alternating row layout;
+all seven visible boundaries move between adjacent rows. It has a separate
+template/profile and passes its own 44-case / 18,736-frame core suite. Both
+eight-write choices pass all 12 GUI option combinations and NASM round trips.
+All 31 regression tests and 59 subtests pass. Native visual confirmation for the
+new staggered profile and physical hardware qualification remain outstanding.
+See [alpha.3 notes](RELEASE_v0.3.0-alpha.3.md) and
+[staggered evidence](research/staggered_validation.md).
+
+The aligned profile's template remains byte-identical to alpha.2. Its earlier
+native confirmation applies to aligned 8 only. The following alpha.2 details
+remain the baseline for that selection.
+
+Aligned baseline: **v0.3.0-alpha.2**, 2026-09-27. Eight-write conversion and
 COM/ASM/DSK exports are enabled. All 26 regression tests and 59 subtests pass.
 The corrected core acceptance suite passes 44 cases / 18,736 exact frames with
 CPU wait states and active raster refresh. The user confirmed the native MartyPC
