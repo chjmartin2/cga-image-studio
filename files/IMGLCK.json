@@ -2,26 +2,26 @@
   "profile": "startlock-mode4",
   "bounds": [
     0,
-    33,
-    73,
+    25,
+    65,
     113,
-    169,
-    201,
-    241,
-    281,
+    161,
+    209,
+    249,
+    289,
     320
   ],
   "source": "C:\\Users\\chjmartin2\\Code\\cga-image-studio\\test_images\\picard_input_copy.bmp",
   "source_sha256": "e03831c6201b34d2895d2d48d4735cb2a3c80639d968cf2712de5b3c65b37056",
-  "picard": {
+  "image": {
     "com": "files/IMGLCK.COM",
     "com_bytes": 57088,
-    "com_sha256": "e70dd7e75f376b87ae450ca3a29820b5d7e4efad1744eb3d4d9d575ebf51281e",
+    "com_sha256": "295e7b5416df3d70776f9e704bc9160bead495f840a574a7a5a9a6efcc0a11c0",
     "preview": "files/IMGLCK_preview.png",
     "expected": "files/IMGLCK_expected.bin",
-    "expected_sha256": "52eb77c951ac1419ddfb20dbe4e2aa7a571ac4125c7b7eef80b9f4032664c1e4",
-    "first_out_ip": "1006",
-    "raster_end_ip": "4200",
+    "expected_sha256": "3a7d0634693e2c3229baeed16cf001586fd6b639482a291d2596fe5ef95d72aa",
+    "first_out_ip": "11E7",
+    "raster_end_ip": "3E6C",
     "used_rgbi_colors": [
       0,
       2,
@@ -42,12 +42,12 @@
   "registration": {
     "com": "files/REGLOCK.COM",
     "com_bytes": 57088,
-    "com_sha256": "d87a375a8f9cbcb8c650e498d1fb044aa3602c47515c8c9ca187f41cc363fbf4",
+    "com_sha256": "b34b6a76532bb9e7da1a6aa84644b375608bd651d71f61a1988983dc24aef6e3",
     "preview": "files/REGLOCK_preview.png",
     "expected": "files/REGLOCK_expected.bin",
-    "expected_sha256": "facbb4d24dcf6445d993f92b885e1dfc636cec388770a7dcfa8d45a9baf9b4b6",
-    "first_out_ip": "1006",
-    "raster_end_ip": "4200",
+    "expected_sha256": "6ae367d024c9bde58aabe80f413bea9a2c799ac4cb60db3e704323bd91c5f3bb",
+    "first_out_ip": "11E7",
+    "raster_end_ip": "3E6C",
     "used_rgbi_colors": [
       0,
       1,
@@ -68,15 +68,41 @@
     ]
   },
   "disk": "files/IMGLCK.DSK",
-  "disk_sha256": "de459c71bb87103cb187a62bdd5915452378169b7b6ef1f5494e2b4c965fbae6",
+  "disk_sha256": "5ff00d167ac7eda2d15fa4ee02c2b1cc878122ad55335a993a4c52bc9d54b20c",
   "disk_bytes": 368640,
   "disk_files": {
     "IO.SYS": 22357,
     "MSDOS.SYS": 30128,
     "COMMAND.COM": 25276,
     "IMGLCK.COM": 57088,
-    "AUTOEXEC.BAT": 237,
+    "AUTOEXEC.BAT": 213,
     "REGLOCK.COM": 57088,
-    "README.TXT": 4879
+    "README.TXT": 5072
+  },
+  "picard": {
+    "com": "files/IMGLCK.COM",
+    "com_bytes": 57088,
+    "com_sha256": "295e7b5416df3d70776f9e704bc9160bead495f840a574a7a5a9a6efcc0a11c0",
+    "preview": "files/IMGLCK_preview.png",
+    "expected": "files/IMGLCK_expected.bin",
+    "expected_sha256": "3a7d0634693e2c3229baeed16cf001586fd6b639482a291d2596fe5ef95d72aa",
+    "first_out_ip": "11E7",
+    "raster_end_ip": "3E6C",
+    "used_rgbi_colors": [
+      0,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ]
   }
 }

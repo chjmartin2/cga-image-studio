@@ -74,15 +74,18 @@ fn main() {
  if disk {machine.fdc().as_mut().unwrap().load_image_from(0,fs::read(&input).unwrap(),Some(&input),true).unwrap();}
  else {
   while machine.cpu_cycles()<20_000_000 {machine.run(100_000,&mut ec);}
-  machine.load_program(&fs::read(&input).unwrap(),0x1000,0x100,0x1000,0x100).unwrap();
-  for reg in [Register16::DS,Register16::ES,Register16::SS] {machine.cpu_mut().set_register16(reg,0x1000);}
+  let delay:u32=std::env::var("CGA_ENTRY_DELAY_CYCLES").ok().map(|v|v.parse().unwrap()).unwrap_or(0);
+  if delay>0 {machine.run(delay,&mut ec);}
+  let segment:u16=std::env::var("CGA_LOAD_SEGMENT").ok().map(|v|u16::from_str_radix(v.trim_start_matches("0x"),16).unwrap()).unwrap_or(0x1000);
+  machine.load_program(&fs::read(&input).unwrap(),segment,0x100,segment,0x100).unwrap();
+  for reg in [Register16::DS,Register16::ES,Register16::SS] {machine.cpu_mut().set_register16(reg,segment);}
   machine.cpu_mut().set_register16(Register16::SP,0xFFFE);
   machine.cpu_mut().set_flags(0x0202);
  }
  let out=output_dir.join(format!("phase{}.csv",phase));
  let mut wr=BufWriter::new(fs::File::create(out).unwrap());
  writeln!(wr,"cpu_cycle,cs,ip,port,value,beam_x_before,beam_y_before,beam_x_after,beam_y_after,frame,scanline,cpu_cycle_before,kernel_active").unwrap();
- let beginning=machine.cpu_cycles(); let mut writes=0u64; let mut samples=0u64; let mut last_frame=0; let mut active=false; let mut frames_saved=0u64; let mut recorded_cpu_options=false;
+ let beginning=machine.cpu_cycles(); let mut writes=0u64; let mut samples=0u64; let mut last_frame=0; let mut active=false; let mut frames_saved=0u64; let mut recorded_cpu_options=false; let mut activations=0u64;
  let mut fw=BufWriter::new(fs::File::create(output_dir.join(format!("phase{phase}-frames.csv"))).unwrap());
  writeln!(fw,"frame,cpu_cycle,fnv64,cropped_fnv64,width_dots,height,aperture_x,aperture_y,mismatching_dots,mismatch_x_min,mismatch_y_min,mismatch_x_max,mismatch_y_max,unequal_pixel_pairs").unwrap();
  while machine.cpu_cycles()-beginning < max_cycles {
@@ -95,11 +98,14 @@ fn main() {
   machine.run(1,&mut ec);
   if marker {
    let vc=machine.bus().primary_video().unwrap(); let after=vc.beam_pos().unwrap();
-   if dx==0x3D9 && relative_ip==active_ip && vc.is_in_graphics_mode() && !active {active=true;last_frame=vc.frame_count();}
+   if dx==0x3D9 && relative_ip==active_ip && vc.is_in_graphics_mode() && !active {active=true;last_frame=vc.frame_count();recorded_cpu_options=false;activations+=1;}
    writeln!(wr,"{},{cs:04X},{relative_ip:04X},{dx:04X},{value:02X},{},{},{},{},{},{},{cycle_before},{}",machine.cpu_cycles(),before.0,before.1,after.0,after.1,vc.frame_count(),vc.scanline(),u8::from(active)).unwrap();
    writes+=1;
   }
   samples+=1;
+  // Reentry must acquire again before comparing pixels. A DOS text-mode return
+  // ends the previous activation; do not count the next acquisition as a raster.
+  if active && !machine.bus().primary_video().unwrap().is_in_graphics_mode() {active=false;}
   if active && !recorded_cpu_options {
    let waits=machine.cpu().get_option(CpuOption::EnableWaitStates(false));
    let refresh=machine.cpu().get_option(CpuOption::ScheduleDramRefresh(false,0,0,false));
@@ -143,7 +149,8 @@ fn main() {
  let vc=machine.bus().primary_video().unwrap();
  fs::write(output_dir.join(format!("phase{phase}-frame.bin")),vc.display_buf()).unwrap();
  fs::write(output_dir.join(format!("phase{phase}-video.txt")),format!("field_w={} field_h={} stride={} mode={:02X} apertures={:?}",vc.display_extents().field_w,vc.display_extents().field_h,vc.display_extents().row_stride,vc.display_extents().mode_byte,vc.display_extents().apertures)).unwrap();
- println!("phase={phase} cycles={} palette_or_mode_writes={writes} active_frames={frames_saved} state={:?} error={:?}",machine.cpu_cycles()-beginning,ec.get_state(),machine.get_error_str());
+ fs::write(output_dir.join(format!("phase{phase}-run-summary.json")),format!("{{\"activations\":{activations},\"visible_frames\":{frames_saved},\"cpu_cycles\":{}}}\n",machine.cpu_cycles()-beginning)).unwrap();
+ println!("phase={phase} cycles={} palette_or_mode_writes={writes} active_frames={frames_saved} activations={activations} state={:?} error={:?}",machine.cpu_cycles()-beginning,ec.get_state(),machine.get_error_str());
 }
 
 

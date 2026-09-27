@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import traceback
 
-RELEASE_VERSION = "0.3.0-alpha.1"
+RELEASE_VERSION = "0.3.0-alpha.2"
 
 
 def smoke_check():
@@ -12,6 +12,7 @@ def smoke_check():
     import cga_mode4_lock as lock
     from PIL import Image
     import numpy as np
+    from tools.build_startlock import read_files
 
     app = cga.CgaConverterApp()
     try:
@@ -27,22 +28,22 @@ def smoke_check():
         disk = cga.build_bootable_dsk_from_com(program)
         assert disk[510:512] == b"\x55\xaa"
         assert b"TEST    COM" in disk
-        assert program in disk
+        assert read_files(bytearray(disk))["TEST.COM"] == program
         preview, plan = cga.quantize_320x200_mode_switch_lockstep_max(
             Image.new("RGB", (320, 200)), free16=True,
             timing_backend=lock.PROFILE_ID, dither_family="None")
         assert np.asarray(preview).shape == (200, 320, 3)
-        try:
-            lock.build_com(bytes(16384), plan)
-        except ValueError as error:
-            assert "withdrawn" in str(error)
-        else:
-            raise AssertionError("Withdrawn timing profile was exportable")
+        raster = lock.build_com(cga.pack_cga_320_vram_from_indices(plan["indices"]), plan)
+        assert lock.descriptor(raster)["palette_count"] == 1600
+        raster_asm = cga.build_nasm_source_from_com(raster, "8 writes", "EIGHT.COM", mode_switch_plan=plan)
+        assert "row_199" in raster_asm
+        raster_disk = cga.build_bootable_dsk_from_com(raster)
+        assert read_files(bytearray(raster_disk))["TEST.COM"] == raster
         return {"status": "passed", "release": RELEASE_VERSION,
                 "frozen": bool(getattr(sys, "frozen", False)),
                 "checks": ["Tk GUI construction", "Pillow and NumPy", "CGA packing",
                            "COM and ASM generation", "bundled boot disk export",
-                           "eight-write preview", "eight-write export guard"]}
+                           "eight-write preview", "eight-write COM/ASM/DSK exports"]}
     finally:
         app.destroy()
 

@@ -1,14 +1,15 @@
 # Standalone Windows build
 
-The v0.3.0-alpha.1 checkpoint includes a single-file Windows x64 executable.
+The v0.3.0-alpha.2 release includes a single-file Windows x64 executable.
 Download `CGAImageStudio.exe` from the GitHub release and double-click it.
 Python, NASM, and MartyPC are not required to run the converter. A DOS computer
 or emulator is required to run exported COM programs. The executable includes
 the mode-4 profile and DOS disk template. It is not code-signed.
 
-Eight-write conversion previews remain experimental. COM, ASM, and DSK export
-using the withdrawn eight-write profile is intentionally blocked. This is not
-the final feature-complete or fully validated release.
+Eight-write conversion and COM, ASM, and DSK exports use the corrected, validated
+MartyPC timing profile. Choose **320x200 (4 Colors) Mode Switch**, **8 writes**,
+then convert and export. Full studio feature validation and physical CGA hardware
+qualification remain outstanding. Restart older running copies before testing.
 
 Build on Windows x64 with Python 3.12, including Tcl/Tk:
 
@@ -24,7 +25,7 @@ Get-Content smoke.json
 
 The smoke check constructs the GUI and exercises bundled image libraries, CGA
 packing, static COM/ASM generation, disk-template injection, eight-write preview,
-and the export guard. It does not validate every feature or raster timing.
+and eight-write COM/ASM/DSK generation. It does not validate every feature or raster timing.
 
 Open `cga-image-studio.code-workspace` in VS Code to reopen the project with its
 local Python interpreter selected. Native MartyPC builds, raw research downloads,

@@ -1,17 +1,20 @@
 ; IMGLCK.COM - acquired mode-4, 200-line palette raster image experiment.
-; Build and patch with tools/build_imagelock.py. Unchanged acquisition from STARTLCK.
+; Build and patch with tools/build_imagelock.py. Lake reference is byte-preserved.
 ; Lake reference bytes keep their original addresses, 0182h..03FFh.
 ; Acquired mode 4 raster; current MartyPC validation is not hardware certification.
-; Measured RGBI boundaries: 0,33,73,113,169,201,241,281,320.
-; 40 NOPs + 8 MOV AL,imm8 / OUT DX,AL pairs per row occupy 64 code bytes.
-; Measured elapsed row period is 304 CPU clocks with PIT1 refresh count 19.
+; RGBI boundaries: 0,25,65,113,161,209,249,289,320.
+; 33 NOPs + 8 MOV AL,imm8 / OUT DX,AL pairs per row occupy 57 code bytes.
+; Measured row period: 304 CPU clocks with native wait states and PIT1 count 19.
+; Paired PREP/MAIN interrupts bound refresh interference during acquisition and
+; raster entry. PIT1 is briefly a mode-0 one-shot during PREP; MAIN restores
+; mode 2/count 19 before the timed raster. Hardware qualification is outstanding.
 ; NOP placement, including the asymmetric middle gaps, is part of the profile.
 bits 16
 cpu 8086
 org 100h
 
 %ifndef IMAGE_TICKS
-%define IMAGE_TICKS 2280        ; 38 blank-to-top lines * 76 PIT ticks
+%define IMAGE_TICKS 2241        ; measured bridge-to-PREP delay; MAIN follows 152 ticks later
 %endif
 %ifndef DISPLAY_FRAMES
 %define DISPLAY_FRAMES 3600     ; about 60 seconds, or Escape
@@ -20,19 +23,19 @@ org 100h
 %define ENTRY_NOPS 0
 %endif
 %ifndef LINE_NOPS
-%define LINE_NOPS 34            ; Measured 304-cycle line in current Marty core.
+%define LINE_NOPS 33            ; 304-cycle row with real CPU waits and refresh
 %endif
 %ifndef LEAD_NOPS
-%define LEAD_NOPS 4
+%define LEAD_NOPS 1
 %endif
 %ifndef INTER_NOPS
 %define INTER_NOPS 2
 %endif
 %ifndef MID_EXTRA_NOPS
-%define MID_EXTRA_NOPS 3       ; moves write 4 into a phase-common latch window
+%define MID_EXTRA_NOPS 1       ; gap 3: three NOPs
 %endif
 %ifndef MID_RETURN_NOPS
-%define MID_RETURN_NOPS 1      ; give one NOP back after write 4
+%define MID_RETURN_NOPS 0       ; gap 4: two NOPs
 %endif
 %ifndef HBLANK_AFTER_NOPS
 %define HBLANK_AFTER_NOPS 6
@@ -47,16 +50,16 @@ org 100h
 %define GAP2_NOPS INTER_NOPS
 %endif
 %ifndef GAP3_NOPS
-%define GAP3_NOPS INTER_NOPS+MID_EXTRA_NOPS
+%define GAP3_NOPS (INTER_NOPS+MID_EXTRA_NOPS)
 %endif
 %ifndef GAP4_NOPS
-%define GAP4_NOPS INTER_NOPS-MID_RETURN_NOPS
+%define GAP4_NOPS (INTER_NOPS-MID_RETURN_NOPS)
 %endif
 %ifndef GAP5_NOPS
 %define GAP5_NOPS INTER_NOPS
 %endif
 %ifndef GAP6_NOPS
-%define GAP6_NOPS INTER_NOPS+LAST_EXTRA_NOPS
+%define GAP6_NOPS (INTER_NOPS+LAST_EXTRA_NOPS)
 %endif
 %ifndef PREROLL_LINES
 %define PREROLL_LINES 8
@@ -161,19 +164,18 @@ mode4_probe:
 .failed:
     mov byte [cs:result_code],1
     jmp cleanup
-.found:
-    ; Freeze the frame period before refining the edge. The old short period
-    ; finishes first; the next IRQ begins the first steady frame.
-    mov ax,19912
+ .found:
+    ; Bootstrap LONG, then SHORT: PREP is two lines before every MAIN probe.
+    mov ax,19760
     out 40h,al
     mov al,ah
     out 40h,al
-    mov byte [cs:fine_pipeline],1
     mov byte [cs:fine_state],0
-    mov byte [cs:fine_left],64
+    mov byte [cs:fine_left],128
+    mov byte [cs:fine_dwell],3
     xor ax,ax
     mov es,ax
-    mov word [es:20h],fine_probe
+    mov word [es:20h],paired_boot
     mov al,20h
     out 20h,al
     mov sp,0EC94h
@@ -183,8 +185,8 @@ mode4_probe:
 
     times 0600h-($-$$+100h) db 90h
 image_bridge:
-    ; IMAGE_TICKS is now counting. Queue the steady frame period after it.
-    mov ax,19912
+    ; IMAGE_TICKS is counting. Queue the short PREP-to-MAIN interval.
+    mov ax,152
     out 40h,al
     mov al,ah
     out 40h,al
@@ -197,7 +199,7 @@ image_bridge:
 %endif
     xor ax,ax
     mov es,ax
-    mov word [es:20h],image_irq
+    mov word [es:20h],raster_prep
     mov dx,03D9h
 bridge_palette:
     mov al,30h                 ; patched palette for row 0 leading pixels
@@ -232,50 +234,46 @@ keyboard_irq:
 
     times 0700h-($-$$+100h) db 90h
 fine_probe:
+    ; MAIN begins LONG with no refresh request due. First instruction samples.
     in al,dx
-%ifdef REFRESH_FINE
     mov ah,al
+    ; Restore the normal refresh cadence at one fixed offset before branches.
     mov al,54h
     out 43h,al
     mov al,19
     out 41h,al
-    mov al,ah
-%endif
-    mov [cs:fine_sample],al
-    cmp byte [cs:fine_pipeline],1
-    je .load_steady
+    mov [cs:fine_sample],ah
     dec byte [cs:fine_dwell]
-    jnz .hold
+    jnz .steady
     test byte [cs:fine_sample],8
     jnz .sample_high
 .sample_low:
     cmp byte [cs:fine_state],2
     je .locked
     mov byte [cs:fine_state],1
-    mov ax,19913             ; low -> search forward until high
+    mov ax,153
     jmp short .nudge
 .sample_high:
     cmp byte [cs:fine_state],1
     jne .back
     mov byte [cs:fine_state],2
 .back:
-    mov ax,19911             ; high -> move back toward the preceding low
+    mov ax,151
 .nudge:
     dec byte [cs:fine_left]
     jz .failed
-    out 40h,al
-    mov al,ah
-    out 40h,al
-    mov byte [cs:fine_pipeline],1
-    jmp short .hold
-.load_steady:
-    ; The transitional count is now running. Restore the following period.
-    mov ax,19912
-    out 40h,al
-    mov al,ah
-    out 40h,al
-    mov byte [cs:fine_pipeline],0
     mov byte [cs:fine_dwell],3
+    jmp short .queue
+.steady:
+    mov ax,152
+.queue:
+    ; SHORT is the next active interval; a 151/153 nudge lasts exactly once.
+    out 40h,al
+    mov al,ah
+    out 40h,al
+    xor ax,ax
+    mov es,ax
+    mov word [es:20h],paired_prep
 .hold:
     mov al,20h
     out 20h,al
@@ -284,6 +282,7 @@ fine_probe:
     hlt
     jmp $
 .locked:
+    ; LONG is active. Bridge -> PREP uses IMAGE_TICKS, PREP -> MAIN 152.
     mov ax,IMAGE_TICKS
     out 40h,al
     mov al,ah
@@ -295,6 +294,45 @@ fine_probe:
 .failed:
     mov byte [cs:result_code],1
     jmp cleanup
+
+    times 0800h-($-$$+100h) db 90h
+paired_prep:
+    ; Keep PIT1 counting, but put its next terminal count well beyond MAIN.
+    ; This lets an already-pending refresh DMA drain rather than freezing it.
+    mov al,70h                 ; PIT1 mode 0, LSB/MSB
+    out 43h,al
+    xor al,al
+    out 41h,al
+    out 41h,al                 ; 65536 ticks, interrupted by MAIN after 2 lines
+    mov ax,19760
+    out 40h,al
+    mov al,ah
+    out 40h,al
+    xor ax,ax
+    mov es,ax
+    mov word [es:20h],fine_probe
+    mov al,20h
+    out 20h,al
+    mov sp,0EC94h
+    sti
+    hlt
+    jmp $
+
+    times 0870h-($-$$+100h) db 90h
+paired_boot:
+    mov ax,152
+    out 40h,al
+    mov al,ah
+    out 40h,al
+    xor ax,ax
+    mov es,ax
+    mov word [es:20h],paired_prep
+    mov al,20h
+    out 20h,al
+    mov sp,0EC94h
+    sti
+    hlt
+    jmp $
 
     times 0900h-($-$$+100h) db 90h
 setup:
@@ -428,17 +466,29 @@ msg_failed:
 
     times 1000h-($-$$+100h) db 90h
 image_irq:
+    ; PREP drained pending refresh. Restore it at this fixed instruction offset.
+    ; The current LONG interval is 19760 ticks; SHORT completes the 19912-tick frame.
+    mov al,54h
+    out 43h,al
+    mov al,19
+    out 41h,al
+    mov ax,152
+    out 40h,al
+    mov al,ah
+    out 40h,al
+    xor ax,ax
+    mov es,ax
+    mov word [es:20h],raster_prep
     ; IRQ entry already clears IF. Only IRQ0 is enabled at the PIC, so the
     ; 200 lines below execute without keyboard or timer nesting. Timer count
-    ; is one complete frame. Every row is identical in instruction bytes other
+    ; plus the SHORT interval is one frame. Rows have identical bytes other
     ; than palette immediates. Runtime image patching changes no instruction.
     ; Slots 0..6 are visible transitions, slot 7 sets the NEXT row's lead.
     ; DO NOT infer a 304-cycle stride from NOP counts: validate actual OUT clocks.
-    ; Per-row NOP gaps are: lead 4; after visible writes 1..6: 2,2,5,1,2,2;
-    ; after visible write 7: 16; after the blanking write: 6. Total: 40.
-    ; Plain two-NOP spacing gave phase-dependent eight-pixel inner shifts.
-    ; The 5/1 middle gaps put all seven writes in common CGA latch windows
-    ; across the tested PIT phases and acquisition-entry perturbations.
+    ; Row gaps: lead 1; after visible writes 1..6: 2,2,3,2,2,2;
+    ; after visible write 7: 13; after the HBLANK write: 6. Total: 33.
+    ; These positions were selected by comparing completed RGBI frames across
+    ; startup phases, not by inferring palette-latch times from OUT endpoints.
 %assign palette_index 0
 %assign raster_row 0
 %rep 200+PREROLL_LINES
@@ -512,6 +562,28 @@ raster_end:
     jmp short .idle
 .done:
     jmp cleanup
+
+raster_prep:
+    ; Two scanlines before each MAIN. Drain a pending DMA request while a
+    ; 65536-tick one-shot prevents another; MAIN restores refresh promptly.
+    mov al,70h
+    out 43h,al
+    xor al,al
+    out 41h,al
+    out 41h,al
+    mov ax,19760
+    out 40h,al
+    mov al,ah
+    out 40h,al
+    xor ax,ax
+    mov es,ax
+    mov word [es:20h],image_irq
+    mov al,20h
+    out 20h,al
+    mov sp,0EC94h
+    sti
+    hlt
+    jmp $
 
     ; Absolute data references preserved from the released initializer.
     times 45C6h-($-$$+100h) db 0

@@ -1,14 +1,9 @@
 # Picard CGA image test
 
-**Validation correction (2026-09-14):** the original image kernel was calibrated
-with CPU wait states inadvertently disabled in the harness, which also bypassed
-DMA refresh delays. Its old passing frame counts do not validate the native
-MartyPC configuration. Enabling the missing option reproduces the user's garbled
-converter export. See the [investigation](research/garbled_export_investigation.md).
-The harness and image schedule are being corrected. Exporting this withdrawn
-profile is disabled in new app sessions until a replacement passes the corrected
-validator. The disk and launch instructions below currently reproduce the old
-experiment; they are not a repaired release.
+**Repaired release (2026-09-27):** eight-write conversion and COM/ASM/DSK
+exports are enabled. The corrected timing passes the wait-state-enabled core
+acceptance suite; the user confirmed the native MartyPC visualization was perfect.
+See the [current validation report](research/eight_write_validation.md).
 
 Double-click **Picard CGA Demo.lnk** in the project folder. It launches the local
 MartyPC build with its configuration and a fresh copy of the correct boot disk.
@@ -53,36 +48,31 @@ palettes in different parts of each row. This can use the full 16-color RGBI
 set across the screen; it does not provide an independent choice of 16 colors
 at every pixel. This Picard conversion uses 14 of those colors; REGLOCK uses all 16.
 
-The withdrawn preview profile assumed boundaries at x = 33, 73, 113, 169, 201,
-241 and 281. Those positions do not describe native execution with waits enabled.
-The eighth write occurs in horizontal blanking and supplies the next row's
-leading palette. The final row's eighth write and a separate startup operand must
-both carry row zero's leading palette. This ownership also needs verification
-against the first completed frame after every acquisition.
+The measured region boundaries are x = 0, 25, 65, 113, 161, 209, 249, 289,
+and 320. Seven writes divide the visible row. The eighth occurs in horizontal
+blanking and supplies the next row's leading palette. The final row's eighth
+write and a startup operand both carry row zero's leading palette.
 
-The renderer reuses the released Lake acquisition bytes, restores standard
-mode-4 geometry, then acquires a frame entry for the graphics raster. It keeps
-DRAM refresh running at PIT divisor 19. The timed body has no bitmap loads,
-palette-table loads or conditional branches: export patches palette immediates
-in a fixed, unrolled instruction template. The target is 304 CPU cycles for each
-of the 200 rows, with 79,648 CPU cycles between frames. The withdrawn kernel
-actually takes 331-338 cycles per row with CPU waits enabled. A memory
-and timing explanation is in [the kernel notes](research/imagelock_kernel.md).
+The renderer retains the released Lake acquisition bytes and uses a new paired
+PREP/MAIN graphics handoff. Each row executes 33 NOPs and eight immediate
+MOV/OUT pairs in 304 CPU clocks; frame spacing is 79,648 CPU clocks. A brief
+PIT1 quiet window drains refresh DMA before each raster; refresh is restored to
+mode 2, divisor 19 before visible writes. Refresh therefore runs during the
+raster, but is not uninterrupted during acquisition and frame preparation.
 
 ## Validation and limits
 
-The corrected harness uses the unchanged local MartyPC core with an IBM 5160,
-normal-speed 8088, CGA, and explicitly asserted CPU waits and refresh scheduling.
-Replacement acceptance requires all four configured PIT phases and eight entry
-delay variants. Full RGBI comparison must include the first completed visible
-frame, all four bitmap indices and the last-row/first-row palette wrap, followed
-by an actual DOS boot. See [the corrected validation report](research/imagelock_waitstates_validation.md)
-for the reproduced failure and the replacement's current status.
+The unchanged MartyPC core uses IBM 5160, normal-speed 8088, CGA, effective
+CPU waits and active raster refresh. The final acceptance suite passes 44 cases
+and 18,736 exact frames: all four PIT phases, eight entry-padding variants,
+all four bitmap indices, photo output, four full DOS boots and repeated launches.
+First and last frames, all 200 rows and row-zero palette ownership are checked.
+Twelve GUI option combinations also pass conversion and COM/ASM/DSK generation.
+The user confirmed native MartyPC visually on 2026-09-27.
 
-These are emulator measurements. This application's full mode-4 image routine
-still needs repeated cold boots and sustained display on documented physical
-IBM CGA hardware before claiming hardware reliability. Published Area 5150
-hardware evidence validates the original acquisition, not this graphics handoff.
+Physical IBM CGA hardware remains unqualified, including the brief refresh
+quiet windows. Published acquisition research does not certify this new handoff.
+Older reports remain historical and do not contribute to the current counts.
 
 ## Rebuild
 

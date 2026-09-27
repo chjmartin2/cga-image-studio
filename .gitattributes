@@ -2,3 +2,4 @@
 /docs/research/** -text
 /files/** -text
 /assets/** -text
+/tools/imagelock.asm -text

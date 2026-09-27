@@ -72,10 +72,10 @@ def build_com(vram16k, plan):
         raise ValueError("vram16k must be 16384 bytes")
     if not isinstance(plan, dict) or plan.get("timing_backend") != PROFILE_ID:
         raise ValueError("Expected a startlock-mode4 conversion plan")
-    if not _PROFILE.get("validated_for_native_martypc", False):
+    if not _PROFILE.get("validated_for_marty_core", False):
         raise ValueError(
-            "The installed mode-4 timing profile has been withdrawn after a "
-            "MartyPC timing failure. Install the corrected profile and restart "
+            "The installed mode-4 timing profile is withdrawn or unvalidated. "
+            "Install a profile that passes the wait-state-enabled MartyPC validator and restart "
             "CGA Image Studio before exporting this mode."
         )
     if plan.get("writes_per_line") != 8 or len(plan.get("lines", [])) != 200:

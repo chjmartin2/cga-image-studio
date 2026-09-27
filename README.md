@@ -1,10 +1,10 @@
 # CGA Image Studio
 
-**Checkpoint prerelease: v0.3.0-alpha.1.** A standalone Windows x64 executable is
+**Eight-write prerelease: v0.3.0-alpha.2.** A standalone Windows x64 executable is
 available on the [releases page](https://github.com/chjmartin2/cga-image-studio/releases).
-Eight-write COM/ASM/DSK exports are intentionally disabled pending the timing
-repair. See [Windows build and use](docs/WINDOWS_BUILD.md) and
-[checkpoint release notes](docs/RELEASE_v0.3.0-alpha.1.md).
+Eight-write conversion and COM/ASM/DSK exports are enabled with corrected timing.
+See [Windows build and use](docs/WINDOWS_BUILD.md) and
+[release notes](docs/RELEASE_v0.3.0-alpha.2.md).
 
 CGA Image Studio is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
 
@@ -15,10 +15,10 @@ This repository starts from the historical manually versioned source file `cga_v
 This project is in early active development. The current version is buggy, some features are incomplete, and several planned features are not implemented yet. Expect rough edges while the app is being cleaned up, refactored, and prepared for more stable releases.
 
 The current production Mode Switch controls offer **1 or 8 writes per scanline**.
-The acquired eight-write timing profile is currently being corrected after a
-validation-harness error: CPU wait states were omitted, also bypassing refresh
-DMA delays. The previous passing emulator counts do not validate normal native
-MartyPC operation. See the [reproduced failure](docs/research/garbled_export_investigation.md).
+The corrected eight-write profile passes the wait-state-enabled MartyPC core
+acceptance suite, and the user confirmed the native MartyPC picture. See the
+[validation report](docs/research/eight_write_validation.md). Physical CGA
+hardware validation and the full studio feature audit remain outstanding.
 The 8-write GUI profile uses the acquired STARTLCK mode-4 timing implementation,
 with an independent leading-edge palette set during horizontal blanking. Both profiles support
 optional dither-aware palette optimization. The older 13-write dense profile

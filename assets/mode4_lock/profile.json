@@ -1,21 +1,21 @@
 {
   "profile": "startlock-mode4",
-  "status": "WITHDRAWN: measured with CPU wait states and effective refresh DMA disabled; corrected schedule in progress",
-  "validated_for_native_martypc": false,
+  "status": "Validated with CPU wait states and active raster refresh; native MartyPC image visually confirmed by user",
+  "validated_for_native_martypc": true,
   "bounds": [
     0,
-    33,
-    73,
+    25,
+    65,
     113,
-    169,
-    201,
-    241,
-    281,
+    161,
+    209,
+    249,
+    289,
     320
   ],
-  "template_sha256": "766eb29f91e1b59e5525b46da676f027ef51814e00b7306c88f16a1215fa008a",
+  "template_sha256": "3866d092a169a128ed7d7ab8fbe9038d8991c770ebed9476bb056633e8e9ed89",
   "source": "tools/imagelock.asm",
-  "source_sha256": "9658541261c47bd5e303769c47ad154d67430dd76445508483c6a3038ea31116",
+  "source_sha256": "d0201ed28d76114b0962645eff7fec588662a93356859cecc9bc0a930d0e3ca4",
   "mode": 4,
   "width": 320,
   "height": 200,
@@ -24,7 +24,7 @@
   "line_cpu_cycles": 304,
   "frame_cpu_cycles": 79648,
   "physical_hardware_validated": false,
-  "validation": "docs/research/imagelock_validation.md",
+  "validation": "docs/research/eight_write_validation.md",
   "entry_nops_tested": [
     0,
     1,
@@ -41,6 +41,25 @@
     2,
     3
   ],
-  "prior_validation_effective_cpu_wait_states": false,
-  "prior_validation_effective_dma_refresh": false
+  "validated_for_marty_core": true,
+  "acquisition": "paired PREP/MAIN; brief PIT1 mode-0 quiet windows; mode 2/count 19 during raster",
+  "line_nops": 33,
+  "lead_nops": 1,
+  "gap_nops": [
+    2,
+    2,
+    3,
+    2,
+    2,
+    2
+  ],
+  "hblank_after_nops": 6,
+  "image_ticks": 2241,
+  "validation_effective_cpu_wait_states": true,
+  "validation_effective_dma_refresh": true,
+  "native_confirmation": {
+    "date": "2026-09-27",
+    "method": "User visual confirmation: The visualization in Marty was perfect.",
+    "com_sha256": "67c94210dbe7177c0a57b7b19741debb766ab1f551a7112f2fc8e536a2bee65f"
+  }
 }

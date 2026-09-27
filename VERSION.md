@@ -1,6 +1,6 @@
 # Version
 
-Current checkpoint prerelease: `0.3.0-alpha.1` (2026-09-26).
+Current eight-write prerelease: `0.3.0-alpha.2` (2026-09-27).
 The application retains its historical `v167` window title and source filename.
 
 Current GitHub baseline: `0.1.0`

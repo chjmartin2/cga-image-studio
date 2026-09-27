@@ -72,13 +72,40 @@ class Mode4LockTests(unittest.TestCase):
                     Image.new("RGB", (320, 200)), **{**base, **change})
 
     def test_withdrawn_timing_profile_cannot_export_another_bad_com(self):
-        with patch.dict(lock._PROFILE, {"validated_for_native_martypc": False}):
+        with patch.dict(lock._PROFILE, {"validated_for_marty_core": False}):
             with self.assertRaisesRegex(ValueError, "withdrawn"):
                 lock.build_com(bytes(16384), self.plan)
 
+    def test_declared_row_padding_matches_actual_instruction_bytes(self):
+        payload = (ROOT / "assets/mode4_lock/template.bin").read_bytes()
+        meta = lock.descriptor(payload)
+        row_bytes = meta["line_nops"] + 8 * 3
+        firsts = meta["palette_offsets"][::8]
+        self.assertEqual({b - a for a, b in zip(firsts, firsts[1:])}, {row_bytes})
+
+    def test_default_assembly_rebuild_matches_packaged_template(self):
+        from test_asm_export import find_nasm
+        from tools.build_startlock import reference_include
+        nasm = find_nasm()
+        if not nasm:
+            self.skipTest("NASM unavailable for default template rebuild")
+        include_dir = ROOT / "external/research/startlock-build"
+        include_dir.mkdir(parents=True, exist_ok=True)
+        reference_include(include_dir)
+        with tempfile.TemporaryDirectory(prefix="cga-template-") as directory:
+            blank = Path(directory) / "blank.bin"
+            output = Path(directory) / "template.bin"
+            blank.write_bytes(bytes(16384))
+            result = subprocess.run(
+                [str(nasm), "-f", "bin", f'-DBITMAP_PATH="{blank.as_posix()}"',
+                 "-o", str(output), "tools/imagelock.asm"], cwd=ROOT,
+                capture_output=True, text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(output.read_bytes(), (ROOT / "assets/mode4_lock/template.bin").read_bytes())
+
     # These two tests validate serialization, not native raster timing. The
     # separate withdrawal test must keep exercising the real export guard.
-    @patch.dict(lock._PROFILE, {"validated_for_native_martypc": True})
+    @patch.dict(lock._PROFILE, {"validated_for_marty_core": True})
     def test_export_changes_only_declared_palette_operands_and_vram(self):
         plan = copy.deepcopy(self.plan)
         for y, row in enumerate(plan["lines"]):
@@ -101,7 +128,7 @@ class Mode4LockTests(unittest.TestCase):
             self.assertEqual(binary[offset], expected)
         self.assertEqual(plan["lines"], before["lines"], "Export mutated the conversion plan")
 
-    @patch.dict(lock._PROFILE, {"validated_for_native_martypc": True})
+    @patch.dict(lock._PROFILE, {"validated_for_marty_core": True})
     def test_asm_rejects_stale_plan_and_round_trips(self):
         vram = cga.pack_cga_320_vram_from_indices(self.plan["indices"])
         binary = cga.build_com_320_mode_switch_lockstep_max(vram, self.plan)

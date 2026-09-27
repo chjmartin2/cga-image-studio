@@ -1,5 +1,8 @@
 # IMAGELOCK wait-state correction
 
+Historical failure report. The repaired 2026-09-27 release and its separate
+acceptance results are documented in [eight-write validation](eight_write_validation.md).
+
 **The earlier harness configuration was wrong. Its reported normal wait-state/DRAM-refresh validation is withdrawn.** The failure has now been reproduced with the CPU options used by desktop MartyPC. A retuned kernel is still under validation; this document does not yet certify a replacement.
 
 MartyPC's `Intel808x` derives `Default`, so `enable_wait_states` initially equals `false`. `MachineBuilder` leaves that setting unchanged, while the desktop frontend explicitly enables it. The original validation harness omitted that frontend step. In `cpu_808x/cycle.rs`, the false flag both suppresses memory/I/O wait states and prevents `tick_dma()` from running, even when the core configuration requests DRAM refresh simulation.
