@@ -1,0 +1,20 @@
+{
+  "project": "CGA Image Studio",
+  "selectedDirection": "Raster CRT",
+  "selectedOption": 1,
+  "source": "raster-crt-identity.png",
+  "sourceWidth": 1536,
+  "sourceHeight": 1024,
+  "cropUnits": "pixels; x, y, width, height from top-left",
+  "logoCrop": [120, 180, 1300, 365],
+  "iconCrop": [1173, 656, 278, 273],
+  "paletteTargets": {
+    "silver": "#E5E9ED",
+    "slate": "#8193A3",
+    "charcoal": "#101416",
+    "cyan": "#55FFFF",
+    "magenta": "#FF55FF",
+    "white": "#FFFFFF"
+  },
+  "status": "Approved design direction. Source is a combined raster concept board; separate production PNG, transparent and ICO exports have not yet been created."
+}

@@ -55,7 +55,11 @@ fn main() {
   Some(value) => u32::from_str_radix(value.trim_start_matches("0x"),16).expect("first OUT IP must be hexadecimal or auto"),
  };
  if let Some((first,_))=kernel {assert_eq!(active_ip,first,"Activation must use the descriptor's first visible OUT, not a preroll OUT");}
- let expected=args.get(7).map(|p|fs::read(root.join(p)).expect("expected RGBI index file"));
+ // Static mode-6 programs leave the BIOS refresh setup intact (GLaBIOS uses 18).
+ // This explicit mode is separate from the strict acquired-raster checks.
+ let static_mode6=args.iter().any(|p|p=="--static-mode6");
+ assert!(!static_mode6 || kernel.is_none(),"Static validation cannot bypass an acquired kernel's checks");
+ let expected=args.get(7).filter(|p|!p.starts_with("--")).map(|p|fs::read(root.join(p)).expect("expected RGBI index file"));
  if let Some(ref pixels)=expected {assert_eq!(pixels.len(),320*200,"Expected one RGBI index byte per 320x200 pixel");assert!(pixels.iter().all(|p|*p<16),"Expected RGBI indices 0..15");}
  let mut mc=MachineConfiguration::default();
  mc.machine_type=MachineType::Ibm5160;
@@ -86,6 +90,7 @@ fn main() {
  let mut wr=BufWriter::new(fs::File::create(out).unwrap());
  writeln!(wr,"cpu_cycle,cs,ip,port,value,beam_x_before,beam_y_before,beam_x_after,beam_y_after,frame,scanline,cpu_cycle_before,kernel_active").unwrap();
  let beginning=machine.cpu_cycles(); let mut writes=0u64; let mut samples=0u64; let mut last_frame=0; let mut active=false; let mut frames_saved=0u64; let mut recorded_cpu_options=false; let mut activations=0u64;
+ let mut static_pending=false;
  let mut fw=BufWriter::new(fs::File::create(output_dir.join(format!("phase{phase}-frames.csv"))).unwrap());
  writeln!(fw,"frame,cpu_cycle,fnv64,cropped_fnv64,width_dots,height,aperture_x,aperture_y,mismatching_dots,mismatch_x_min,mismatch_y_min,mismatch_x_max,mismatch_y_max,unequal_pixel_pairs").unwrap();
  while machine.cpu_cycles()-beginning < max_cycles {
@@ -97,12 +102,17 @@ fn main() {
   let before=if marker {machine.bus().primary_video().unwrap().beam_pos().unwrap()}else{(0,0)};
   machine.run(1,&mut ec);
   if marker {
+   if static_mode6 && dx==0x3D9 && relative_ip==active_ip {static_pending=true;}
    let vc=machine.bus().primary_video().unwrap(); let after=vc.beam_pos().unwrap();
    if dx==0x3D9 && relative_ip==active_ip && vc.is_in_graphics_mode() && !active {active=true;last_frame=vc.frame_count();recorded_cpu_options=false;activations+=1;}
    writeln!(wr,"{},{cs:04X},{relative_ip:04X},{dx:04X},{value:02X},{},{},{},{},{},{},{cycle_before},{}",machine.cpu_cycles(),before.0,before.1,after.0,after.1,vc.frame_count(),vc.scanline(),u8::from(active)).unwrap();
    writes+=1;
   }
   samples+=1;
+  if static_pending && !active && machine.bus().primary_video().unwrap().is_in_graphics_mode() {
+   active=true; static_pending=false; last_frame=machine.bus().primary_video().unwrap().frame_count();
+   recorded_cpu_options=false; activations+=1;
+  }
   // Reentry must acquire again before comparing pixels. A DOS text-mode return
   // ends the previous activation; do not count the next acquisition as a raster.
   if active && !machine.bus().primary_video().unwrap().is_in_graphics_mode() {active=false;}
@@ -116,7 +126,8 @@ fn main() {
     // clean=false reads presentation state without clearing flags or clocking PIT.
     (reload,current,counting,pit.does_channel_retrigger(1),pit.get_string_state(false).c1_channel_mode.to_string())
    };
-   assert_eq!(pit1_reload,19,"PIT1 refresh divisor must be restored before visible output");
+   if static_mode6 {assert_eq!(pit1_reload,18,"Static mode must preserve GLaBIOS refresh divisor");}
+   else {assert_eq!(pit1_reload,19,"PIT1 refresh divisor must be restored before visible output");}
    assert!(pit1_counting && pit1_retrigger && pit1_mode=="RateGenerator","PIT1 must be actively counting in mode 2 before visible output");
    let raster_end=kernel.map(|(_,end)|end.to_string()).unwrap_or("null".into());
    fs::write(output_dir.join(format!("phase{phase}-cpu-options.json")),format!("{{\"enable_wait_states\":{waits},\"dram_refresh_schedule_enabled_at_first_out\":{refresh},\"pit1_reload_at_first_out\":{pit1_reload},\"pit1_current_at_first_out\":{pit1_current},\"pit1_counting_at_first_out\":{pit1_counting},\"pit1_retrigger_at_first_out\":{pit1_retrigger},\"pit1_mode_at_first_out\":\"{pit1_mode}\",\"first_out_cpu_cycle\":{},\"first_visible_out_ip\":{active_ip},\"raster_end_ip\":{raster_end}}}\n",machine.cpu_cycles())).unwrap();

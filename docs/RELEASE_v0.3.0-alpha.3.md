@@ -11,8 +11,16 @@ measured boundaries. Normal 8 retains its previous timing template.
 
 Download **CGAImageStudio.exe**, close older copies, select **8 staggered**, then
 load an image and click **Convert** before exporting. No Python or NASM is needed.
-The historical window title remains **CGA Converter v167**. **STAGGER.DSK** is a
-bootable Picard example; type **TEST** at DOS to repeat it after it finishes.
+The historical window title remains **CGA Converter v167**.
+
+The example assets have been refreshed: **RAIDERS.DSK** replaces the Picard
+example. It auto-runs the Raiders of the Lost Ark image in **640x200 (1024 Colors)**
+full-screen text-composite mode. Enable composite rendering; the accompanying
+**RAIDERS_preview.png** uses the Old CGA simulation. Press a key to return to
+DOS; type **TEST** to repeat. This example is not an eight-write staggered image.
+The alpha.3 executable and original staggered validation reports are unchanged.
+The replacement disk was checked for embedded COM integrity and byte-exact ASM
+assembly; native visual approval of this Raiders example remains pending.
 
 Validation: 31 tests / 59 subtests; 44 staggered timing cases / 18,736 exact
 frames; all 12 GUI option combinations for each eight-write selection; byte-exact

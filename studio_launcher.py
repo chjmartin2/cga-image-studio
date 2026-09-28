@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import traceback
 
-RELEASE_VERSION = "0.3.0-alpha.3"
+from app_version import VERSION as RELEASE_VERSION
 
 
 def smoke_check():
@@ -18,7 +18,11 @@ def smoke_check():
     try:
         app.withdraw()
         app.update()
-        assert app.title() == "CGA Converter v167", app.title()
+        assert app.title() == f"CGA Image Studio {RELEASE_VERSION}", app.title()
+        assert hasattr(app, '_brand_logo'), 'Bundled logo missing'
+        assert app.text_ntsc_stop_btn.cget('text') == 'STOP'
+        assert app.preview_scale_var.get() == 'Auto (whole pixels)'
+        import cga_composite_multicolor
         picture = Image.new("P", (320, 200), 1)
         bitmap = cga.pack_cga_320x200_4color_vram(picture)
         assert len(bitmap) == 16384

@@ -1,0 +1,71 @@
+CGA IMAGE STUDIO - ALIGNED EIGHT-WRITE SCOPE TEST
+
+Run on the IBM 5160 / New CGA using the same monitor connection as Cheetara.
+Boot SCOPE8.DSK (360 KiB raw floppy image), or run SCOPE8.COM from DOS.
+The disk runs the test automatically. It lasts about 60 seconds; Escape exits.
+At the DOS prompt, type SCOPE8 to repeat. The inherited program's closing
+message mentions IMGLCK; the filename in this package is SCOPE8.COM.
+
+EXPECTED PICTURE
+Five horizontal bands, each 40 scanlines tall, from top to bottom:
+  y=  0.. 39: black / red       (background bit 2)
+  y= 40.. 79: black / green     (background bit 1)
+  y= 80..119: black / blue      (background bit 0)
+  y=120..159: black / dark gray (intensity bit 3)
+  y=160..199: black / white     (all four background bits)
+The color changes form straight vertical edges. The columns are deliberately
+unequal widths. There should be no small extra colored slivers at the edges.
+The PNG is an RGBI reference, not a composite-monitor simulation.
+
+All framebuffer pixels are index zero. ONLY palette writes produce the bars.
+This isolates background-color switching; it does not exercise every possible
+foreground palette-select transition present in a converted photograph.
+No dither, changing picture data, or staggered timing is used.
+
+TIMING
+The instruction bytes are identical to the released aligned eight-write
+template. Only palette operands and framebuffer data have changed.
+Eight writes occur per scanline: seven visible changes plus an eighth during
+horizontal blanking, which establishes black for the next line's leading area.
+Expected visible boundaries, in 320-pixel coordinates:
+  25, 65, 113, 161, 209, 249, 289
+Writes 1,3,5,7 select the band's color; writes 2,4,6,8 select black.
+Color-select bits 4 and 5 stay set (30h) throughout this diagnostic.
+
+WHAT TO SEND BACK
+1. A photo of this pattern and whether the original small edge defect remains.
+2. Whether using 9-pin RGB or RCA composite, and the monitor model.
+3. The CGA board number/photo and scope model.
+4. If comfortable probing, one full-line capture and a close-up of an edge.
+
+SUGGESTED SCOPE CAPTURE
+Trigger from horizontal sync. Ideally use:
+ CH1: horizontal sync
+ CH2: decoded write strobe at the 3D9 color-select latch
+ CH3: red output (or the color matching the band under test)
+ CH4: intensity output (or a second color output)
+The internal latch probe point must be identified for this board revision.
+RGB connector: H sync pin 8; R/G/B pins 3/4/5; intensity pin 6;
+logic ground pins 1/2. Confirm connector orientation before probing.
+Use x10 high-impedance probes and short grounds to PC logic ground.
+Do not open the CRT. Keep the same monitor attached for the test.
+
+First capture approximately one scanline (about 64 microseconds), using
+persistence to see whether write positions wander relative to horizontal sync.
+Then zoom to one write edge, looking for brief unwanted output pulses.
+Compare rows within the same horizontal band; if possible select a repeatable
+line using video triggering or a vertical-sync reference. RGB data differ
+between the five bands, so overlaying all bands will mix their waveforms.
+Record both rising and falling color edges and repeat after restarting SCOPE8.
+Raw waveform files plus screenshots with time/voltage scales are most useful.
+
+Interpretation: moving write positions suggest timing instability; stationary
+writes with short output glitches suggest card transition behavior. A clean
+pattern does not rule out a problem that depends on Cheetara's particular
+foreground/background transitions.
+
+VALIDATION
+SCOPE8.ASM reassembles byte-for-byte to SCOPE8.COM.
+The embedded disk program matches the standalone COM.
+See validation-summary.json for the actual Marty-core frame comparison.
+Real-hardware validation is pending; this disk is intended to obtain it.

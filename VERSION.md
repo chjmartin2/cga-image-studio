@@ -1,16 +1,15 @@
 # Version
 
-Current staggered-write prerelease: `0.3.0-alpha.3` (2026-09-27).
-The application retains its historical `v167` window title and source filename.
+Current release: **0.167a**, alpha snapshot dated 2026-09-28.
+Git tag: `v0.167a`. Next milestone: **1.0 beta** after release validation.
 
-Current GitHub baseline: `0.1.0`
+This intentionally rebaselines public numbering around the historical v167
+development line. It succeeds `v0.3.0-alpha.3`; previous tags/releases remain
+available and are not renamed. The suffix `a` denotes alpha.
 
-Current development source version: `v167`
+The GUI and launcher use `app_version.py`. Windows file properties display
+`0.167a` (numeric resource version `0.167.0.0`). The implementation filename
+remains `cga_v167.py` for compatibility; use `studio_launcher.py` to launch.
 
-The current runnable source file is:
-
-```text
-cga_v167.py
-```
-
-Future releases should use semantic version tags such as `v0.1.0`, `v0.2.0`, and eventually `v1.0.0`.
+This snapshot does not claim full mode/output or physical-hardware validation.
+See `docs/INITIAL_RELEASE_CHECKLIST.md` for remaining acceptance work.

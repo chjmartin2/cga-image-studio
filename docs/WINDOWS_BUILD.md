@@ -1,6 +1,6 @@
 # Standalone Windows build
 
-The v0.3.0-alpha.3 release includes a single-file Windows x64 executable.
+The 0.167a alpha release includes a single-file Windows x64 executable.
 Download `CGAImageStudio.exe` from the GitHub release and double-click it.
 Python, NASM, and MartyPC are not required to run the converter. A DOS computer
 or emulator is required to run exported COM programs. The executable includes

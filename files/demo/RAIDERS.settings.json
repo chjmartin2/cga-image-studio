@@ -1,0 +1,16 @@
+{
+  "mode": "640x200 (1024 Colors)",
+  "source": "test_images\\raiders-of-the-lost-ark.webp",
+  "source_sha256": "62711d2fb5af04998706a2a114ad98d6eb6bddf96efef55a6962f0be6eeaa2af",
+  "composite_model": "Old CGA",
+  "dither": "Floyd-Steinberg",
+  "strength": 1.0,
+  "serpentine": true,
+  "search_K": 64,
+  "polish_percent": 5,
+  "scaling": "Stretch",
+  "resampler": "Lanczos",
+  "seconds": 139.26,
+  "visual_acceptance": "User confirmed in native MartyPC, 2026-09-27",
+  "com_sha256": "480c440ed8cce0f25fc3521e94e9a7c9e2966b78a2e4e5b4c1023eb1e634ebc9"
+}

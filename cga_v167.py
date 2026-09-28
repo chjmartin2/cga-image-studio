@@ -10,7 +10,7 @@ DEBUG_DIFFUSION = False  # set True to log error propagation stats for Mode Swit
 # Application version. Bumped each time a new file is shipped to /outputs so
 # the user can keep historical versions on their local machine. Also shown in
 # the window title bar.
-__version__ = "v167"
+from app_version import VERSION as __version__
 
 # Changelog (newest first):
 # v167 - 2026-06-02
@@ -459,6 +459,7 @@ import datetime
 import os
 import re
 import threading
+import queue
 from pathlib import Path
 from typing import List, Tuple, Optional, Dict
 from tkinter import ttk, filedialog, messagebox
@@ -969,6 +970,13 @@ COMPOSITE_PALETTES = {name: None for name in _COMPOSITE_PRESETS.keys()}
 _TEXT_NTSC_4K_LUT_CACHE = {}  # preset_name -> list of entries (avg_rgb, fg, bg, pattern_bits)
 
 
+def _build_text_ntsc_512_lut(preset_name):
+    """Only patterns whose first two ROM rows repeat in static 80x100 mode."""
+    allowed = {tuple(pattern) for pattern in _TEXT_NTSC_PATTERNS_8[:2]}
+    return [entry for entry in _build_text_ntsc_4k_lut(preset_name)
+            if tuple(entry[3]) in allowed]
+
+
 def _quantize_rgb444(rgb):
     """Quantize an (r,g,b) tuple to RGB444 (4096-color)."""
     status_dbg('ENTER _quantize_rgb444()')
@@ -1034,8 +1042,8 @@ def _build_text_ntsc_4k_lut(preset_name):
 # 80x100 CENTERED 1024-color mode encoder
 # ============================================================================
 #
-# Distinct from the legacy 80x100 (1024 Colors) mode (broken on MartyPC because
-# it requires per-scanline mini-frames CRTC tricks). This centered variant uses
+# Distinct from the full-height Mini-Frames mode (timed variant now user-verified
+# in MartyPC). This centered variant uses
 # a working two-frame CRTC technique (l100.asm style) and pairs of cells are
 # encoded against the FULL composite simulation, considering every unique CGA
 # top-row character pattern (not just the 4 hard-coded ones).
@@ -4793,7 +4801,9 @@ def build_com_text_80x100_512color(char_attr_16000: bytes) -> bytes:
     out_crtc(0x06, 0x64)  # Vertical displayed = 100 char rows
     out_crtc(0x07, 0x70)  # Vertical sync position = 112
     out_crtc(0x09, 0x01)  # Max scanline = 1 (each char row = 2 scanlines)
-    out_crtc(0x03, 0x0A)  # Hsync width register (default position, normal width)
+    # Extended sync enables composite color in 80-column text with a black
+    # border. Width 10 suppresses color in Marty despite mode bit 2 being clear.
+    out_crtc(0x03, 0x00)  # MC6845 width 0 means 16, as in Mini-Frames.
     
     # OUT 3D8h, AL=09h  (video on, 80-col, no blink, COLOR BURST ON)
     # bit 0 = 80-col text, bit 3 = video enable. bit 2 = 0 → color burst on (composite color).
@@ -4863,9 +4873,7 @@ def pack_text_80x100_512color(chosen) -> bytes:
         elif pat_list == PATTERN_66:
             char_code = 0x13
         else:
-            # Unknown pattern — shouldn't happen if the LUT only has 512-mode patterns.
-            # Fall back to char 0x55 (visually wrong but won't crash).
-            char_code = 0x55
+            raise ValueError('512-color export requires repeating-row patterns 0xCC or 0x66; convert again.')
         
         # Apply swap by flipping FG and BG in the attribute. The hardware char
         # bitmap is fixed, so swapping FG↔BG in the attr byte produces the same
@@ -4941,7 +4949,7 @@ def pack_text_80x100_1024color(chosen) -> bytes:
     return bytes(out)
 
 
-def build_com_text_80x100_1024color(char_attr_16000: bytes) -> bytes:
+def build_com_text_80x100_1024color(char_attr_16000: bytes, display_seconds: int = 30) -> bytes:
     """Build a DOS .COM that displays an 80x100 NTSC-text-trick 1024-color image
     on a real CGA card with composite output, using the canonical mini-frames technique.
     
@@ -4978,6 +4986,10 @@ def build_com_text_80x100_1024color(char_attr_16000: bytes) -> bytes:
     
     code = bytearray()
     
+    if type(display_seconds) is not int or not 1 <= display_seconds <= 300:
+        raise ValueError('Mini-Frames display length must be 1–300 seconds')
+    display_frames = display_seconds * 60
+
     # ---- BIOS init: mode 3, disable blink, mode register, palette ----
     code += bytes([0x0E, 0x1F])                          # push cs ; pop ds
     code += bytes([0xB8, 0x03, 0x00, 0xCD, 0x10])        # mov ax,3 ; int 10h (mode 03h)
@@ -5032,15 +5044,13 @@ def build_com_text_80x100_1024color(char_attr_16000: bytes) -> bytes:
     # ---- Set up registers for frame loop ----
     code += bytes([0xB2, 0xDA])              # mov dl, DAh (DX = 3DAh for status polling)
     code += bytes([0xBB, 0x50, 0x00])        # mov bx, 80 (initial start addr for mini-frame 1)
-    code += bytes([0xBD, 0x00, 0x00])        # mov bp, 0 (frame counter; wraps to 0xFFFF on first dec, ~18min @60Hz)
+    code += bytes([0xBD, display_frames & 0xFF, display_frames >> 8])  # nominal 60 Hz
 
     # ============================================================
-    # FRAME LOOP — runs until keypress OR ~65536 frames
+    # FRAME LOOP — timed display, matching the user-confirmed diagnostic.
     # ============================================================
-    # Per-frame exit detection uses two cheap, CLI-safe checks:
-    #   (1) read 8042 keyboard controller status port 0x64; bit 0 set = scancode
-    #       waiting in the controller's output buffer (works without IRQ 1)
-    #   (2) decrement BP frame counter; when it hits 0 we exit
+    # Exit only when BP expires. The legacy status-read instructions below are
+    # retained as timing padding; their result cannot trigger an exit.
     # We deliberately do NOT use INT 16h here: with CLI in effect the BIOS
     # keyboard buffer is never refilled, so INT 16h can't detect anything,
     # AND the BIOS handler internally STIs and consumes hundreds-to-thousands
@@ -5128,12 +5138,11 @@ def build_com_text_80x100_1024color(char_attr_16000: bytes) -> bytes:
     code += bytes([0xB2, 0xDA])
     code += bytes([0xEC, 0xA8, 0x01, 0x74, 0xFB])  # waitForDisplayDisable
     
-    # ---- Check for exit: keypress (port 0x64) OR frame counter expired ----
-    # in al, 0x64 ; test al, 1 ; jnz exit  (8042 status; bit 0 = scancode ready)
+    # ---- Timed exit only: preserve the approved diagnostic's instruction timing ----
     code += bytes([0xE4, 0x64])                    # in al, 0x64
     code += bytes([0xA8, 0x01])                    # test al, 1
-    code += bytes([0x75, 0x06])                    # jnz +6 (skip dec/jz/jmp → exit)
-    # dec bp ; jz exit  (frame counter; 0 → 0xFFFF → ... → 0 → exit)
+    code += bytes([0x90, 0x90])                    # result ignored; no keyboard exit
+    # dec bp ; jz exit
     code += bytes([0x4D])                          # dec bp
     code += bytes([0x74, 0x03])                    # jz +3 (exit)
 
@@ -11932,7 +11941,7 @@ def build_bootable_dsk_from_com(com_bytes: bytes, image_name: str = "TEST.COM") 
 class CgaConverterApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(f"CGA Converter {__version__}")
+        self.title(f"CGA Image Studio {__version__}")
         self.geometry("1040x720")
 
         self.src_image = None
@@ -12006,26 +12015,93 @@ class CgaConverterApp(tk.Tk):
     # --- UI setup ---
 
     def _build_ui(self):
-        controls = ttk.Frame(self)
-        controls.pack(side=tk.TOP, fill=tk.X, padx=8, pady=4)
-
-        ttk.Button(controls, text="Open Image...", command=self.on_open).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Convert", command=self.on_convert).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Optimize Palette", command=self.on_optimize).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Save GIF...", command=self.on_save).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Save .ASM...", command=self.on_export_asm).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Export COM...", command=self.on_export_com).pack(side=tk.LEFT, padx=4)
-        ttk.Button(controls, text="Export Bootable DSK...", command=self.on_export_dsk).pack(side=tk.LEFT, padx=4)
-
-        ttk.Checkbutton(
-            controls,
-            text="Input Adjust",
-            variable=self.show_input_adjust_var,
-            command=self._toggle_input_adjust,
-        ).pack(side=tk.LEFT, padx=(12,4))
-
-        options = ttk.LabelFrame(self, text="Options")
-        options.pack(side=tk.TOP, fill=tk.X, padx=8, pady=4)
+        # __file__ resolves beside bundled assets in PyInstaller as well as source.
+        from pathlib import Path
+        branding = Path(__file__).resolve().parent / 'assets/branding/raster-crt'
+        if (branding / 'app.ico').is_file():
+            self.iconbitmap(str(branding / 'app.ico'))
+        from studio_ui import Tooltip, StopButton
+        style = ttk.Style(self)
+        if 'vista' in style.theme_names():
+            style.theme_use('vista')
+        self.geometry('1200x780')
+        self.minsize(960, 640)
+        banner = ttk.Frame(self, padding=(12, 8))
+        banner.pack(side=tk.TOP, fill=tk.X)
+        self._activity_busy = False
+        self.activity_var = tk.StringVar(value='Ready')
+        # Restore a dedicated full-width identity bar; activity uses native styling.
+        if (branding / 'logo.png').is_file():
+            with Image.open(branding / 'logo.png') as logo:
+                logo = logo.copy()
+            logo.thumbnail((214, 60), Image.Resampling.LANCZOS)
+            self._brand_logo = ImageTk.PhotoImage(logo)
+            self._brand_header = ttk.Label(banner, image=self._brand_logo)
+            self._brand_header.pack(side=tk.LEFT, padx=(0, 24))
+        else:
+            ttk.Label(banner, text='CGA Image Studio').pack(side=tk.LEFT, padx=(0, 24))
+        self.text_ntsc_stop_btn = StopButton(banner, command=self.on_centered_encoder_stop)
+        self.text_ntsc_stop_btn.pack(side=tk.RIGHT, padx=(10, 0))
+        Tooltip(self.text_ntsc_stop_btn, 'Stop encoding. Cancel the current background conversion.')
+        activity = ttk.Frame(banner)
+        activity.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(24, 4))
+        ttk.Label(activity, textvariable=self.activity_var).pack(anchor='w', pady=(0, 5))
+        self.activity_bar = ttk.Progressbar(activity, mode='determinate', maximum=100)
+        self.activity_bar.pack(fill=tk.X)
+        Tooltip(self.activity_bar, 'Conversion progress when available. An animated bar means the amount of work is not yet known. Detailed messages appear below.')
+        ttk.Separator(self).pack(side=tk.TOP, fill=tk.X)
+        controls = ttk.Frame(self, padding=(10, 8))
+        controls.pack(side=tk.TOP, fill=tk.X)
+        for text, command, help_text in (
+            ('Open image...', self.on_open, 'Choose the source image to convert.'),
+            ('Convert', self.on_convert, 'Convert the image using the selected mode and settings.'),
+        ):
+            button = ttk.Button(controls, text=text, command=command)
+            button.pack(side=tk.LEFT, padx=4)
+            Tooltip(button, help_text)
+        self.export_button = ttk.Menubutton(controls, text='Export')
+        self.export_menu = tk.Menu(self.export_button, tearoff=False)
+        for label, command in (
+            ('Image (GIF)...', self.on_save),
+            ('Assembly source (ASM)...', self.on_export_asm),
+            ('DOS program (COM)...', self.on_export_com),
+            ('Bootable disk (DSK)...', self.on_export_dsk),
+        ):
+            self.export_menu.add_command(label=label, command=command)
+        self.export_button.configure(menu=self.export_menu)
+        self.export_button.pack(side=tk.LEFT, padx=4)
+        Tooltip(self.export_button, 'Save the converted image, assembly source, DOS program, or bootable disk.')
+        adjust_button = ttk.Checkbutton(controls, text='Adjust input',
+            variable=self.show_input_adjust_var, command=self._toggle_input_adjust)
+        adjust_button.pack(side=tk.LEFT, padx=12)
+        Tooltip(adjust_button, 'Show brightness, contrast, and RGB adjustments in the settings panel.')
+        self.optimize_button = ttk.Button(controls, text='Find best palette', command=self.on_optimize)
+        Tooltip(self.optimize_button, 'Compare hardware palettes for the current four-color image.')
+        workspace = ttk.Frame(self)
+        workspace.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=8, pady=4)
+        sidebar = ttk.Frame(workspace, width=330)
+        sidebar.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 8))
+        sidebar.pack_propagate(False)
+        self.settings_canvas = tk.Canvas(sidebar, highlightthickness=0,
+            background=style.lookup('TFrame', 'background') or self.cget('background'))
+        settings_scroll = ttk.Scrollbar(sidebar, orient='vertical', command=self.settings_canvas.yview)
+        settings_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        self.settings_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.settings_canvas.configure(yscrollcommand=settings_scroll.set)
+        options = ttk.Frame(self.settings_canvas, padding=8)
+        self._settings_window = self.settings_canvas.create_window(0, 0, window=options, anchor='nw')
+        options.bind('<Configure>', lambda e: self.settings_canvas.configure(scrollregion=self.settings_canvas.bbox('all')))
+        self.settings_canvas.bind('<Configure>', lambda e: self.settings_canvas.itemconfigure(self._settings_window, width=e.width))
+        def settings_wheel(event):
+            widget = event.widget
+            while widget is not None:
+                if widget is sidebar:
+                    self.settings_canvas.yview_scroll(int(-event.delta / 120) * 3, 'units')
+                    return 'break'
+                widget = getattr(widget, 'master', None)
+        self.bind('<MouseWheel>', settings_wheel, add='+')
+        preview_area = ttk.Frame(workspace)
+        preview_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # Mode
         ttk.Label(options, text="Output mode:").grid(row=0, column=0, sticky="w", padx=4, pady=2)
@@ -12038,6 +12114,7 @@ class CgaConverterApp(tk.Tk):
                 "320x200 (4 Colors)",
                 "640x200 (2 Colors)",
                 "160x200 (16 Colors) Composite",
+                "640x200 Multicolor Composite",
                 "80x100 (512 Colors)",
                 "80x100 (1024 Colors) Mini-Frames",
                 "80x100 (1024 Colors)",
@@ -12047,23 +12124,12 @@ class CgaConverterApp(tk.Tk):
                 "640x200 (16 Colors) Char",
                 "80x100 (4352 Colors) HiColor",
                 "320x200 (4 Colors) Mode Switch",
-                "640x200 (2 Colors) Mode Switch",
             ],
             width=30,
         )
         mode_cb.grid(row=0, column=1, sticky="w", padx=4, pady=2)
         mode_cb.bind("<<ComboboxSelected>>", self.on_mode_changed)
 
-        # STOP button for 640x100 (1024 Colors) background encoder. Visible only
-        # in that mode, enabled only while an encode is running. The encoder for
-        # that mode takes ~3 minutes and runs on a worker thread; this button
-        # lets the user cancel without waiting for completion.
-        self.text_ntsc_stop_btn = ttk.Button(
-            options, text="Stop encode", command=self.on_centered_encoder_stop,
-            state="disabled",
-        )
-        self.text_ntsc_stop_btn.grid(row=0, column=7, sticky="w", padx=4, pady=2)
-        self.text_ntsc_stop_btn.grid_remove()
 
         # Search depth slider (K) for the Viterbi per-row encoder, used by the
         # 640x100 (1024 Colors) mode. K controls how many candidate cells per
@@ -12172,7 +12238,7 @@ class CgaConverterApp(tk.Tk):
 
 
         # Composite palette (Composite mode only)
-        ttk.Label(options, text="Composite Palette/Color:").grid(row=9, column=0, sticky="w", padx=4, pady=2)
+        ttk.Label(options, text="Composite model:").grid(row=10, column=0, sticky="w", padx=4, pady=2)
         self.composite_palette_var = tk.StringVar(value="Old CGA")
         self.composite_palette_cb = ttk.Combobox(
             options,
@@ -12181,7 +12247,7 @@ class CgaConverterApp(tk.Tk):
             width=30,
             values=["Old CGA", "New CGA"],
         )
-        self.composite_palette_cb.grid(row=9, column=1, sticky="w", padx=4, pady=2)
+        self.composite_palette_cb.grid(row=10, column=1, sticky="w", padx=4, pady=2)
         self.composite_palette_cb.state(["disabled"])
         self.composite_palette_cb.bind("<<ComboboxSelected>>", self.on_composite_palette_changed)
 
@@ -12359,6 +12425,34 @@ class CgaConverterApp(tk.Tk):
         )
         serp_cb.grid(row=4, column=3, columnspan=3, sticky="w", padx=4, pady=2)
 
+        self.multicolor_diffusion_timing_var = tk.StringVar(value="After each line")
+        self.multicolor_diffusion_frame = ttk.Frame(options)
+        ttk.Label(self.multicolor_diffusion_frame, text="Composite error diffusion:").pack(side=tk.LEFT)
+        self.multicolor_diffusion_timing_cb = ttk.Combobox(
+            self.multicolor_diffusion_frame, state="readonly", width=23,
+            textvariable=self.multicolor_diffusion_timing_var,
+            values=("After each line", "During line search"))
+        self.multicolor_diffusion_timing_cb.pack(side=tk.LEFT, padx=6)
+        ttk.Label(self.multicolor_diffusion_frame,
+                  text="Error diffusion only; click Convert after changing.").pack(side=tk.LEFT)
+        self.multicolor_diffusion_frame.grid(row=11, column=0, columnspan=8,
+                                             sticky="w", padx=4, pady=2)
+        self.multicolor_diffusion_frame.grid_remove()
+
+        self.miniframes_duration_var = tk.StringVar(value="30 seconds")
+        self.miniframes_duration_frame = ttk.Frame(options)
+        ttk.Label(self.miniframes_duration_frame, text="Mini-Frames display length:").pack(side=tk.LEFT)
+        self.miniframes_duration_cb = ttk.Combobox(
+            self.miniframes_duration_frame, state="readonly", width=15,
+            textvariable=self.miniframes_duration_var,
+            values=tuple(f"{seconds} seconds" for seconds in (5, 10, 30, 60, 120, 300)))
+        self.miniframes_duration_cb.pack(side=tk.LEFT, padx=6)
+        ttk.Label(self.miniframes_duration_frame,
+                  text="Approximate duration; returns to DOS automatically. Applies on export.").pack(side=tk.LEFT)
+        self.miniframes_duration_frame.grid(row=12, column=0, columnspan=8,
+                                            sticky="w", padx=4, pady=2)
+        self.miniframes_duration_frame.grid_remove()
+
         # Target video card (affects .COM export for 80x100 text-trick modes:
         # 160x100 16-color, 640x200 Char16, 80x100 HiColor).
         # - "CGA": original CGA register pokes (3D8h disable, MC6845 CRTC pokes 04/06/07/09,
@@ -12498,33 +12592,43 @@ class CgaConverterApp(tk.Tk):
 
         # Preview scale
         ttk.Label(options, text="Preview scale:").grid(row=2, column=4, sticky="e", padx=4, pady=2)
-        self.preview_scale_var = tk.StringVar(value="1x")
+        self.preview_scale_var = tk.StringVar(value="Auto (whole pixels)")
         preview_cb = ttk.Combobox(
             options,
             textvariable=self.preview_scale_var,
             state="readonly",
-            values=["1x", "2x", "3x", "4x"],
+            values=["Auto (whole pixels)", "1x", "2x", "3x", "4x"],
             width=5,
         )
         preview_cb.grid(row=2, column=5, sticky="w", padx=4, pady=2)
         preview_cb.bind("<<ComboboxSelected>>", self.on_preview_scale_changed)
 
+        self.mode_description_var = tk.StringVar()
+        description = ttk.Label(preview_area, textvariable=self.mode_description_var, wraplength=650, padding=(6, 4))
+        description.pack(side=tk.TOP, fill=tk.X)
+        preview_area.bind('<Configure>', lambda e: description.configure(wraplength=max(200, e.width-20)))
+        self.bind('<Destroy>', lambda event: self._cancel_multicolor()
+                  if event.widget is self else None, add='+')
+
         # Image frames
-        img_frame = ttk.Frame(self)
+        img_frame = ttk.Frame(preview_area)
         img_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=8, pady=4)
 
-        left_frame = ttk.LabelFrame(img_frame, text="Input")
+        left_frame = ttk.LabelFrame(img_frame, text="Input", width=250, height=400)
+        left_frame.pack_propagate(False)
         left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=4, pady=4)
 
         self.mid_frame = ttk.LabelFrame(img_frame, text="80x100 Effective")
         # start hidden; only show for 80x100 HiColor mode
         self.mid_label = ttk.Label(self.mid_frame, text="(HiColor mode only)")
         self.mid_label.pack(fill=tk.BOTH, expand=True)
-        self.right_frame = ttk.LabelFrame(img_frame, text="Output")
+        self.right_frame = ttk.LabelFrame(img_frame, text="Output", width=400, height=400)
+        self.right_frame.pack_propagate(False)
         self.right_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=4, pady=4)
 
         self.left_label = ttk.Label(left_frame, text="No image loaded")
         self.left_label.pack(fill=tk.BOTH, expand=True)
+        self.left_label.bind('<Configure>', self._schedule_left_preview_update)
 
         # Tone-match preview (only shown for 320x200 4-color + "Match contrast / tone" enabled)
         self.tone_preview_frame = ttk.LabelFrame(left_frame, text="Tone-match (4-color only)")
@@ -12573,7 +12677,8 @@ class CgaConverterApp(tk.Tk):
         self.out_canvas_frame = ttk.Frame(out_inner)
         self.out_canvas_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        self.out_canvas = tk.Canvas(self.out_canvas_frame, highlightthickness=0)
+        self.out_canvas = tk.Canvas(self.out_canvas_frame, highlightthickness=0,
+            background=style.lookup('TFrame', 'background') or self.cget('background'))
         self.out_vscroll = ttk.Scrollbar(self.out_canvas_frame, orient="vertical", command=self.out_canvas.yview)
         self.out_hscroll = ttk.Scrollbar(self.out_canvas_frame, orient="horizontal", command=self.out_canvas.xview)
         self.out_canvas.configure(yscrollcommand=self.out_vscroll.set, xscrollcommand=self.out_hscroll.set)
@@ -12586,6 +12691,13 @@ class CgaConverterApp(tk.Tk):
 
         self.out_canvas_img_id = None
         self.out_tk_image = None
+        self._preview_resize_id = None
+        def resize_output(event):
+            if self.preview_scale_var.get() in ('Auto (whole pixels)', 'Fit'):
+                if self._preview_resize_id is not None:
+                    self.after_cancel(self._preview_resize_id)
+                self._preview_resize_id = self.after(80, self._refresh_fitted_preview)
+        self.out_canvas.bind('<Configure>', resize_output)
 
         # Mousewheel scrolling (Windows/macOS/Linux)
         def _out_canvas_on_mousewheel(event):
@@ -12628,6 +12740,45 @@ class CgaConverterApp(tk.Tk):
         self.progress_label.pack(side=tk.LEFT, padx=(8, 0))
         self.on_dither_family_changed()
         self._update_dither_labels()
+        from studio_ui import SettingsLayout
+        self.settings_layout = SettingsLayout(self, options, mode_cb)
+        self._install_context_help()
+        self.status_var.set('Open an image to begin.')
+
+    def destroy(self):
+        if hasattr(self, 'activity_bar'):
+            self.activity_bar.stop()
+        for name in ('_left_preview_after_id', '_preview_resize_id'):
+            pending = getattr(self, name, None)
+            if pending is not None:
+                self.after_cancel(pending)
+                setattr(self, name, None)
+        super().destroy()
+
+    def _refresh_settings_layout(self):
+        if hasattr(self, 'settings_layout'):
+            self.settings_layout.refresh()
+
+    def _refresh_fitted_preview(self):
+        self._preview_resize_id = None
+        self._update_right_preview()
+
+    def _install_context_help(self):
+        from studio_ui import Tooltip
+        tips = {
+            'Reset': 'Restore neutral brightness, contrast, and RGB gains.',
+            'After polish': 'Show the final refined conversion.',
+            'Before polish': 'Compare the initial conversion before polishing.',
+            'Highlight changed cells': 'Highlight cells changed by the polishing pass.',
+        }
+        def visit(parent):
+            for widget in parent.winfo_children():
+                if isinstance(widget, (ttk.Button, ttk.Radiobutton, ttk.Checkbutton)):
+                    text = str(widget.cget('text'))
+                    if text in tips:
+                        Tooltip(widget, tips[text])
+                visit(widget)
+        visit(self)
 
     def _reset_status_steps(self):
         self._status_step_idx = 0
@@ -12649,6 +12800,23 @@ class CgaConverterApp(tk.Tk):
         """Update the status bar and keep UI responsive."""
         try:
             self.status_var.set(text)
+            status = text.lower()
+            if status.startswith('ready'):
+                pending = getattr(self, '_pending_output_signature', None)
+                if pending is not None and self.output_pimage is not None:
+                    self._valid_output_signature = pending
+                    self._pending_output_signature = None
+                self._finish_activity()
+            elif 'failed' in status:
+                self._pending_output_signature = None
+                self._valid_output_signature = None
+                self._finish_activity('Failed')
+            elif 'cancelled' in status or 'canceled' in status:
+                self._pending_output_signature = None
+                self._valid_output_signature = None
+                self._finish_activity('Canceled')
+            elif status.startswith('stopping') and self._activity_busy:
+                self.activity_var.set('Stopping...')
             self.update_idletasks()
         except Exception:
             pass
@@ -12663,6 +12831,13 @@ class CgaConverterApp(tk.Tk):
             if pct > 100:
                 pct = 100
             self.progress_var.set(f"{pct}%")
+            if self._activity_busy:
+                if pct > 0:
+                    self.activity_bar.stop()
+                    self.activity_bar.configure(mode='determinate', value=pct)
+                    self.activity_var.set(f'Converting... {pct}%')
+                else:
+                    self._begin_activity()
             self.update_idletasks()
         except Exception:
             pass
@@ -12699,11 +12874,14 @@ class CgaConverterApp(tk.Tk):
     
     def is_composite_mode(self):
         m = self.mode_var.get()
-        return ("Composite" in m) and ("160x200" in m)
+        return (("Composite" in m) and ("160x200" in m)) or self.is_multicolor_composite_mode()
+
+    def is_multicolor_composite_mode(self):
+        return self.mode_var.get() == "640x200 Multicolor Composite"
 
     def is_text_ntsc_4k_mode(self):
         """True for any of the 1024-color text-NTSC modes:
-          - "80x100 (1024 Colors) Mini-Frames" — legacy mini-frames CRTC trick (broken on MartyPC)
+          - "80x100 (1024 Colors) Mini-Frames" — timed full-height mini-frames CRTC trick
           - "80x100 (1024 Colors)"             — 4-pattern centered (cell-grain encoder)
           - "640x100 (1024 Colors)"            — 40-pattern centered (per-pixel encoder)
           - "640x200 (1024 Colors)"            — full-screen Viterbi, 2 scanlines/cell (set-and-forget)
@@ -12776,6 +12954,8 @@ class CgaConverterApp(tk.Tk):
         return self.is_mode_switch_mode() or self.is_640_2color_mode_switch_mode()
 
     def get_target_size(self):
+        if self.is_multicolor_composite_mode():
+            return 640, 200
         if self.is_4color_mode() or self.is_mode_switch_mode():
             return 320, 200
         if self.is_mono_mode():
@@ -12886,6 +13066,23 @@ class CgaConverterApp(tk.Tk):
                 self._update_mid_preview()
 
     def on_mode_changed(self, event=None):
+        self._cancel_multicolor()
+        if hasattr(self, 'miniframes_duration_frame'):
+            if self.mode_var.get() == '80x100 (1024 Colors) Mini-Frames':
+                self.miniframes_duration_frame.grid()
+            else:
+                self.miniframes_duration_frame.grid_remove()
+        if hasattr(self, 'multicolor_diffusion_frame'):
+            if self.is_multicolor_composite_mode():
+                self.multicolor_diffusion_frame.grid()
+            else:
+                self.multicolor_diffusion_frame.grid_remove()
+        if hasattr(self, 'mode_description_var'):
+            self.mode_description_var.set(
+                "640×200 bitmap · NTSC signal search · Full-resolution simulated preview · Composite display required"
+                if self.is_multicolor_composite_mode() else
+                "160×200 conversion · Nearest RGB match to the selected 16-color composite palette · NTSC-simulated preview"
+                if self.is_composite_mode() else "")
         current_mode = self.mode_var.get()
         previous_mode = getattr(self, "_previous_mode_for_bg", None)
         if (
@@ -12927,14 +13124,6 @@ class CgaConverterApp(tk.Tk):
                 if self.diffusion_var.get() in ("", "None"):
                     self.diffusion_var.set("Horizontal Striped")
 
-        # Show/hide the STOP button for background Viterbi encoders. STOP is
-        # only meaningful for modes that run the slow per-cell-row DP encoder
-        # on a worker thread (currently 640x100 and 640x200).
-        if getattr(self, "text_ntsc_stop_btn", None) is not None:
-            if self.is_text_ntsc_viterbi_mode():
-                self.text_ntsc_stop_btn.grid()
-            else:
-                self.text_ntsc_stop_btn.grid_remove()
 
         # Show/hide the Search depth (K) slider for the Viterbi encoder.
         # Same modes that show STOP also use K.
@@ -13026,6 +13215,7 @@ class CgaConverterApp(tk.Tk):
 
         self._update_mid_preview()
         self._update_right_preview()
+        self._refresh_settings_layout()
 
     
     def _update_dither_labels(self):
@@ -13077,6 +13267,7 @@ class CgaConverterApp(tk.Tk):
                 pass
 
         self._update_dither_labels()
+        self._refresh_settings_layout()
 
     def get_current_palette(self):
         if self.is_mode_switch_mode() or self.is_640_2color_mode_switch_mode():
@@ -13235,6 +13426,7 @@ class CgaConverterApp(tk.Tk):
         except Exception:
             # Be defensive; Tk can throw if widget is mid-destroy
             pass
+        self._refresh_settings_layout()
 
 
     # --- Centered 40-pattern background encoder ---
@@ -13324,8 +13516,119 @@ class CgaConverterApp(tk.Tk):
         except Exception:
             pass
 
+    def _cancel_multicolor(self):
+        event = getattr(self, '_multicolor_cancel', None)
+        if event is not None:
+            event.set()
+
+    def _multicolor_settings(self):
+        names = ('mode_var', 'composite_palette_var', 'scale_var', 'resample_var',
+                 'dither_family_var', 'diffusion_var', 'dither_intensity_var',
+                 'serpentine_var', 'ordered_size_var', 'ordered_strength_var',
+                 'in_brightness_var', 'in_contrast_var', 'in_r_gain_var',
+                 'in_g_gain_var', 'in_b_gain_var', 'multicolor_diffusion_timing_var')
+        return (id(self.src_image), *(getattr(self, name).get() for name in names))
+
+    def _start_multicolor(self, source, dither, method, strength, serpentine,
+                          ordered_size, ordered_strength):
+        from cga_composite_multicolor import encode, Cancelled
+        # Supersede a text encoder too; its queued callbacks check this token.
+        previous = getattr(self, '_centered_encoder_cancel', None)
+        if previous is not None:
+            previous.set()
+        self._centered_encoder_token += 1
+        cancel = threading.Event()
+        self._multicolor_cancel = cancel
+        self._multicolor_busy = True
+        signature = self._multicolor_settings()
+        self._multicolor_signature = None
+        self.output_pimage = None
+        self.composite_bits_pimage = None
+        self._update_right_preview()
+        self.effective_80x100_image = None
+        self._update_mid_preview()
+        self.text_ntsc_stop_btn.state(['!disabled'])
+        search_label = ('Composite search with diffusion' if
+                        self.multicolor_diffusion_timing_var.get() == 'During line search' and dither == 'Diffusion'
+                        else 'Exhaustive composite search')
+        self.set_status(search_label + ': preparing signal model...')
+        self.set_progress(0)
+        preset = self.composite_palette_var.get() or 'Old CGA'
+        hue, sat, bri, con, shp, new_cga, cgamode = _COMPOSITE_PRESETS[preset]
+        ctx = _ReCompositeContextPy()
+        ctx.adjust(hue_offset_deg=hue, saturation=sat, brightness=bri,
+                   contrast=con, sharpness=shp, new_cga=new_cga)
+        ctx.update_cga16_color(cgamode)
+        kernels = {'Floyd-Steinberg': _FS_KERNEL, 'Atkinson': _ATKINSON_KERNEL,
+                   'Jarvis-Judice-Ninke': _JJN_KERNEL, 'Stucki': _STUCKI_KERNEL,
+                   'Burkes': _BURKES_KERNEL, 'Sierra': _SIERRA_KERNEL,
+                   'Sierra-2': _SIERRA2_KERNEL, 'Sierra Lite': _SIERRA_LITE_KERNEL,
+                   'Horizontal Striped': _HSTRIPE_KERNEL}
+        matrix = get_ordered_matrix(ordered_size) if dither == 'Ordered' else None
+        during_search = self.multicolor_diffusion_timing_var.get() == 'During line search'
+        divisors = {'Floyd-Steinberg': 16, 'Atkinson': 8, 'Jarvis-Judice-Ninke': 48,
+                    'Stucki': 42, 'Burkes': 32, 'Sierra': 32, 'Sierra-2': 16,
+                    'Sierra Lite': 4, 'Horizontal Striped': 1}
+        messages = queue.Queue()
+
+        def worker():
+            try:
+                result = encode(source, ctx, cancelled=cancel.is_set,
+                                progress=lambda n, total: messages.put(('progress', n * 100 // total)),
+                                dither=dither, strength=strength,
+                                diffusion_kernel=kernels.get(method, _FS_KERNEL),
+                                serpentine=serpentine, ordered_matrix=matrix,
+                                ordered_strength=ordered_strength,
+                                diffuse_during_search=during_search,
+                                diffusion_divisor=divisors.get(method, 16))
+                messages.put(('done', result))
+            except Cancelled:
+                messages.put(('cancelled', None))
+            except Exception as exc:
+                messages.put(('error', str(exc)))
+
+        def poll():
+            if self._multicolor_cancel is not cancel:
+                return
+            while not messages.empty():
+                kind, value = messages.get_nowait()
+                if kind == 'progress':
+                    if not cancel.is_set():
+                        self.set_progress(value)
+                        self.set_status(f'{search_label}: {value}%')
+                    continue
+                self._multicolor_busy = False
+                # Do not overwrite a newer conversion or another mode's UI.
+                if cancel.is_set() or signature != self._multicolor_settings():
+                    self._finish_activity('Canceled')
+                    if self.is_multicolor_composite_mode():
+                        self.text_ntsc_stop_btn.state(['disabled'])
+                        self.set_status('Conversion canceled or settings changed. Click Convert to restart.')
+                    return
+                self.text_ntsc_stop_btn.state(['disabled'])
+                if kind == 'error':
+                    self.set_status('Composite conversion failed.')
+                    messagebox.showerror('Composite conversion', value)
+                    return
+                if kind == 'done':
+                    self.composite_bits_pimage, self.output_pimage = value
+                    self._multicolor_signature = signature
+                    self.last_output_mode = self.mode_var.get()
+                    self._update_right_preview()
+                    self.set_progress(100)
+                    self.set_status('Ready — 640×200 Multicolor Composite, ' +
+                                    ('experimental diffusion during search.' if during_search and dither == 'Diffusion'
+                                     else 'exhaustive NTSC search.'))
+                return
+            self.after(50, poll)
+
+        self._multicolor_thread = threading.Thread(target=worker, daemon=True)
+        self._multicolor_thread.start()
+        self.after(50, poll)
+
     def on_centered_encoder_stop(self):
         """User clicked the STOP button. Cancel any running 40-pattern encoder."""
+        self._cancel_multicolor()
         cancel = getattr(self, '_centered_encoder_cancel', None)
         if cancel is not None:
             cancel.set()
@@ -14103,10 +14406,12 @@ class CgaConverterApp(tk.Tk):
             messagebox.showerror("Error", f"Failed to open image:\n{e}")
             return
 
+        self._cancel_multicolor()
         self.src_image = img
         self._update_left_preview()
 
     def _update_left_preview(self):
+        self._left_preview_after_id = None
         if not self.src_image:
             return
         # Apply live input adjustments to the LEFT preview.
@@ -14118,7 +14423,8 @@ class CgaConverterApp(tk.Tk):
             g_gain_pct=int(self.in_g_gain_var.get()),
             b_gain_pct=int(self.in_b_gain_var.get()),
         )
-        max_w, max_h = 400, 400
+        max_w = max(32, self.left_label.winfo_width() - 12)
+        max_h = max(32, self.left_label.winfo_height() - 12)
         preview.thumbnail((max_w, max_h), resample=get_resample_filter("Lanczos"))
         self.src_tk_image = ImageTk.PhotoImage(preview)
         self.left_label.configure(image=self.src_tk_image, text="")
@@ -14206,6 +14512,13 @@ class CgaConverterApp(tk.Tk):
         img = self.output_pimage.convert("RGB")
         w, h = img.size
 
+        if self.preview_scale_var.get() in ('Auto (whole pixels)', 'Fit'):
+            from studio_ui import whole_pixel_preview_size
+            size = whole_pixel_preview_size(img.size,
+                (max(1, self.out_canvas.winfo_width() - 8),
+                 max(1, self.out_canvas.winfo_height() - 8)))
+            return img.resize(size, resample=Image.Resampling.NEAREST)
+
         # --- Output-pixel aspect normalization ---
         # Targets the actual CGA 4:3 display geometry. Pixel aspect ratio
         # on a 4:3 CGA monitor is 1:2.4 (one logical pixel = 1 unit wide × 2.4
@@ -14270,7 +14583,15 @@ class CgaConverterApp(tk.Tk):
             else:
                 self.out_canvas.itemconfigure(self.out_canvas_img_id, image=self.out_tk_image)
             w, h = preview.size
-            self.out_canvas.configure(scrollregion=(0, 0, w, h))
+            if self.preview_scale_var.get() in ('Auto (whole pixels)', 'Fit'):
+                cw, ch = self.out_canvas.winfo_width(), self.out_canvas.winfo_height()
+                self.out_canvas.coords(self.out_canvas_img_id, max(0, (cw-w)//2), max(0, (ch-h)//2))
+                self.out_canvas.configure(scrollregion=(0, 0, max(cw, w), max(ch, h)))
+                self.out_canvas.xview_moveto(0)
+                self.out_canvas.yview_moveto(0)
+            else:
+                self.out_canvas.coords(self.out_canvas_img_id, 0, 0)
+                self.out_canvas.configure(scrollregion=(0, 0, w, h))
         else:
             # Fallback for older UI variants (right_label was used before the scrollable canvas);
             # the current UI always has out_canvas, so this branch is defensive only.
@@ -14316,8 +14637,39 @@ class CgaConverterApp(tk.Tk):
         except Exception:
             pass
 
+    def _begin_activity(self):
+        self._activity_busy = True
+        self.activity_var.set('Working...')
+        self.activity_bar.stop()
+        self.activity_bar.configure(mode='indeterminate', value=0)
+        self.activity_bar.start(40)
+        self.update_idletasks()
+
+    def _finish_activity(self, label='Ready'):
+        self._activity_busy = False
+        self.activity_bar.stop()
+        self.activity_bar.configure(mode='determinate', value=0)
+        self.activity_var.set(label)
+
     def on_convert(self):
+        self._valid_output_signature = None
+        self._pending_output_signature = self._output_settings_signature()
+        self._begin_activity()
+        try:
+            return self._convert_impl()
+        except Exception:
+            self._pending_output_signature = None
+            self._finish_activity('Failed')
+            raise
+        finally:
+            # Background workers finish through their GUI-thread status callbacks.
+            if (not getattr(self, '_multicolor_busy', False)
+                    and self._centered_encoder_thread is None and self._activity_busy):
+                self._finish_activity()
+
+    def _convert_impl(self):
         global STATUS_CB
+        self._cancel_multicolor()
         self._reset_status_steps()
         self.status_step('Convert clicked')
 
@@ -14409,6 +14761,10 @@ class CgaConverterApp(tk.Tk):
         if dither_family in ("Error diffusion", "Diffusion"):
             dither_family = "Diffusion"
         diffusion_method = self.diffusion_var.get()
+        # "None" is an explicit opt-out, not an unknown kernel that may fall
+        # back to Floyd-Steinberg in a mode-specific encoder.
+        if dither_family == "Diffusion" and diffusion_method == "None":
+            dither_family = "None"
         intensity= float(self.dither_intensity_var.get())
         serpentine = bool(self.serpentine_var.get())
         dither_intensity = float(self.dither_intensity_var.get())
@@ -14433,6 +14789,13 @@ class CgaConverterApp(tk.Tk):
             scale_mode,
             resample_name,
         )
+
+        if self.is_multicolor_composite_mode():
+            STATUS_CB = None
+            self._start_multicolor(resized.convert('RGB'), dither_family,
+                                   diffusion_method, dither_intensity, serpentine,
+                                   ordered_size, ordered_strength)
+            return
 
         self.set_progress(20)
 
@@ -14790,11 +15153,9 @@ class CgaConverterApp(tk.Tk):
             #   the standard 80x100 mode (2 scanlines/row), no per-frame CRTC trickery.
             #   "Set and forget" — static image, zero CPU load after setup.
             # 
-            # 1024-color mode would ADD chars 0xB0 and 0xB1 (patterns 0x22, 0x55),
-            #   whose row 0 ≠ row 1 — requires the CRTC mini-frame trick to display
-            #   correctly. Currently the simulation/encoder only uses the 512 subset
-            #   (so 1024-mode preview is actually 512-mode preview); full 1024 support
-            #   is planned for the future.
+            # Four-pattern 1024 modes add chars 0xB0/0xB1, whose first two rows
+            # differ; they use Mini-Frames or centered single-row display timing.
+            # Static 512 conversion must restrict its LUT to the first two patterns.
             preset = (self.composite_palette_var.get() or "Old CGA").strip()
 
             # Always produce src640: needed by 640x100 mode for Viterbi, and
@@ -14821,7 +15182,8 @@ class CgaConverterApp(tk.Tk):
             need_4pattern_setup = not self.is_text_ntsc_viterbi_mode()
 
             if need_4pattern_setup:
-                lut = _build_text_ntsc_4k_lut(preset)  # [(avg_rgb, fg, bg, pat, swap), ...]
+                lut = (_build_text_ntsc_512_lut(preset) if self.is_text_ntsc_512_mode()
+                       else _build_text_ntsc_4k_lut(preset))
                 palette1024 = [avg for (avg, _fg, _bg, _pat, _swap) in lut]
 
                 # 1) Scale source into 80x100 logical cells.
@@ -15042,6 +15404,10 @@ class CgaConverterApp(tk.Tk):
                 self.set_status(
                     f"Encoding {mode_label} Viterbi K={k_value} — 0% (background, {est_str})"
                 )
+                # Completion belongs to the worker. Falling through would set
+                # Ready and disable banner progress while it is still encoding.
+                STATUS_CB = None
+                return
             else:
                 # 4-pattern path: drop any stashed 40-pattern cells (so export
                 # for 4-pattern doesn't accidentally use stale 40-pattern cells).
@@ -15199,6 +15565,20 @@ class CgaConverterApp(tk.Tk):
             pass
 
     def on_optimize(self):
+        self._begin_activity()
+        try:
+            return self._optimize_impl()
+        except Exception:
+            self._finish_activity('Failed')
+            raise
+        finally:
+            if self._activity_busy:
+                self._finish_activity()
+
+    def _optimize_impl(self):
+        if self.is_multicolor_composite_mode():
+            self.on_convert()
+            return
         if self.src_image is None:
             messagebox.showinfo("No image", "Please open an image first.")
             return
@@ -15301,6 +15681,47 @@ class CgaConverterApp(tk.Tk):
         self.on_convert()
         self.set_status("Ready.")
 
+    def _output_settings_signature(self):
+        """Conversion inputs only; zoom, view controls and export options excluded."""
+        names = ['mode_var', 'scale_var', 'resample_var', 'dither_family_var',
+                 'in_brightness_var', 'in_contrast_var', 'in_r_gain_var',
+                 'in_g_gain_var', 'in_b_gain_var']
+        if self.dither_family_var.get() == 'Error diffusion':
+            names += ['diffusion_var', 'dither_intensity_var', 'serpentine_var']
+        elif self.dither_family_var.get() == 'Ordered':
+            names += ['ordered_size_var', 'ordered_strength_var']
+        if self.is_4color_mode() or self.is_mono_mode():
+            names += ['palette_var']
+        if self.is_4color_mode() or self.is_any_mode_switch():
+            names += ['bg_color_var', 'tone_var']
+        if self.is_composite_mode() or self.is_text_ntsc_mode():
+            names += ['composite_palette_var']
+        if self.is_multicolor_composite_mode():
+            names += ['multicolor_diffusion_timing_var']
+        if self.is_text_ntsc_viterbi_mode():
+            names += ['text_ntsc_k_var', 'text_ntsc_shape_var', 'text_ntsc_polish_var']
+        if self.is_any_mode_switch():
+            names += ['ms_switches_var', 'tweaked_mode_var', 'ms_stagger_mode_var',
+                      'ms_stagger_optimize_var', 'ms_black_border_var', 'ms_dither_aware_var']
+        if self.is_hicolor_mode():
+            names += ['hicolor_limit_var']
+        if self.is_16color_char_mode():
+            names += ['char16_subsample_var']
+        return (id(self.src_image), tuple((name, getattr(self, name).get()) for name in names))
+
+    def _require_current_output(self):
+        if (getattr(self, '_activity_busy', False)
+                or getattr(self, '_multicolor_busy', False)
+                or self._centered_encoder_thread is not None):
+            messagebox.showinfo('Export', 'Conversion is still running. Wait for it to finish before exporting.')
+            return False
+        if (self.output_pimage is None or getattr(self, '_valid_output_signature', None)
+                != self._output_settings_signature()):
+            messagebox.showinfo('Convert before exporting',
+                'The image or conversion settings have changed, or no completed conversion is available.\n\nClick Convert and wait for it to finish, then export again.')
+            return False
+        return True
+
     def on_export_asm(self):
         self.on_export_com("asm")
 
@@ -15309,12 +15730,15 @@ class CgaConverterApp(tk.Tk):
 
     def on_export_com(self, export_kind="com"):
         """Build the current DOS COM and save it as COM, ASM, or bootable DSK."""
+        if not self._require_current_output():
+            return
         export_kind = str(export_kind or "com").lower()
         if export_kind not in ("com", "asm", "dsk"):
             raise ValueError(f"Unknown export kind: {export_kind}")
         mode = self.mode_var.get()
 
         SUPPORTED = (
+            "640x200 Multicolor Composite",
             "320x200 (4 Colors)",
             "320x200 (4 Colors) Mode Switch",
             "640x200 (2 Colors)",
@@ -15363,6 +15787,14 @@ class CgaConverterApp(tk.Tk):
         if self.output_pimage is None:
             messagebox.showinfo("Export COM", "Please click Convert first so there is an output image to export.")
             return
+
+        if (self.is_multicolor_composite_mode() or
+                getattr(self, 'last_output_mode', '') == '640x200 Multicolor Composite'):
+            if (getattr(self, '_multicolor_busy', False) or
+                    not self.is_multicolor_composite_mode() or
+                    getattr(self, '_multicolor_signature', None) != self._multicolor_settings()):
+                messagebox.showinfo('Export', 'Settings changed or conversion is incomplete. Click Convert and wait for it to finish.')
+                return
 
         # Helper: pick the right COM stub for 80x100 text-trick modes
         # based on the user's "Target video card" selection.
@@ -15454,7 +15886,7 @@ class CgaConverterApp(tk.Tk):
                     )
                     default_name = "cga_320_modeswitch_n1.com"
 
-            elif mode == "160x200 (16 Colors) Composite":
+            elif mode in ("160x200 (16 Colors) Composite", "640x200 Multicolor Composite"):
                 # Export as CGA 640x200 2-color (BIOS mode 06h). The *apparent* 16 colors
                 # come from composite artifacting on a real NTSC composite display.
                 if getattr(self, "composite_bits_pimage", None) is None:
@@ -15468,7 +15900,8 @@ class CgaConverterApp(tk.Tk):
                 # (value 0x1A: bit4=hi-res, bit3=video on, bit1=graphics, bit0/2 cleared) to
                 # re-enable composite NTSC colorburst.
                 com = build_com_static_cga(0x0006, vram, color_select_3d9=palbyte, mode_control_3d8=0x1A)
-                default_name = "cga_composite_160x200.com"
+                default_name = ("cga_multicolor_640x200.com" if self.is_multicolor_composite_mode()
+                                else "cga_composite_160x200.com")
 
             elif mode == "640x200 (2 Colors)":
                 vram = pack_cga_640x200_2color_vram(self.output_pimage)
@@ -15529,9 +15962,8 @@ class CgaConverterApp(tk.Tk):
                 #   100 mini-frames per CRT frame, each 2 scanlines tall, MaxSL=0.
                 # CPU is fully occupied by the timing loop while displaying.
                 # REQUIRES composite output to see all 1024 colors.
-                # NOTE: this mode is LEGACY and does NOT work on MartyPC because
-                # mini-frames CRTC reprogramming isn't supported there. Use
-                # "80x100 (1024 Colors)" or "640x100 (1024 Colors)" for working alternatives.
+                # User validated the timed variant in native MartyPC with and
+                # without dithering. A keyboard check caused the earlier exit.
                 chosen = getattr(self, "text_ntsc_chosen", None)
                 if chosen is None:
                     messagebox.showinfo(
@@ -15540,7 +15972,8 @@ class CgaConverterApp(tk.Tk):
                     )
                     return
                 char_attr = pack_text_80x100_1024color(chosen)
-                com = build_com_text_80x100_1024color(char_attr)
+                seconds = int(self.miniframes_duration_var.get().split()[0])
+                com = build_com_text_80x100_1024color(char_attr, display_seconds=seconds)
                 default_name = "cga_1024color_miniframes.com"
 
             elif mode == "80x100 (1024 Colors)":
@@ -15769,6 +16202,11 @@ class CgaConverterApp(tk.Tk):
                 messagebox.showinfo("Export ASM", f"Saved NASM source:\n{path}")
             elif export_kind == "dsk":
                 dsk = build_bootable_dsk_from_com(com)
+                if self.is_multicolor_composite_mode():
+                    from tools.make_marty_disk import inject_file
+                    boot = bytearray(dsk)
+                    inject_file(boot, b'@ECHO OFF\r\nPROMPT $P$G\r\nTEST\r\n', 'AUTOEXEC.BAT')
+                    dsk = bytes(boot)
                 Path(path).write_bytes(dsk)
                 messagebox.showinfo(
                     "Export Bootable DSK",
@@ -15783,6 +16221,13 @@ class CgaConverterApp(tk.Tk):
 
 
     def on_save(self):
+        if not self._require_current_output():
+            return
+        if self.is_multicolor_composite_mode() and (
+                getattr(self, '_multicolor_busy', False) or
+                getattr(self, '_multicolor_signature', None) != self._multicolor_settings()):
+            messagebox.showinfo('Save preview', 'Click Convert and wait for it to finish before saving this preview.')
+            return
         if self.output_pimage is None:
             messagebox.showinfo("No output", "There is no converted image to save yet.")
             return

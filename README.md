@@ -1,16 +1,39 @@
 # CGA Image Studio
 
-**Staggered-write prerelease: v0.3.0-alpha.3.** A standalone Windows x64 executable is
+**Current alpha: 0.167a. Working toward 1.0 beta.** A standalone Windows x64 executable is
 available on the [releases page](https://github.com/chjmartin2/cga-image-studio/releases).
 Mode Switch offers **1**, **8**, and **8 staggered** writes for 320x200 conversion
 and COM/ASM/DSK export. The staggered selection uses a fixed alternating pattern;
 every visible palette boundary moves between adjacent rows without animation.
 See [Windows build and use](docs/WINDOWS_BUILD.md) and
-[release notes](docs/RELEASE_v0.3.0-alpha.3.md).
+[release notes](docs/RELEASE_v0.167a.md).
 
 CGA Image Studio is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
 
 This repository starts from the historical manually versioned source file `cga_v165.py`. The first GitHub baseline is version `0.1.0`, corresponding to the working `v165` application. Current development continues in `cga_v167.py`.
+
+## Featured demo image
+
+The studio's demo image uses **640x200 (1024 Colors)**, the full-screen
+text-composite mode, using the supplied Raiders of the Lost Ark image.
+This is separate from the Multicolor bitmap mode and the
+older palette-timing demo.
+
+![Raiders full-screen text-composite demo](files/demo/RAIDERS.png)
+
+[Bootable demo disk](files/demo/RAIDERS.dsk) ·
+[DOS program](files/demo/RAIDERS.com) ·
+[Conversion settings](files/demo/RAIDERS.settings.json)
+
+Use composite rendering to view the exported program. The pictured preview is
+the studio's Old CGA simulation, corrected to 4:3 display proportions.
+
+The earlier Picard demo remains in `files/demo/PICARD640.*` for comparison.
+To regenerate the featured demo:
+
+```powershell
+.venv/Scripts/python.exe tools/build_featured_demo.py test_images/raiders-of-the-lost-ark.webp --name RAIDERS
+```
 
 ## Project Status
 
