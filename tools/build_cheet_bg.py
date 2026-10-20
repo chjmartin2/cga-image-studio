@@ -27,7 +27,7 @@ sys.path.insert(0, str(ROOT))
 
 from tools import make_marty_disk as disk  # noqa: E402
 
-ASM = ROOT / "cheet.asm"
+ASM = ROOT / "Old Storage" / "legacy-root" / "cheet.asm"
 FILES = ROOT / "files"
 TEMPLATE = FILES / "dos_boot_template.dsk"
 OUT_COM = FILES / "CHEETBG.COM"

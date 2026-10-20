@@ -13,7 +13,7 @@ See [Windows build and use](docs/WINDOWS_BUILD.md) and
 
 CGA Image Studio is a Python/Tkinter desktop tool for converting modern images into IBM CGA-style graphics outputs. It can preview classic CGA modes, composite artifact color modes, text-mode color tricks, mode-switch palette experiments, and export many results as DOS `.COM` programs.
 
-This repository starts from the historical manually versioned source file `cga_v165.py`. The first GitHub baseline is version `0.1.0`, corresponding to the working `v165` application. Current development continues in `cga_v167.py`.
+This repository starts from the historical manually versioned source file `cga_v165.py`, now preserved in `Old Storage/legacy-root/`. The first GitHub baseline is version `0.1.0`, corresponding to the working `v165` application. Current development continues in `cga_v167.py`.
 
 ## Standard CGA text conversion
 
@@ -142,8 +142,9 @@ See [Project status and restart notes](docs/PROJECT_STATUS.md) for the current
 development checkpoint, validation commands, and the next work to tackle.
 
 The [Picard image test](docs/IMAGELOCK.md) uses this core converter and includes
-a bootable disk, expected preview and registration pattern. Double-click
-`Picard CGA Demo.lnk` to boot it in the local MartyPC build.
+a bootable disk, expected preview and registration pattern. Run
+[`tools/launchers/run_imagelock.cmd`](tools/launchers/run_imagelock.cmd) to boot it
+in the local MartyPC build.
 
 ## Quick Start
 
@@ -300,17 +301,43 @@ It includes the annotated assembly, loader contract and reproducible byte checks
 
 The [STARTLCK demo](docs/STARTLCK.md) packages a mode-4 start-line marker as
 `files/STARTLCK.COM` and the bootable `files/STARTLCK.DSK`. Run
-`run_startlock.cmd` to open the separate MartyPC build with the disk mounted.
+[`tools/launchers/run_startlock.cmd`](tools/launchers/run_startlock.cmd) to open
+the separate MartyPC build with the disk mounted.
 Its first four configured PIT-phase tests produced the same visible marker
 position; this is emulator evidence for the diagnostic, not production validation.
 
 A separate MartyPC 0.5.0 source build is available through
-`run_martypc_latest.cmd`. See the [build and update guide](docs/MARTYPC_BUILD.md)
+[`tools/launchers/run_martypc_latest.cmd`](tools/launchers/run_martypc_latest.cmd).
+See the [build and update guide](docs/MARTYPC_BUILD.md)
 for the pinned upstream revision, local toolchain, CGA configuration and checks.
+
+## Repository layout
+
+The root contains the 20 current application Python files, including
+`cga_v167.py`, the packaged entry point `studio_launcher.py`, and the supporting
+conversion, UI, version and MartyPC modules. `run_cga_v167.cmd` starts the app;
+`run_demo_disk.cmd` starts the reviewed demo.
+
+| Location | Contents |
+| --- | --- |
+| `assets/` | Application branding and runtime resources |
+| `tools/` | Current build, demo, diagnostic and validation tools |
+| `tools/launchers/` | Windows launchers for the optional MartyPC diagnostics |
+| `tests/`, `test_images/` | Regression tests and their existing image inputs |
+| `files/` | Boot templates, demo data and diagnostic fixtures used by current tools |
+| `docs/` | Application documentation and retained research evidence |
+| [`Old Storage/`](<Old Storage/README.md>) | Historical app versions, root experiments and reference source |
+
+The existing `.venv/`, `external/`, `artifacts/`, `build/`, `dist/` and `release/`
+paths remain in place for local dependencies and generated builds. Historical
+files were moved without deletion; the archive guide records their locations
+and how to run preserved experiments with `tools/run_archived.py`.
 
 ## Refactor Direction
 
-The current application is intentionally preserved as a single working file. Future refactors should be small, reversible commits that move code into modules without changing behavior.
+The main application remains in `cga_v167.py`, with focused conversion and UI
+modules beside it. Future refactors should be small, reversible commits that
+move code into modules without changing behavior.
 
 Proposed future layout:
 

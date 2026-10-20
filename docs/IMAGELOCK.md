@@ -5,7 +5,7 @@ exports are enabled. The corrected timing passes the wait-state-enabled core
 acceptance suite; the user confirmed the native MartyPC visualization was perfect.
 See the [current validation report](research/eight_write_validation.md).
 
-Double-click **Picard CGA Demo.lnk** in the project folder. It launches the local
+Double-click **`tools/launchers/run_imagelock.cmd`** in the checkout. It launches the local
 MartyPC build with its configuration and a fresh copy of the correct boot disk.
 DOS starts Picard automatically. The launcher checks that both test programs are
 actually present on drive A before opening the emulator.
@@ -29,9 +29,8 @@ four bitmap indices, so incorrect palette boundaries cannot hide in a photograph
 - `files/REGLOCK.COM` and `files/REGLOCK_preview.png`: registration diagnostic.
 - `files/IMGLCK.json`: input, output, disk-content and SHA256 manifest.
 
-From PowerShell in the project folder, `.\run_imagelock.cmd` is equivalent to
-the shortcut.
-For a different emulator PIT phase, run `.\run_imagelock.cmd 3`; phases 0 through
+From PowerShell in the project folder, run `.\tools\launchers\run_imagelock.cmd`.
+For a different emulator PIT phase, run `.\tools\launchers\run_imagelock.cmd 3`; phases 0 through
 3 are accepted. The script prepares a separate disk/configuration for each phase.
 
 ## Core program integration

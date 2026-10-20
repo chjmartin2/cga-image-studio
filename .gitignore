@@ -26,3 +26,7 @@ __pycache__/
 # Local generated previews, diagnostic disks and raw validation traces.
 /artifacts/
 .pytest_cache/
+
+# Private/local one-off scripts and empty generated-output folder, archived
+# during repository organization. Historical tracked sources remain visible.
+/Old Storage/local-work/

@@ -25,7 +25,7 @@ try {
         Write-Output "Created $martyLinkPath"
         [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($martyLink)
     }
-    $martyDemoLauncher = Join-Path $martyWorkspace 'run_startlock.cmd'
+    $martyDemoLauncher = Join-Path $martyWorkspace 'tools\launchers\run_startlock.cmd'
     if (Test-Path -LiteralPath $martyDemoLauncher -PathType Leaf) {
         $martyDemoLinkPath = Join-Path $martyWorkspace 'STARTLCK Demo.lnk'
         $martyDemoLink = $martyShell.CreateShortcut($martyDemoLinkPath)
@@ -37,7 +37,7 @@ try {
         Write-Output "Created $martyDemoLinkPath"
         [void][System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($martyDemoLink)
     }
-    $martyImageLauncher = Join-Path $martyWorkspace 'run_imagelock.cmd'
+    $martyImageLauncher = Join-Path $martyWorkspace 'tools\launchers\run_imagelock.cmd'
     if (Test-Path -LiteralPath $martyImageLauncher -PathType Leaf) {
         $martyImageLinkPath = Join-Path $martyWorkspace 'Picard CGA Demo.lnk'
         $martyImageLink = $martyShell.CreateShortcut($martyImageLinkPath)
@@ -53,7 +53,7 @@ try {
         $martyExportDisk = (Resolve-Path -LiteralPath $ExportDisk).Path
         $martyExportLinkPath = Join-Path $martyWorkspace 'Test My CGA Export.lnk'
         $martyExportLink = $martyShell.CreateShortcut($martyExportLinkPath)
-        $martyExportLink.TargetPath = Join-Path $martyWorkspace 'run_cga_disk.cmd'
+        $martyExportLink.TargetPath = Join-Path $martyWorkspace 'tools\launchers\run_cga_disk.cmd'
         $martyExportLink.Arguments = '"' + $martyExportDisk + '"'
         $martyExportLink.WorkingDirectory = $martyWorkspace
         $martyExportLink.IconLocation = $martyExecutable + ',0'

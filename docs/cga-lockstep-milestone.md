@@ -1,5 +1,13 @@
 # CGA Lockstep Milestone
 
+> Repository organization, October 20, 2026: the root `generate_cgalk*.py`
+> experiments and `cgalk*.asm` snapshots referenced below now live in
+> `Old Storage/legacy-root/`. This historical record retains its original
+> commands and evidence. See the [archive guide](<../Old Storage/README.md>)
+> for current locations. Run an archived experiment from the repository root
+> with `.\.venv\Scripts\python.exe tools\run_archived.py generate_cgalk5_test.py --help`,
+> replacing the filename and arguments as needed.
+
 ## Goal
 
 Place more than one CGA color-select write (`OUT 03D9h,AL`) on each scanline

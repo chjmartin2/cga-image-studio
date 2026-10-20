@@ -1,0 +1,259 @@
+{
+  "date": "2026-10-20",
+  "source_commit": "13cdea81c14876f90e5cdc9bed961675fa51a4bc",
+  "purpose": "Repository organization; archived file bytes preserved unchanged.",
+  "files": [
+    {
+      "original_path": "cga_v165.py",
+      "archive_path": "Old Storage/legacy-root/cga_v165.py",
+      "bytes": 591702,
+      "sha256": "0ea7621dd76936dcb57faee0b75bbb2aa59e674be6fc58dd86dd40f29dfda47f"
+    },
+    {
+      "original_path": "cga_v166.py",
+      "archive_path": "Old Storage/legacy-root/cga_v166.py",
+      "bytes": 634328,
+      "sha256": "87cdb9d52d3ab7bf035cf2e8da6e8bd53b4c7f98ecb8e61477269a648341baea"
+    },
+    {
+      "original_path": "VISUAL_STUDIO_RUN.txt",
+      "archive_path": "Old Storage/legacy-root/VISUAL_STUDIO_RUN.txt",
+      "bytes": 298,
+      "sha256": "ff63137b36bbd9297f955b89bd809001ee84d44bd6507b36cf8ef15977a9fa85"
+    },
+    {
+      "original_path": "_cmp_preview_vs_hw.png",
+      "archive_path": "Old Storage/legacy-root/_cmp_preview_vs_hw.png",
+      "bytes": 47001,
+      "sha256": "d649ebb3e4efd85f921e36c3cd73ba6a7e8fe0970069afce25b9d5fcd9fe3287"
+    },
+    {
+      "original_path": "generate_cgalk10_n3_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk10_n3_test.py",
+      "bytes": 8011,
+      "sha256": "7785a2251db15a22fa0ef769e622bd5a63fd6cc81f1b05d8dcd805f476141dc6"
+    },
+    {
+      "original_path": "generate_cgalk11_dense_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk11_dense_test.py",
+      "bytes": 9532,
+      "sha256": "4ae704a01162c1316f20e54f6d35d5e3b1aa3b2834edfd2719e5694e280d3254"
+    },
+    {
+      "original_path": "generate_cgalk12_n11_tuning_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk12_n11_tuning_test.py",
+      "bytes": 2390,
+      "sha256": "180aa10c5f97f723f2b90adfb571f2e9144236a76f7d7d6a8c4c826b23f99f93"
+    },
+    {
+      "original_path": "generate_cgalk13_n12_tuning_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk13_n12_tuning_test.py",
+      "bytes": 2316,
+      "sha256": "9f848740f471db7bbce13f8102d7bf3715dd51383d44cc361c75f6d473f70541"
+    },
+    {
+      "original_path": "generate_cgalk14_n13_tuning_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk14_n13_tuning_test.py",
+      "bytes": 2316,
+      "sha256": "28c67c1c56d41e30f1ca6ffbb8307863d74758d11ef222592c9eac63c1e334bf"
+    },
+    {
+      "original_path": "generate_cgalk15_n13_equalbands_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk15_n13_equalbands_test.py",
+      "bytes": 3564,
+      "sha256": "be766dc2743ccbbdc4e429d7498f79f1242d9e92cfb2a13e85437ccf5cc0f13a"
+    },
+    {
+      "original_path": "generate_cgalk16_n13_visiblebands_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk16_n13_visiblebands_test.py",
+      "bytes": 3407,
+      "sha256": "e1fbb0b00a6f32e11452a1bbfddfbe7ebdf8b3f40a98e02e86c126caadbcb20e"
+    },
+    {
+      "original_path": "generate_cgalk17_n13_finephase_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk17_n13_finephase_test.py",
+      "bytes": 3069,
+      "sha256": "2a2751f66227466cdb8c41f01cefde0e697f30e7f8bf6137d3809354a30fd652"
+    },
+    {
+      "original_path": "generate_cgalk18_n12_ninebands_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk18_n12_ninebands_test.py",
+      "bytes": 3838,
+      "sha256": "d59bf3157ac36fc241c56db35b94dd12c0222ab8dbe396d803166edad013e94b"
+    },
+    {
+      "original_path": "generate_cgalk19_trace_anchor_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk19_trace_anchor_test.py",
+      "bytes": 5550,
+      "sha256": "6a0100b40e2bddc628375b9baf72f9868cb87ebd33759b6ff727dce83989da64"
+    },
+    {
+      "original_path": "generate_cgalk20_border_schedule_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk20_border_schedule_test.py",
+      "bytes": 2690,
+      "sha256": "5ab8cfed9a1fa0e5c92b795eab7fc94ac0ca1423031da57d4eabd42743040556"
+    },
+    {
+      "original_path": "generate_cgalk21_disperse_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk21_disperse_test.py",
+      "bytes": 4893,
+      "sha256": "5a80f4c1e3f47d51231f8aea17ecba353c2fc47621e4e5f9657d992d4e52f41b"
+    },
+    {
+      "original_path": "generate_cgalk22_safe_disperse_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk22_safe_disperse_test.py",
+      "bytes": 7772,
+      "sha256": "064d78e6c4adc805b201cf69c1b41ab038709d2bfcf1111b1771d466ce4329a0"
+    },
+    {
+      "original_path": "generate_cgalk5_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk5_test.py",
+      "bytes": 8029,
+      "sha256": "3fddb990d65a963e5cab730aff65d761d7d5715344087bcc9a2c8ea20d09dbcc"
+    },
+    {
+      "original_path": "generate_cgalk6_preroll_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk6_preroll_test.py",
+      "bytes": 4485,
+      "sha256": "6617867e3b8b998d24a1dac858802f746755434dccd46d5bf284f84e128e179a"
+    },
+    {
+      "original_path": "generate_cgalk7_alternating_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk7_alternating_test.py",
+      "bytes": 5325,
+      "sha256": "fd6a8ceeb208cc60ef87b798a425d3cf3dbd79b740bcb02b9eebd0c6e560f988"
+    },
+    {
+      "original_path": "generate_cgalk8_width_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk8_width_test.py",
+      "bytes": 5105,
+      "sha256": "41250d0745bf4548d9be964c65d095b9cf925c398446f14f81241498afa3f547"
+    },
+    {
+      "original_path": "generate_cgalk9_palette_random_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_cgalk9_palette_random_test.py",
+      "bytes": 6254,
+      "sha256": "2020902781eaff820794506d09dadda203dd04902ed8a870db4ea0acd312a0a4"
+    },
+    {
+      "original_path": "generate_modeswitch_n1_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_modeswitch_n1_test.py",
+      "bytes": 2746,
+      "sha256": "5f2acc8fae6267b27791a7e82c8ce27578858ce60aff75415915b465fa93c54d"
+    },
+    {
+      "original_path": "generate_modeswitch_n2_midpoint_test.py",
+      "archive_path": "Old Storage/legacy-root/generate_modeswitch_n2_midpoint_test.py",
+      "bytes": 26317,
+      "sha256": "e9e31c2b9391b8b68611a6c5d0887326e86fdaebf62c24c06231aaa289647419"
+    },
+    {
+      "original_path": "bugs.asm",
+      "archive_path": "Old Storage/legacy-root/bugs.asm",
+      "bytes": 446104,
+      "sha256": "75481944aeb289c2b2cb56b06a96d464ec300a544d3a29e2edcde58298f4fed9"
+    },
+    {
+      "original_path": "cgalk5.asm",
+      "archive_path": "Old Storage/legacy-root/cgalk5.asm",
+      "bytes": 3194,
+      "sha256": "41ea6fa24b76a1dbfe1a1f9593e500a8121cdafb2e82afcfca0b62d4bde0038d"
+    },
+    {
+      "original_path": "cgalk6_preroll.asm",
+      "archive_path": "Old Storage/legacy-root/cgalk6_preroll.asm",
+      "bytes": 2896,
+      "sha256": "f618697ca1241c9f612582fd3bee6fe6401bf7fb22dbdfcd0503db140ad7b4d4"
+    },
+    {
+      "original_path": "cgalk7_alternating.asm",
+      "archive_path": "Old Storage/legacy-root/cgalk7_alternating.asm",
+      "bytes": 2814,
+      "sha256": "112875670a909bab0d84554aa2564d4613ad9438245955c1b33a6a76fa5f9e37"
+    },
+    {
+      "original_path": "cgalk8_width.asm",
+      "archive_path": "Old Storage/legacy-root/cgalk8_width.asm",
+      "bytes": 2787,
+      "sha256": "61649872a8b9fc83928c7def166c6c1ef693b2880f1568964c96657e06fc18d1"
+    },
+    {
+      "original_path": "cheet.asm",
+      "archive_path": "Old Storage/legacy-root/cheet.asm",
+      "bytes": 446104,
+      "sha256": "13cf58d47508807a9c54087ce9c7d9dd762747aeb71699ab438e077e3ada7f07"
+    },
+    {
+      "original_path": "lethal.asm",
+      "archive_path": "Old Storage/legacy-root/lethal.asm",
+      "bytes": 198996,
+      "sha256": "095688f5a5237151de3c4c7a9068a51a24a8f649b36f821e6dde618f47d7c07a"
+    },
+    {
+      "original_path": "run_cga_disk.cmd",
+      "archive_path": "Old Storage/legacy-root/run_cga_disk.cmd",
+      "bytes": 105,
+      "sha256": "2ac8c0135e9a435cf231cd104aebbda922541faf5ca60b5470e7289dc44656ff"
+    },
+    {
+      "original_path": "run_cga_v165.cmd",
+      "archive_path": "Old Storage/legacy-root/run_cga_v165.cmd",
+      "bytes": 71,
+      "sha256": "5a79c2bb07db8aa050add3a1e5ee7f1e6860ae7e9a0f6703178e556f5df323cd"
+    },
+    {
+      "original_path": "run_cga_v166.cmd",
+      "archive_path": "Old Storage/legacy-root/run_cga_v166.cmd",
+      "bytes": 71,
+      "sha256": "332e4db280606cc14a922e15e0fec709d67d84bceba5ac743b60dc6d5c3b02d5"
+    },
+    {
+      "original_path": "run_imagelock.cmd",
+      "archive_path": "Old Storage/legacy-root/run_imagelock.cmd",
+      "bytes": 84,
+      "sha256": "7790258db2a2b5036d412a2a2d384dfb9b6d23c19fcaf0f0d359f9bb3434acf5"
+    },
+    {
+      "original_path": "run_martypc_latest.cmd",
+      "archive_path": "Old Storage/legacy-root/run_martypc_latest.cmd",
+      "bytes": 556,
+      "sha256": "3a46dd136e642622e5e6a2d4e37cbc318cfce98798ce08398586f6b9de75daaa"
+    },
+    {
+      "original_path": "run_martypc_pit9.cmd",
+      "archive_path": "Old Storage/legacy-root/run_martypc_pit9.cmd",
+      "bytes": 142,
+      "sha256": "9eca6cc8b69f4399dfb3243a6c57f62f9fd0088689839950f4eef97615697b17"
+    },
+    {
+      "original_path": "run_startlock.cmd",
+      "archive_path": "Old Storage/legacy-root/run_startlock.cmd",
+      "bytes": 84,
+      "sha256": "8d6de4b06339142fb47b8e255afe6a0c91963a9233eedc15a8eba09887da1d7d"
+    },
+    {
+      "original_path": "CompositeSource/composite.rs",
+      "archive_path": "Old Storage/CompositeSource/composite.rs",
+      "bytes": 235711,
+      "sha256": "9529ed5d01ed9f8ec34f48c08c3f03feb0fcc5491d0e99f6ff3f40ff21985f6b"
+    },
+    {
+      "original_path": "CompositeSource/main.rs",
+      "archive_path": "Old Storage/CompositeSource/main.rs",
+      "bytes": 7874,
+      "sha256": "64c628b3ced89bc0f33922e2aaf0f0fecfc862be221b7aa1a8d0fdf2e069a078"
+    },
+    {
+      "original_path": "CompositeSource/ntsc.rs",
+      "archive_path": "Old Storage/CompositeSource/ntsc.rs",
+      "bytes": 12502,
+      "sha256": "15ff49f9646fa5a2fa6a8da6b74ee2d4d1666718b7a067cf797c6cfa0ae44736"
+    },
+    {
+      "original_path": "CompositeSource/reenigne_composite.rs",
+      "archive_path": "Old Storage/CompositeSource/reenigne_composite.rs",
+      "bytes": 15609,
+      "sha256": "a74faaa2fc954a70b290c015ea197ee5909f9715b31657338d139f80481a5902"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ From the CGA Studio project directory, run:
 
 ```powershell
 cmd /c tools\build_martypc.cmd
-cmd /c run_martypc_latest.cmd
+cmd /c tools\launchers\run_martypc_latest.cmd
 ```
 
 The build script initializes the installed Visual Studio C++ toolchain and runs:
@@ -17,9 +17,10 @@ The build script initializes the installed Visual Studio C++ toolchain and runs:
 cargo build --locked --release -p martypc_eframe --bin martypc
 ```
 
-Double-click **`MartyPC Latest.lnk`** in the project root, or use the CMD launcher
-above. A second copy of the shortcut is beside the build executable. The shortcut
-uses an absolute configuration path and sets the working folder to `install`.
+Double-click **`tools/launchers/run_martypc_latest.cmd`**, or use the command
+above. Locally created **`MartyPC Latest.lnk`** shortcuts may also be available.
+The shortcut uses an absolute configuration path and sets the working folder
+to `install`.
 
 The executable is `external/martypc/target/release/martypc.exe`. Running that raw
 EXE directly from its build folder produces a missing-configuration error because

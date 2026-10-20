@@ -3,3 +3,6 @@
 /files/** -text
 /assets/** -text
 /tools/imagelock.asm -text
+# Archive checksums refer to exact snapshot bytes on every checkout/platform.
+"/Old Storage/legacy-root/**" -text
+"/Old Storage/CompositeSource/**" -text

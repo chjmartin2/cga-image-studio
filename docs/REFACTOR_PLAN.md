@@ -1,5 +1,11 @@
 # Refactor Plan
 
+> Historical plan: the preserved `cga_v165.py` and `cga_v166.py` snapshots now
+> live in `Old Storage/legacy-root/`. Current development uses the root
+> `cga_v167.py` and its supporting modules. The original plan and commands
+> below are retained as written; see the [archive guide](<../Old Storage/README.md>)
+> for the historical files and the [current layout](../README.md#repository-layout).
+
 The first GitHub baseline preserves `cga_v165.py` as the known-good working application. Refactoring should happen after the baseline is committed and tagged.
 
 ## Goals

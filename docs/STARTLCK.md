@@ -12,7 +12,7 @@ The standalone DOS program is **`files/STARTLCK.COM`**.
 
 ## Run in MartyPC
 
-Double-click **`STARTLCK Demo.lnk`** or **`run_startlock.cmd`** in the project root to use the separately
+Double-click **`tools/launchers/run_startlock.cmd`** in the checkout to use the separately
 built MartyPC 0.5.0 with the test disk already mounted in A:. Alternatively,
 mount `files/STARTLCK.DSK` in MartyPC's drive A: and reset the emulated machine.
 The disk boots DOS and runs STARTLCK automatically.
@@ -30,10 +30,10 @@ The original harness did not actually apply the CPU wait-state option.
 For separate process starts with all four configured PIT phases:
 
 ```text
-run_startlock.cmd 0
-run_startlock.cmd 1
-run_startlock.cmd 2
-run_startlock.cmd 3
+tools\launchers\run_startlock.cmd 0
+tools\launchers\run_startlock.cmd 1
+tools\launchers\run_startlock.cmd 2
+tools\launchers\run_startlock.cmd 3
 ```
 
 Close the previous MartyPC before each launch. Repeating STARTLCK at the DOS
