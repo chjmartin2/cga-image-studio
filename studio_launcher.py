@@ -56,17 +56,82 @@ def smoke_check():
         assert stagger_plan["lines"][0]["zones"] != stagger_plan["lines"][1]["zones"]
         assert "row_199" in cga.build_nasm_source_from_com(stagger, "8 staggered", "TEST.COM", mode_switch_plan=stagger_plan)
         assert read_files(bytearray(cga.build_bootable_dsk_from_com(stagger)))["TEST.COM"] == stagger
+
+        # Run the newly shipped encoders, including their packaged data and JIT
+        # paths. Imports alone cannot catch missing templates or Numba sources.
+        import cga_n1_border as border
+        import cga_repeat as repeat
+        import cga_standard_text as text
+        import cga_text_new as new_text
+        import cga_text_new_cpu as cpu
+
+        random = np.random.default_rng(1000)
+        source = Image.fromarray(random.integers(0, 256, (8, 16, 3), dtype=np.uint8))
+        repeat_image, repeat_rows, repeat_info = repeat.encode(
+            source, cga._repeat_mode_switch_palettes(0, "off"), 2, dither_family="None")
+        assert repeat_info["selected_unique_palette_count"] == 2
+        assert all(repeat_rows[y] == repeat_rows[y % 2] for y in range(8))
+        full_image = Image.fromarray(np.tile(np.asarray(repeat_image), (25, 20, 1)))
+        full_rows = [repeat_rows[y % 2] for y in range(200)]
+        repeat_vram = cga.pack_cga_320_vram_from_indices(
+            cga.derive_indices_320_from_rgb(full_image, full_rows))
+        registers = cga.build_cga_reg_table(full_rows)
+        repeat_com = cga.build_com_320_mode_switch_n1(
+            repeat_vram, registers, exit_on_keypress=True, keep_border_black=True)
+        repeat_meta = border.descriptor(repeat_com)
+        start = repeat_meta["bitmap_offset"]
+        assert repeat_com[start:start + 16384] == repeat_vram
+        assert bytes(repeat_com[o] for o in repeat_meta["palette_offsets"])[1::3] == registers[1::2]
+        assert "row_199_color" in cga.build_nasm_source_from_com(repeat_com, "Repeat", "REPEAT.COM")
+        assert read_files(bytearray(cga.build_bootable_dsk_from_com(repeat_com)))["TEST.COM"] == repeat_com
+
+        tiles = random.integers(0, 256, (3, 8, 8, 3), dtype=np.uint8)
+        cells, errors = text.match_tiles(
+            tiles, cga._CGA_FONT, np.asarray(cga.CGA_COLORS, np.uint8), backend="cpu")
+        assert cells.shape == (3, 2) and np.isfinite(errors).all()
+        geometry = text.Geometry(40, 8)
+        text_data = cells[0].tobytes() * (geometry.rows * geometry.columns)
+        assert text.render(text_data, cga._CGA_FONT, cga.CGA_COLORS, geometry).size == (320, 200)
+        text_com = text.build_com(text_data, geometry)
+        assert text_com.endswith(text_data)
+        assert "bits 16" in cga.build_nasm_source_from_com(text_com, "RGB Text", "TEXT.COM")
+        assert read_files(bytearray(cga.build_bootable_dsk_from_com(text_com)))["TEST.COM"] == text_com
+
+        if getattr(sys, "frozen", False):
+            assert cpu.numba is not None, "Standalone build is missing Numba CPU acceleration"
+        _, composite_table, coefficients = new_text.model("Old CGA")
+        candidates = random.integers(0, 16, (3, 2, 8), dtype=np.uint8)
+        target = cga._rgb_array_to_lab(
+            random.integers(0, 256, (1, 2, 8, 3), dtype=np.uint8)).astype(np.float32)
+        scores = cpu.score_candidates(
+            candidates[:1], candidates, target, composite_table, coefficients,
+            np.asarray([[0, 0]], np.int32), workers=1)
+        expected = np.asarray([
+            np.square(cga._rgb_array_to_lab(cpu.decode_rgb(
+                candidate[None], composite_table, coefficients)) - target).sum()
+            for candidate in candidates])
+        np.testing.assert_allclose(scores[0], expected, rtol=1e-12, atol=1e-8)
+        factors = cpu.score_triples(
+            candidates, np.asarray([[[0, 1, 2]]], np.int32), target,
+            composite_table, coefficients, workers=1)
+        np.testing.assert_allclose(factors[0, 0, 0, :, 0], expected, rtol=1e-12, atol=1e-8)
         return {"status": "passed", "release": RELEASE_VERSION,
                 "frozen": bool(getattr(sys, "frozen", False)),
+                "text_cpu_backend": cpu.backend_name(),
                 "checks": ["Tk GUI construction", "Pillow and NumPy", "CGA packing",
                            "COM and ASM generation", "bundled boot disk export",
                            "eight-write preview", "eight-write COM/ASM/DSK exports",
-                           "8 staggered selection, preview and COM/ASM/DSK exports"]}
+                           "8 staggered selection, preview and COM/ASM/DSK exports",
+                           "Repeat conversion and N1 black-border COM/ASM/DSK exports",
+                           "standard RGB text CPU matching and COM/ASM/DSK exports",
+                           "640x200 CPU candidate and triple scorers against decoded RGB"]}
     finally:
         app.destroy()
 
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
     if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
         try:
             result = smoke_check()

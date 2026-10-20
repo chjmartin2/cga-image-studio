@@ -1,0 +1,4 @@
+# Optional compiled CPU scorer for 640x200x1024 NEW.
+# Install with: .venv/Scripts/python.exe -m pip install -r requirements-acceleration.txt
+# The application retains its NumPy fallback when this is absent.
+numba>=0.68,<0.69

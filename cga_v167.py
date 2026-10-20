@@ -589,6 +589,9 @@ def _palette_name_is_tweaked(name):
 
 def filter_candidates_by_tweaked_mode(candidates_dict, tweaked_mode):
     """Filter a {name: palette} dict to either Tweaked-only or non-Tweaked palettes.
+
+    This is a low-level exclusive filter. N=1/Repeat use the additive
+    _single_line_mode_switch_palettes builder instead.
     
     This is the encoder's way of guaranteeing 3D8 stays constant across all 200
     scanlines, allowing the COM builder to use the proven KABLAM fast path
@@ -3754,111 +3757,16 @@ def build_com_text_640x200_1024color(char_attr_16000):
 
 
 def build_com_text_80x100_centered_1024color(buffer_16320):
-    """Build a standalone DOS .COM that displays an 80x100 image vertically
-    centered on screen using the L100V4-verified CRTC technique.
+    """Centered 100-scanline composite display, with a BIOS keypress exit.
 
-    Args:
-        buffer_16320: exactly 16320 bytes of VRAM data as packed by
-            pack_text_80x100_centered_1024color.
-
-    Returns:
-        bytes — the .COM file contents.
+    Accept the existing packed buffer format; normalize its wrapped rows before
+    handing it to the display kernel. Both centered 1024-color modes use this.
     """
     if len(buffer_16320) != 16320:
         raise ValueError(f"buffer must be 16320 bytes, got {len(buffer_16320)}")
-
-    code = bytearray()
-    code += bytes([0x0E, 0x1F])
-    code += bytes([0xB8, 0x03, 0x00, 0xCD, 0x10])
-    code += bytes([0xB8, 0x00, 0xB8, 0x8E, 0xC0])
-    code += bytes([0xB9, 0xE0, 0x1F])
-    si_patch = len(code) + 1
-    code += bytes([0xBE, 0x00, 0x00])
-    code += bytes([0x31, 0xFF])
-    code += bytes([0xFC, 0xF3, 0xA5])
-    code += bytes([0x31, 0xC0, 0xAB])
-
-    code += bytes([0xBA, 0xD8, 0x03, 0xB0, 0x01, 0xEE])
-
-    crtc_init = [
-        (0x00, 0x71), (0x01, 0x50), (0x02, 0x5A),
-        (0x03, 0x0A),
-        (0x04, 0x63), (0x05, 0x00), (0x06, 0x64), (0x07, 0x7F),
-        (0x08, 0x02), (0x09, 0x00), (0x0A, 0x00), (0x0B, 0x00),
-        (0x0C, 0x00), (0x0D, 0x00), (0x0E, 0x1F), (0x0F, 0xFF),
-    ]
-    for reg, val in crtc_init:
-        code += bytes([0xBA, 0xD4, 0x03])
-        code += bytes([0xB0, reg, 0xEE])
-        code += bytes([0x42, 0xB0, val, 0xEE])
-
-    code += bytes([0xBA, 0xD8, 0x03, 0xB0, 0x09, 0xEE])
-    code += bytes([0x42, 0xB0, 0x00, 0xEE])
-
-    code += bytes([0xFA])
-    code += bytes([0xB2, 0xDA])
-    code += bytes([0xB9, 0x00, 0x00])
-
-    # NOTE on keypress handling: We tried multiple approaches (port 0x60/0x64
-    # drain loops at startup, BIOS int 16h drain, single port 0x60 read).
-    # All variants either break the CRTC two-frame switching on MartyPC OR
-    # fail to consume the initial Enter-key scancode. So we use the simplest
-    # working solution: pure frame counter, no keypress polling. The COM
-    # displays for ~5 seconds (300 frames @ 60Hz) and auto-exits.
-
-    frame_loop_off = len(code)
-
-    code += bytes([0xEC, 0xA8, 0x01, 0x75, 0xFB])
-    code += bytes([0xB2, 0xD4])
-    for reg, val in [(0x09, 0x00), (0x04, 0x63), (0x06, 0x64),
-                     (0x07, 0x7F), (0x0C, 0x1F), (0x0D, 0x40)]:
-        word = (val << 8) | reg
-        code += bytes([0xB8, word & 0xFF, (word >> 8) & 0xFF, 0xEF])
-    code += bytes([0xB2, 0xDA])
-    code += bytes([0xEC, 0xA8, 0x01, 0x74, 0xFB])
-
-    for _ in range(99):
-        code += bytes([0xEC, 0xA8, 0x01, 0x75, 0xFB])
-        code += bytes([0xEC, 0xA8, 0x01, 0x74, 0xFB])
-
-    code += bytes([0xEC, 0xA8, 0x01, 0x75, 0xFB])
-    code += bytes([0xB2, 0xD4])
-    # NOTE on ordering: tried writing R6=0 (VDisp) FIRST to gate display off
-    # immediately and eliminate a thin scanline of stray VRAM content at
-    # bottom of image. But that broke vsync detection — when VDisp=0 hits
-    # before VTotal updates, CRTC state machine doesn't fire vsync cleanly
-    # and the frame loop hangs in waitForVerticalSync.
-    # R9 (MaxSL) first matches reenigne's original code and lets vsync work.
-    # Accept the thin scanline defect; can revisit later if it matters.
-    for reg, val in [(0x09, 0x01), (0x06, 0x00), (0x07, 0x25), (0x04, 0x50)]:
-        word = (val << 8) | reg
-        code += bytes([0xB8, word & 0xFF, (word >> 8) & 0xFF, 0xEF])
-    code += bytes([0xB8, 0x0C, 0x00, 0xEF])
-    code += bytes([0x40, 0xEF])
-    code += bytes([0xB2, 0xDA])
-    code += bytes([0xEC, 0xA8, 0x01, 0x74, 0xFB])
-
-    code += bytes([0xEC, 0xA8, 0x08, 0x74, 0xFB])
-    code += bytes([0xEC, 0xA8, 0x08, 0x75, 0xFB])
-
-    # ---- Frame counter exit (300 frames = 5 sec @ 60Hz) ----
-    # 300 = 0x012C, little-endian = 2C 01
-    code += bytes([0x41])                          # inc cx
-    code += bytes([0x81, 0xF9, 0x2C, 0x01])        # cmp cx, 300
-    code += bytes([0x74, 0x03])                    # jz +3 → exit
-    rel = frame_loop_off - (len(code) + 3)
-    rel16 = rel & 0xFFFF
-    code += bytes([0xE9, rel16 & 0xFF, (rel16 >> 8) & 0xFF])  # jmp frame_loop
-
-    # exit:
-    code += bytes([0xFB])                          # sti
-    code += bytes([0xB8, 0x03, 0x00, 0xCD, 0x10])
-    code += bytes([0xB4, 0x4C, 0xCD, 0x21])
-
-    data_off = 0x100 + len(code)
-    code[si_patch] = data_off & 0xFF
-    code[si_patch + 1] = (data_off >> 8) & 0xFF
-    return bytes(code) + buffer_16320
+    from centered_display import build_centered_com
+    rows = bytes(buffer_16320[16000:16320]) + bytes(buffer_16320[:15680])
+    return build_centered_com(rows)
 
 
 # 16 possible 2-pixel pairs in 2bpp (values 0..3). We map composite "color index" 0..15 to these pairs.
@@ -5523,7 +5431,8 @@ def build_cga_reg_table(pals_by_y) -> bytes:
 
 def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
                                   display_frames: int = 1800,
-                                  exit_on_keypress: bool = False) -> bytes:
+                                  exit_on_keypress: bool = False,
+                                  keep_border_black: bool = False) -> bytes:
     """Build a stable DOS .COM that displays a 320x200 image with one palette change
     per scanline (CGA Mode Switch, N=1 segments).
 
@@ -5567,10 +5476,19 @@ def build_com_320_mode_switch_n1(vram16k: bytes, reg_table_400: bytes,
         exit_on_keypress: when True, briefly re-enable interrupts between frames
                           and exit after a keypress. The timing-critical scanline
                           loop still runs with interrupts disabled.
+        keep_border_black: use the separate acquired overscan-write template.
+                           This preserves image register choices; see
+                           docs/N1_BORDER.md for renderer/phase limitations.
 
     Returns:
         bytes — the .COM file contents
     """
+    if keep_border_black:
+        # Separate acquired raster: image palettes at the left edge, black at
+        # the right edge and throughout vertical overscan. The legacy polled
+        # path below is retained byte-for-byte when the option is off.
+        from cga_n1_border import build_com
+        return build_com(vram16k, reg_table_400, display_frames, exit_on_keypress)
     if len(vram16k) != 16384:
         raise ValueError(f"vram16k must be exactly 16384 bytes, got {len(vram16k)}")
     if len(reg_table_400) != 400:
@@ -9412,6 +9330,73 @@ def find_best_stagger_step_320(image_rgb, N, W=320, H=200):
     return best_step
 
 
+def _single_line_mode_switch_palettes(forced_bg_idx=None, tweaked_mode="off"):
+    """Standard row palettes, plus tweaked families when enabled.
+
+    Enabling an optional family must not exclude standard exact matches.
+    Standard candidates stay first for deterministic ties and Repeat parity.
+    """
+    import operator
+
+    if isinstance(CGA_4COLOR_PALETTES, dict):
+        candidates = filter_candidates_by_tweaked_mode(CGA_4COLOR_PALETTES, "off")
+        if tweaked_mode != "off":
+            candidates += filter_candidates_by_tweaked_mode(CGA_4COLOR_PALETTES, "on")
+    else:
+        candidates = list(CGA_4COLOR_PALETTES)
+    if forced_bg_idx is not None:
+        try:
+            index = operator.index(forced_bg_idx)
+        except TypeError as exc:
+            raise ValueError("Background must be a CGA color index from 0 to 15, or None for Per line") from exc
+        if not 0 <= index < len(CGA_COLORS):
+            raise ValueError("Background must be a CGA color index from 0 to 15")
+        background = tuple(CGA_COLORS[index])
+        candidates = [p for p in candidates if tuple(p[0]) == background]
+    # The legacy Dark Red/Green/Brown label duplicates one standard palette.
+    # Remove duplicate trials, never distinct legal choices or palette entries.
+    unique = list(dict.fromkeys(tuple(tuple(color) for color in palette) for palette in candidates))
+    if not unique:
+        raise ValueError("No legal CGA palettes match the selected background and palette family")
+    return unique
+
+
+def _repeat_mode_switch_palettes(forced_bg_idx=None, tweaked_mode="off"):
+    """Share the four/six-family pool without duplicating standard candidates."""
+    return _single_line_mode_switch_palettes(forced_bg_idx, tweaked_mode)
+
+
+def quantize_320x200_mode_switch_repeat(
+    image_rgb_320x200, repeat_rows=2, *, forced_bg_idx=None,
+    dither_family="Diffusion", diffusion_name="Floyd-Steinberg",
+    diffusion_intensity=1.0, serpentine=True, ordered_matrix_size=4,
+    ordered_strength=1.0, tweaked_mode="off", progress_cb=None,
+    return_palettes=False, return_diagnostics=False, force_no_repeat_background=False,
+):
+    """Globally choose legal palettes, then repeat the full cycle down the image."""
+    from cga_repeat import encode
+
+    if force_no_repeat_background and forced_bg_idx is not None:
+        raise ValueError("Forced No Repeats cannot use a fixed background color")
+    image = image_rgb_320x200.convert("RGB")
+    if image.size != (320, 200):
+        image = image.resize((320, 200), Image.Resampling.LANCZOS)
+    # Five/six unique foreground combinations require the two tweaked families.
+    # The UI makes this automatic inclusion visible by selecting Tweaked on.
+    include_tweaked = tweaked_mode == "on" or int(repeat_rows) > 4
+    candidates = _repeat_mode_switch_palettes(forced_bg_idx, "on" if include_tweaked else "off")
+    output, palettes, diagnostics = encode(
+        image, candidates, repeat_rows=repeat_rows, dither_family=dither_family,
+        diffusion_name=diffusion_name, diffusion_intensity=diffusion_intensity,
+        serpentine=serpentine, ordered_matrix_size=ordered_matrix_size,
+        ordered_strength=ordered_strength, progress_cb=progress_cb,
+        force_no_repeat_background=force_no_repeat_background)
+    diagnostics['tweaked_combinations_allowed'] = include_tweaked
+    if return_diagnostics:
+        return output, palettes, diagnostics
+    return (output, palettes) if return_palettes else output
+
+
 def quantize_320x200_mode_switch(
     image_rgb_320x200,
     forced_bg_idx=None,
@@ -9429,18 +9414,38 @@ def quantize_320x200_mode_switch(
     progress_cb=None,
     debug=DEBUG_MODE_SWITCH,
     return_palettes=False,
-    tweaked_mode="off",         # "off" → mode-04 palettes only (3D8=0x0A constant)
-                                # "on"  → mode-05 Tweaked palettes only (3D8=0x0E constant)
-    dither_aware=False,         # pick each segment's palette by simulating the dither (Lab) instead
-                                # of pre-dither nearest-colour -> kills mid-tone horizontal banding
+    tweaked_mode="off",         # N=1: off = standard; on = standard + tweaked.
+                                # Legacy multiwrite path retains its family restriction.
+    dither_aware=False,         # evaluate palette choices using the selected dither renderer
+    force_unique_palette_per_scanline=False,
 ):
     """
     320x200 Mode Switch:
       - Choose a 4-color CGA palette PER SCANLINE.
-      - Render the scanline left-to-right (optionally serpentine) using that palette.
-      - Error diffusion propagates from the *working/original* pixel value (work[y][x]) into future pixels,
-        including the pixel(s) below, so palette choice for the next scanline can be influenced.
+      - For one palette per row, search and output share a linear-light renderer.
+      - Diffusion uses the selected kernel and optional serpentine direction.
+        Only the chosen trial's signed error reaches subsequent pixels and rows.
     """
+    if force_unique_palette_per_scanline and int(segments_per_line) != 1:
+        raise ValueError("Force unique palette per scanline requires one palette per scanline")
+    if int(segments_per_line) == 1:
+        # One palette spans each complete scanline. Search and output share the
+        # same linear-light renderer; only the selected trial commits its error.
+        from cga_scanline import encode
+
+        image = image_rgb_320x200.convert("RGB")
+        if image.size != (320, 200):
+            image = image.resize((320, 200), Image.LANCZOS)
+        candidates = _single_line_mode_switch_palettes(forced_bg_idx, tweaked_mode)
+        output, palettes = encode(
+            image, candidates, dither_family=dither_family,
+            diffusion_name=diffusion_name, diffusion_intensity=diffusion_intensity,
+            serpentine=serpentine, ordered_matrix_size=ordered_matrix_size,
+            ordered_strength=ordered_strength, dither_aware=dither_aware,
+            force_unique_palette_per_scanline=force_unique_palette_per_scanline,
+            progress_cb=progress_cb)
+        return (output, palettes) if return_palettes else output
+
     status_dbg('ENTER quantize_320x200_mode_switch()')
 
     # --- Debug files ---
@@ -11714,6 +11719,9 @@ def build_nasm_source_from_com(com_bytes: bytes, mode_label: str, binary_name: s
     """
     if not isinstance(com_bytes, (bytes, bytearray)) or not com_bytes:
         raise ValueError("COM export did not produce any bytes")
+    if com_bytes[0xE00:0xE08] == b'N1BRD001':
+        from cga_n1_border import build_nasm_source
+        return build_nasm_source(com_bytes, mode_label, binary_name)
     if mode_switch_plan is not None and mode_switch_plan.get("timing_backend") is not None:
         timing_backend = mode_switch_plan["timing_backend"]
         if timing_backend not in _CGA_ACQUIRED_TIMING_BACKENDS:
@@ -11963,7 +11971,7 @@ class CgaConverterApp(tk.Tk):
         # 4-pattern legacy LUT path.
         self.text_ntsc_src640 = None
         # For 640x200 (1024 Colors) mode: 640x200 source for the per-cell-row
-        # Viterbi encoder. Stashed at convert time when that mode is active.
+        # CPU/GPU optimizer. Stashed at convert time when that mode is active.
         self.text_ntsc_src640x200 = None
         # Threading state for the slow centered-40-pattern encoder. When an
         # encode is in progress, _centered_encoder_thread is non-None and the
@@ -12062,21 +12070,28 @@ class CgaConverterApp(tk.Tk):
         self.export_button = ttk.Menubutton(controls, text='Export')
         self.export_menu = tk.Menu(self.export_button, tearoff=False)
         for label, command in (
-            ('Image (GIF)...', self.on_save),
+            ('Image (PNG, WebP, GIF)...', self.on_save),
             ('Assembly source (ASM)...', self.on_export_asm),
             ('DOS program (COM)...', self.on_export_com),
             ('Bootable disk (DSK)...', self.on_export_dsk),
+            ('Save DSK and launch in MartyPC...', self.on_export_marty),
         ):
             self.export_menu.add_command(label=label, command=command)
+        self.export_menu.add_separator()
+        self.export_menu.add_command(label='Link to MartyPC...', command=self.on_link_marty)
         self.export_button.configure(menu=self.export_menu)
         self.export_button.pack(side=tk.LEFT, padx=4)
         Tooltip(self.export_button, 'Save the converted image, assembly source, DOS program, or bootable disk.')
+        self.open_marty_button = ttk.Button(controls, text='Open in MartyPC',
+            command=self.on_open_marty)
+        self.open_marty_button.pack(side=tk.LEFT, padx=4)
+        Tooltip(self.open_marty_button, 'Boot the completed conversion in MartyPC. Studio creates a bootable disk and runs its DOS program automatically.')
         adjust_button = ttk.Checkbutton(controls, text='Adjust input',
             variable=self.show_input_adjust_var, command=self._toggle_input_adjust)
         adjust_button.pack(side=tk.LEFT, padx=12)
         Tooltip(adjust_button, 'Show brightness, contrast, and RGB adjustments in the settings panel.')
         self.optimize_button = ttk.Button(controls, text='Find best palette', command=self.on_optimize)
-        Tooltip(self.optimize_button, 'Compare hardware palettes for the current four-color image.')
+        Tooltip(self.optimize_button, 'Compare palettes in four-color mode, or text conversion settings using a fixed visual score. Text keeps the selected height, composition, adjustments, DCT weights and CGA-reduction checkbox. Dither strengths use 0.25 steps plus current values.')
         workspace = ttk.Frame(self)
         workspace.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=8, pady=4)
         sidebar = ttk.Frame(workspace, width=330)
@@ -12106,11 +12121,22 @@ class CgaConverterApp(tk.Tk):
         # Mode
         ttk.Label(options, text="Output mode:").grid(row=0, column=0, sticky="w", padx=4, pady=2)
         self.mode_var = tk.StringVar(value="320x200 (4 Colors)")
+        self.standard_text_height_var = tk.StringVar(value="8")
+        self.standard_text_match_var = tk.StringVar(value="DCT (structure)")
+        self.standard_text_preprocess_var = tk.StringVar(value="Original")
+        self.standard_text_quantize_var = tk.BooleanVar(value=False)
+        self.standard_text_info_var = tk.StringVar()
+        self.standard_text_cells = None
+        from cga_standard_text import DCTSettings
+        for name in ('structure','falloff','color','vertical'):
+            setattr(self,f'standard_text_dct_{name}_var',tk.DoubleVar(value=getattr(DCTSettings(),name)))
         mode_cb = ttk.Combobox(
             options,
             textvariable=self.mode_var,
             state="readonly",
             values=[
+                "40-column Text (RGB)",
+                "80-column Text (RGB)",
                 "320x200 (4 Colors)",
                 "640x200 (2 Colors)",
                 "160x200 (16 Colors) Composite",
@@ -12124,6 +12150,7 @@ class CgaConverterApp(tk.Tk):
                 "640x200 (16 Colors) Char",
                 "80x100 (4352 Colors) HiColor",
                 "320x200 (4 Colors) Mode Switch",
+                "320x200 Mode Switch Repeat",
             ],
             width=30,
         )
@@ -12486,7 +12513,34 @@ class CgaConverterApp(tk.Tk):
         self.ms_switches_spin.grid(row=6, column=4, sticky="w", padx=4, pady=2)
         self.ms_switches_spin.bind("<FocusOut>", lambda e: self._on_mode_switch_options_changed())
         self.ms_switches_spin.bind("<Return>", lambda e: self._on_mode_switch_options_changed())
-        
+
+        # Repeat mode selects one palette for each slot in a repeating row cycle.
+        # Its cycle length is independent of the original mode's write profile.
+        self.ms_repeat_rows_var = tk.StringVar(value="2")
+        self.ms_repeat_rows_cb = ttk.Combobox(
+            options,
+            values=("2", "3", "4", "5", "6"),
+            textvariable=self.ms_repeat_rows_var,
+            width=12,
+            state="readonly",
+        )
+        self.ms_repeat_rows_cb.bind("<<ComboboxSelected>>", self._on_mode_switch_repeat_rows_changed)
+        self.ms_repeat_limit_var = tk.StringVar()
+        self.ms_repeat_limit_label = ttk.Label(
+            options, textvariable=self.ms_repeat_limit_var, wraplength=285,
+        )
+
+        # Repeat mode has its own background policy; never overwrite the
+        # original Mode Switch mode's remembered fixed-color/per-line choice.
+        self.ms_repeat_background_var = tk.StringVar(value="Adjustable")
+        self.ms_repeat_background_cb = ttk.Combobox(
+            options,
+            values=("Adjustable", "Forced No Repeats", *CGA_COLOR_NAMES),
+            textvariable=self.ms_repeat_background_var,
+            width=18,
+            state="readonly",
+        )
+        self.ms_repeat_background_cb.bind("<<ComboboxSelected>>", lambda e: self._on_mode_switch_options_changed())
 
         # Mode Switch palette strip diagnostic
         self.ms_show_palette_var = tk.BooleanVar(value=False)
@@ -12504,23 +12558,21 @@ class CgaConverterApp(tk.Tk):
         #   green/red/yellow LOW/HIGH, cyan/magenta/white LOW/HIGH).
         #   3D8 = 0x0A constant for all 200 lines.
         # 
-        # When ON: encoder restricts to mode 05 "Tweaked" palettes
-        #   (cyan/red/light-gray, light-cyan/light-red/white).
-        #   3D8 = 0x0E constant for all 200 lines.
-        # 
-        # Either way 3D8 is written ONCE at startup (not per-line). The COM 
-        # builder's fast path then writes only 3D9 per scanline (single OUT, 
-        # no back-to-back register writes that caused leftmost-pixel defects).
+        # When ON: add the two mode-05 families to the four standard families.
+        # The N=1 exporter supports mixed per-row 3D8/3D9 pairs. Multiwrite
+        # profiles remain standard-only and disable this selector.
         ttk.Label(options, text="Tweaked palettes:").grid(row=9, column=3, sticky="e", padx=4, pady=2)
         self.tweaked_mode_var = tk.StringVar(value="off")
         tweaked_frame = ttk.Frame(options)
         tweaked_frame.grid(row=9, column=4, columnspan=2, sticky="w", padx=4, pady=2)
         self.tweaked_off_rb = ttk.Radiobutton(
-            tweaked_frame, text="Off (mode 04)", variable=self.tweaked_mode_var, value="off"
+            tweaked_frame, text="Off (standard)", variable=self.tweaked_mode_var, value="off",
+            command=self._on_mode_switch_options_changed,
         )
         self.tweaked_off_rb.pack(side=tk.LEFT, padx=2)
         self.tweaked_on_rb = ttk.Radiobutton(
-            tweaked_frame, text="On (mode 05)", variable=self.tweaked_mode_var, value="on"
+            tweaked_frame, text="On (standard + tweaked)", variable=self.tweaked_mode_var, value="on",
+            command=self._on_mode_switch_options_changed,
         )
         self.tweaked_on_rb.pack(side=tk.LEFT, padx=2)
 
@@ -12550,22 +12602,33 @@ class CgaConverterApp(tk.Tk):
         self.ms_black_border_var = tk.BooleanVar(value=True)
         self.ms_black_border_cb = ttk.Checkbutton(
             options,
-            text="Keep border black after final Mode Switch write",
+            text="Keep border black",
             variable=self.ms_black_border_var,
         )
         self.ms_black_border_cb.grid(row=8, column=3, columnspan=3, sticky="w", padx=4, pady=2)
 
-        # Dither-aware palette selection: pick each zone's palette by SIMULATING the dither and
-        # scoring the resulting CIE-Lab error, instead of pre-dither nearest-colour. Stops the
-        # mid-tone palette oscillation that shows up as horizontal banding. Slower (per-candidate
-        # dither sim), so it is opt-in.
+        # Evaluate palette choices using the selected dither. The single-write
+        # profile defaults on; keep the multi-write profile's opt-in default and
+        # remember explicit checkbox choices separately when switching profiles.
+        self._mode_switch_dither_aware_preferences = {"single": True, "multi": False}
+        self._mode_switch_dither_aware_profile = None
         self.ms_dither_aware_var = tk.BooleanVar(value=False)
         self.ms_dither_aware_cb = ttk.Checkbutton(
             options,
-            text="Dither aware optimization (Lab, slower)",
+            text="Dither-aware palette search",
             variable=self.ms_dither_aware_var,
         )
         self.ms_dither_aware_cb.grid(row=9, column=0, columnspan=3, sticky="w", padx=4, pady=2)
+
+        # Optional adjacent-row foreground constraint; remember its value while
+        # modes that do not support it hide and disable the advanced control.
+        self.ms_force_unique_palette_var = tk.BooleanVar(value=False)
+        self.ms_force_unique_palette_cb = ttk.Checkbutton(
+            options,
+            text="Force unique palette per scanline",
+            variable=self.ms_force_unique_palette_var,
+        )
+        self.ms_force_unique_palette_cb.state(["disabled"])
 
         # Backward-compat alias (so old code paths that still reference ms_stagger_var don't crash)
         self.ms_stagger_var = tk.BooleanVar(value=False)
@@ -12629,6 +12692,8 @@ class CgaConverterApp(tk.Tk):
         self.left_label = ttk.Label(left_frame, text="No image loaded")
         self.left_label.pack(fill=tk.BOTH, expand=True)
         self.left_label.bind('<Configure>', self._schedule_left_preview_update)
+        from cga_standard_text_ui import install_input_preview
+        install_input_preview(self, left_frame)
 
         # Tone-match preview (only shown for 320x200 4-color + "Match contrast / tone" enabled)
         self.tone_preview_frame = ttk.LabelFrame(left_frame, text="Tone-match (4-color only)")
@@ -12643,6 +12708,23 @@ class CgaConverterApp(tk.Tk):
 
         self.preview_size_label = ttk.Label(self.right_frame, text="", anchor="w")
         self.preview_size_label.pack(side=tk.BOTTOM, fill=tk.X, padx=4, pady=(0,4))
+
+        # Display the same encoded character/attribute bytes through either
+        # monitor connection. This changes only the view, never the search.
+        self.text_display_var = tk.StringVar(value="Composite")
+        self.text_display_frame = ttk.Frame(self.right_frame)
+        ttk.Label(self.text_display_frame, text="Display:").pack(side=tk.LEFT, padx=(4, 2))
+        self.text_display_composite_radio = ttk.Radiobutton(
+            self.text_display_frame, text="Composite", variable=self.text_display_var,
+            value="Composite", command=self._update_right_preview)
+        self.text_display_composite_radio.pack(side=tk.LEFT, padx=2)
+        self.text_display_rgb_radio = ttk.Radiobutton(
+            self.text_display_frame, text="RGB text", variable=self.text_display_var,
+            value="RGB text", command=self._update_right_preview)
+        self.text_display_rgb_radio.pack(side=tk.LEFT, padx=2)
+        Tooltip(self.text_display_rgb_radio,
+                'View the encoded characters on a 16-color RGBI monitor. '
+                'Switch instantly without converting again; image exports use the selected display.')
 
         # Polish before/after toggle. Hidden until polish completes; revealed
         # by _update_polish_view_toggle(visible=True). Lets the user flip
@@ -12720,10 +12802,42 @@ class CgaConverterApp(tk.Tk):
         # Optional: Mode Switch palette strip (diagnostic) — full-width image map
         # showing the per-scanline segment layout including stagger offsets.
         # Lives BELOW the output canvas (banner-style) so it can show its full width.
-        self.ms_pal_frame = ttk.LabelFrame(self.right_frame, text="Mode Switch layout map")
+        self.ms_pal_frame = ttk.LabelFrame(self.right_frame, text="Mode Switch layout map", height=270)
+        # The diagnostic image must not change the space available to Auto zoom.
+        self.ms_pal_frame.pack_propagate(False)
         # Don't pack it here; _update_right_preview will pack/forget based on whether a strip exists.
-        self.ms_pal_label = ttk.Label(self.ms_pal_frame, text="")
-        self.ms_pal_label.pack(fill=tk.BOTH, expand=True, padx=4, pady=4)
+        map_toolbar = ttk.Frame(self.ms_pal_frame)
+        map_toolbar.pack(fill=tk.X, padx=4, pady=(2, 4))
+        ttk.Label(map_toolbar, text="Zoom").pack(side=tk.LEFT, padx=(0, 4))
+        self.ms_pal_zoom_var = tk.StringVar(value="Auto")
+        self.ms_pal_zoom_cb = ttk.Combobox(
+            map_toolbar, textvariable=self.ms_pal_zoom_var, state="readonly",
+            values=("Auto", "1x", "2x", "4x", "8x"), width=6)
+        self.ms_pal_zoom_cb.pack(side=tk.LEFT)
+        self.ms_pal_zoom_cb.bind("<<ComboboxSelected>>", lambda event: self._update_mode_switch_map())
+        from studio_ui import Tooltip
+        Tooltip(self.ms_pal_zoom_cb, "Zoom the layout map independently. Whole pixels preserve every scanline; use the scrollbars to inspect enlarged rows.")
+        self.ms_pal_size_var = tk.StringVar(value="")
+        ttk.Label(map_toolbar, textvariable=self.ms_pal_size_var).pack(side=tk.RIGHT)
+        map_viewport = ttk.Frame(self.ms_pal_frame)
+        map_viewport.pack(fill=tk.BOTH, expand=True, padx=4, pady=(0, 4))
+        self.ms_pal_canvas = tk.Canvas(map_viewport, highlightthickness=0,
+            background=style.lookup('TFrame', 'background') or self.cget('background'))
+        self.ms_pal_vscroll = ttk.Scrollbar(map_viewport, orient="vertical", command=self.ms_pal_canvas.yview)
+        self.ms_pal_hscroll = ttk.Scrollbar(map_viewport, orient="horizontal", command=self.ms_pal_canvas.xview)
+        self.ms_pal_canvas.configure(yscrollcommand=self.ms_pal_vscroll.set,
+                                     xscrollcommand=self.ms_pal_hscroll.set)
+        self.ms_pal_canvas.grid(row=0, column=0, sticky="nsew")
+        self.ms_pal_vscroll.grid(row=0, column=1, sticky="ns")
+        self.ms_pal_hscroll.grid(row=1, column=0, sticky="ew")
+        map_viewport.grid_rowconfigure(0, weight=1)
+        map_viewport.grid_columnconfigure(0, weight=1)
+        self.ms_pal_canvas.bind("<Configure>", self._schedule_mode_switch_map_refresh)
+        for sequence in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+            self.ms_pal_canvas.bind(sequence, self._scroll_mode_switch_map)
+        self._ms_pal_resize_id = None
+        self._ms_pal_source = None
+        self.ms_pal_canvas_img_id = None
         self.ms_pal_tk = None
         self.ms_pal_pimage = None
         self.composite_encoded_pimage = None
@@ -12746,9 +12860,13 @@ class CgaConverterApp(tk.Tk):
         self.status_var.set('Open an image to begin.')
 
     def destroy(self):
+        cancel=getattr(self,'_centered_encoder_cancel',None)
+        if cancel is not None:
+            cancel.set()
+        self._centered_encoder_token+=1
         if hasattr(self, 'activity_bar'):
             self.activity_bar.stop()
-        for name in ('_left_preview_after_id', '_preview_resize_id'):
+        for name in ('_left_preview_after_id', '_preview_resize_id', '_ms_pal_resize_id', '_standard_text_dct_after'):
             pending = getattr(self, name, None)
             if pending is not None:
                 self.after_cancel(pending)
@@ -12862,6 +12980,22 @@ class CgaConverterApp(tk.Tk):
     def is_16color_low_mode(self):
         return self.mode_var.get().startswith("160x100 (16 Colors)")
 
+    def is_standard_text_mode(self):
+        from cga_standard_text import MODES
+        return self.mode_var.get() in MODES
+
+    def standard_text_geometry(self):
+        from cga_standard_text import MODES, Geometry
+        return Geometry(MODES[self.mode_var.get()],int(self.standard_text_height_var.get()))
+
+    def _on_standard_text_options_changed(self, event=None):
+        if self.is_standard_text_mode():
+            geometry = self.standard_text_geometry()
+            note = 'full ROM glyph' if geometry.height == 8 else 'top ROM rows'
+            self.standard_text_info_var.set(f'{geometry.columns} x {geometry.rows} cells | '
+                f'{geometry.memory_bytes:,} / 16,384 bytes\n{geometry.active_size[1]} image scanlines; {note}')
+        self._refresh_settings_layout()
+
 
     def is_16color_char_mode(self):
         m = self.mode_var.get()
@@ -12884,13 +13018,14 @@ class CgaConverterApp(tk.Tk):
           - "80x100 (1024 Colors) Mini-Frames" — timed full-height mini-frames CRTC trick
           - "80x100 (1024 Colors)"             — 4-pattern centered (cell-grain encoder)
           - "640x100 (1024 Colors)"            — 40-pattern centered (per-pixel encoder)
-          - "640x200 (1024 Colors)"            — full-screen Viterbi, 2 scanlines/cell (set-and-forget)
+          - "640x200 (1024 Colors)"            — full-screen CPU/GPU optimizer, 2 scanlines/cell
         """
         m = self.mode_var.get()
         return (m == "80x100 (1024 Colors) Mini-Frames"
                 or m == "80x100 (1024 Colors)"
                 or m == "640x100 (1024 Colors)"
-                or m == "640x200 (1024 Colors)")
+                or m == "640x200 (1024 Colors)"
+                or m == "640x200x1024 NEW")
 
     def is_text_ntsc_centered_mode(self):
         """True for the two centered-CRTC modes (the L100V4 builder).
@@ -12908,17 +13043,20 @@ class CgaConverterApp(tk.Tk):
         return self.mode_var.get() == "640x100 (1024 Colors)"
 
     def is_text_ntsc_640x200_mode(self):
-        """True only for the 640x200 (1024 Colors) full-screen set-and-forget
-        mode. Each cell renders 2 scanlines via different (row0, row1) byte
-        pairs from the CGA font. Uses Viterbi DP encoder run on a background
-        thread."""
-        return self.mode_var.get() == "640x200 (1024 Colors)"
+        """Full-screen text modes sharing the two-scanline preview and export."""
+        return self.mode_var.get() in ("640x200 (1024 Colors)", "640x200x1024 NEW")
+
+    def is_text_ntsc_new_mode(self):
+        """The standard full-screen optimizer (including its former script alias)."""
+        return self.is_text_ntsc_640x200_mode()
 
     def is_text_ntsc_viterbi_mode(self):
-        """True for any mode that runs the slow per-row Viterbi encoder on a
-        background thread (currently 640x100 and 640x200). Used to gate
-        STOP button visibility and the slow-encode dispatch."""
-        return self.is_text_ntsc_640_mode() or self.is_text_ntsc_640x200_mode()
+        """Only the centered 640x100 mode retains the legacy Viterbi encoder."""
+        return self.is_text_ntsc_640_mode()
+
+    def is_text_ntsc_background_mode(self):
+        """Text encoders using the shared cancellable background job lifecycle."""
+        return self.is_text_ntsc_viterbi_mode() or self.is_text_ntsc_new_mode()
 
     def is_text_ntsc_80x100_centered_mode(self):
         """True only for the 4-pattern centered mode. Used to dispatch convert
@@ -12942,18 +13080,24 @@ class CgaConverterApp(tk.Tk):
 
 
     def is_mode_switch_mode(self):
-        # ONLY the original 320x200 4-color Mode Switch.
-        # The 640x200 2-color Mode Switch has its own predicate (is_640_2color_mode_switch_mode).
-        return self.mode_var.get() == "320x200 (4 Colors) Mode Switch"
+        # Both 320x200 four-color variants share palette and diagnostic controls.
+        # The 640x200 two-color mode has its own predicate.
+        return self.mode_var.get() in (
+            "320x200 (4 Colors) Mode Switch", "320x200 Mode Switch Repeat")
+
+    def is_mode_switch_repeat_mode(self):
+        return self.mode_var.get() == "320x200 Mode Switch Repeat"
 
     def is_640_2color_mode_switch_mode(self):
         return self.mode_var.get() == "640x200 (2 Colors) Mode Switch"
 
     def is_any_mode_switch(self):
-        """True for either Mode Switch variant — used for shared UI logic."""
+        """True for any Mode Switch variant — used for shared UI logic."""
         return self.is_mode_switch_mode() or self.is_640_2color_mode_switch_mode()
 
     def get_target_size(self):
+        if self.is_standard_text_mode():
+            return self.standard_text_geometry().active_size
         if self.is_multicolor_composite_mode():
             return 640, 200
         if self.is_4color_mode() or self.is_mode_switch_mode():
@@ -13066,6 +13210,9 @@ class CgaConverterApp(tk.Tk):
                 self._update_mid_preview()
 
     def on_mode_changed(self, event=None):
+        # Older local launch scripts may still select the experimental name.
+        if self.mode_var.get() == '640x200x1024 NEW':
+            self.mode_var.set('640x200 (1024 Colors)')
         self._cancel_multicolor()
         if hasattr(self, 'miniframes_duration_frame'):
             if self.mode_var.get() == '80x100 (1024 Colors) Mini-Frames':
@@ -13096,20 +13243,24 @@ class CgaConverterApp(tk.Tk):
 
         # Background color selection is only meaningful in 320x200 4-color and Mode Switch modes.
         if getattr(self, "bg_color_cb", None) is not None:
-            if self.is_mode_switch_mode():
+            if self.is_mode_switch_repeat_mode():
+                self.bg_color_cb.state(["disabled"])
+            elif self.is_mode_switch_mode():
                 self.status_step('Mode branch: Mode Switch 320x200 (4 Colors)')
-                vals = ["Multiple"] + list(CGA_COLOR_NAMES)
+                vals = ["Per line"] + list(CGA_COLOR_NAMES)
                 self.bg_color_cb["values"] = vals
                 self.bg_color_cb.state(["!disabled"])
                 if previous_mode != current_mode:
-                    self.bg_color_var.set(getattr(self, "_mode_switch_bg_selection", "Multiple"))
+                    self.bg_color_var.set(getattr(self, "_mode_switch_bg_selection", "Per line"))
+                if self.bg_color_var.get() == "Multiple":
+                    self.bg_color_var.set("Per line")
                 if self.bg_color_var.get() not in vals:
-                    self.bg_color_var.set("Multiple")
+                    self.bg_color_var.set("Per line")
             elif self.is_4color_mode():
                 vals = list(CGA_COLOR_NAMES)
                 self.bg_color_cb["values"] = vals
                 self.bg_color_cb.state(["!disabled"])
-                if self.bg_color_var.get() not in vals or self.bg_color_var.get() == "Multiple":
+                if self.bg_color_var.get() not in vals:
                     self.bg_color_var.set("Black")
             else:
                 self.bg_color_cb.state(["disabled"])
@@ -13215,6 +13366,8 @@ class CgaConverterApp(tk.Tk):
 
         self._update_mid_preview()
         self._update_right_preview()
+        self._on_standard_text_options_changed()
+        self._update_left_preview()
         self._refresh_settings_layout()
 
     
@@ -13285,11 +13438,46 @@ class CgaConverterApp(tk.Tk):
         return CGA_16COLOR_PALETTE
 
 
+    def _on_mode_switch_repeat_rows_changed(self, event=None):
+        """Five or six distinct foregrounds require the two tweaked families."""
+        enable_tweaked = int(self.ms_repeat_rows_var.get()) > 4 and self.tweaked_mode_var.get() != "on"
+        if enable_tweaked:
+            self.tweaked_mode_var.set("on")
+        self._on_mode_switch_options_changed()
+        if enable_tweaked:
+            self.ms_repeat_limit_var.set(
+                f"Enabled tweaked palettes for {self.ms_repeat_rows_var.get()} unique foreground combinations."
+            )
+
+    def _refresh_repeat_palette_choices(self):
+        """Keep each cycle slot's three foreground colors unique, regardless of background."""
+        fixed_background = self.ms_repeat_background_var.get() in CGA_COLOR_NAMES
+        tweaked = self.tweaked_mode_var.get() == "on"
+        maximum = 6 if tweaked else 4
+        choice_maximum = maximum if fixed_background else 6
+        self.ms_repeat_rows_cb.configure(values=tuple(str(n) for n in range(2, choice_maximum + 1)))
+        previous = self.ms_repeat_rows_var.get()
+        try:
+            selected = min(maximum, max(2, int(previous)))
+        except (TypeError, ValueError):
+            selected = 2
+        self.ms_repeat_rows_var.set(str(selected))
+        if tweaked:
+            description = "6 unique foreground combinations: 4 standard + 2 tweaked."
+        elif fixed_background:
+            description = "4 unique standard foreground combinations. Enable tweaked palettes for 5–6 rows."
+        else:
+            description = "4 unique standard foreground combinations. Choosing 5–6 rows enables tweaked palettes."
+        if previous != str(selected):
+            description += f" Repeat rows changed from {previous} to {selected}."
+        self.ms_repeat_limit_var.set(description)
+
     def _on_mode_switch_options_changed(self):
         """Keep Mode Switch sub-options consistent with the selected profile."""
         try:
+            repeat_mode = self.is_mode_switch_repeat_mode()
             seg_n = mode_switch_write_count(getattr(self, "ms_switches_var", tk.StringVar(value="1")).get())
-            seg_n = _CGA_FREE16_WRITES if seg_n == _CGA_FREE16_WRITES else 1
+            seg_n = _CGA_FREE16_WRITES if seg_n == _CGA_FREE16_WRITES and not repeat_mode else 1
             selection = str(self.ms_switches_var.get())
             if selection not in ("1", "8", "8 staggered"):
                 self.ms_switches_var.set("1")
@@ -13300,10 +13488,12 @@ class CgaConverterApp(tk.Tk):
                 self.ms_switches_var.set("8")
             in_ms_mode = self.is_any_mode_switch()
 
-            if in_ms_mode:
+            if in_ms_mode and not repeat_mode:
                 self.ms_switches_spin.state(["!disabled"])
             else:
                 self.ms_switches_spin.state(["disabled"])
+            self.ms_repeat_rows_cb.state(["!disabled"] if repeat_mode else ["disabled"])
+            self.ms_repeat_background_cb.state(["!disabled"] if repeat_mode else ["disabled"])
 
             # The eight-write timing profile is Fixed only -- the dispersed-pattern combobox
             # no longer applies, so keep it pinned and disabled.
@@ -13313,25 +13503,44 @@ class CgaConverterApp(tk.Tk):
             # "Keep border black" is honoured by both the N=1 and the 8-write wrap paths.
             self.ms_black_border_cb.state(["!disabled"] if in_ms_mode else ["disabled"])
 
-            # Dither-aware optimization only applies to the 8-write lockstep selection path.
-            da_ok = in_ms_mode and seg_n in (1, _CGA_FREE16_WRITES)
+            # Single-write rows and multi-write zones each support dither-aware
+            # palette trials, with independent defaults and remembered choices.
+            # Repeat mode always searches its cycle with the selected dither;
+            # keep the original mode's optional-search preferences separate.
+            da_ok = in_ms_mode and not repeat_mode and seg_n in (1, _CGA_FREE16_WRITES)
             self.ms_dither_aware_cb.state(["!disabled"] if da_ok else ["disabled"])
-            if not da_ok:
-                self.ms_dither_aware_var.set(False)
+            profile = ("single" if seg_n == 1 else "multi") if da_ok else None
+            previous_profile = getattr(self, "_mode_switch_dither_aware_profile", None)
+            if profile != previous_profile:
+                preferences = getattr(self, "_mode_switch_dither_aware_preferences", None)
+                if preferences is None:
+                    preferences = self._mode_switch_dither_aware_preferences = {"single": True, "multi": False}
+                if previous_profile is not None:
+                    preferences[previous_profile] = bool(self.ms_dither_aware_var.get())
+                self.ms_dither_aware_var.set(preferences[profile] if profile is not None else False)
+                self._mode_switch_dither_aware_profile = profile
+
+            force_unique_allowed = self.is_mode_switch_mode() and not repeat_mode and seg_n == 1
+            self.ms_force_unique_palette_cb.state(["!disabled"] if force_unique_allowed else ["disabled"])
 
             # Multi-write lockstep is mode-04h only: changing 3D8h inside the
             # raster loop would alter the tested instruction cadence. Tweaked
-            # palettes therefore stay available for the N=1 mode only.
+            # palettes stay available for N=1 and the repeating row cycle.
             tweaked_allowed = self.is_mode_switch_mode() and seg_n == 1
             if not tweaked_allowed:
                 self.tweaked_mode_var.set("off")
             for widget in (self.tweaked_off_rb, self.tweaked_on_rb):
                 widget.state(["!disabled"] if tweaked_allowed else ["disabled"])
+            self.tweaked_off_rb.configure(text="Off (standard)")
+            self.tweaked_on_rb.configure(text="On (standard + tweaked)")
+            if repeat_mode:
+                self._refresh_repeat_palette_choices()
 
             self.ms_stagger_optimize_var.set(False)
             self.ms_stagger_optimize_cb.state(["disabled"])
         except Exception:
             pass
+        self._refresh_settings_layout()
 
     def _on_stagger_toggle(self):
         """Backward-compatible alias for older callbacks."""
@@ -13639,6 +13848,120 @@ class CgaConverterApp(tk.Tk):
                 self.text_ntsc_stop_btn.state(["disabled"])
         except Exception:
             pass
+
+    def _start_new_text_encoder(self, source, preset, **dither_settings):
+        """Start the independent optimizer, keeping all Tk calls on the GUI thread."""
+        self._centered_encoder_token += 1
+        token = self._centered_encoder_token
+        cancel = threading.Event()
+        self._centered_encoder_cancel = cancel
+        self._centered_encoder_phase = None
+        self._text_new_diagnostics = None
+        self._centered_encoder_placeholder = source.copy()
+        self.output_pimage = source.copy()
+        self.text_ntsc_centered_cells = None
+        self._centered_encoder_cells_pre_polish = None
+        self._centered_encoder_cells_post_polish = None
+        self._centered_encoder_pre_polish_pimage = None
+        self._centered_encoder_post_polish_pimage = None
+        self._update_polish_view_toggle(visible=False)
+        self._update_right_preview()
+        messages = queue.Queue()
+        signature = self._output_settings_signature()
+
+        def poll():
+            if token != self._centered_encoder_token:
+                return
+            if not cancel.is_set() and signature != self._output_settings_signature():
+                cancel.set()
+                deferred = getattr(self, '_centered_encoder_deferred_render_id', None)
+                if deferred is not None:
+                    self.after_cancel(deferred)
+                    self._centered_encoder_deferred_render_id = None
+                self.set_status('Stopping encode: conversion settings changed...')
+            while not messages.empty():
+                kind, value = messages.get_nowait()
+                if kind in ('done', 'error', 'cancelled'):
+                    deferred = getattr(self, '_centered_encoder_deferred_render_id', None)
+                    if deferred is not None:
+                        self.after_cancel(deferred)
+                        self._centered_encoder_deferred_render_id = None
+                    if cancel.is_set() or kind == 'cancelled':
+                        self._centered_encoder_on_cancelled(token)
+                    elif kind == 'error':
+                        self._centered_encoder_on_error(token, value)
+                    else:
+                        self._centered_encoder_on_done(token, value, preset, True)
+                        if self._valid_output_signature is not None:
+                            self.set_status(self._new_text_completion_status(self._text_new_diagnostics))
+                    return
+                if cancel.is_set():
+                    continue
+                if kind == 'progress':
+                    self.set_progress(value)
+                elif kind == 'status':
+                    # Backend fallback details are informational, even when
+                    # they contain "failed". Only terminal messages own the
+                    # conversion/export validity lifecycle.
+                    self.status_var.set('Encoding 640x200 (1024 Colors): ' + value)
+                elif kind == 'diagnostics':
+                    self._text_new_diagnostics = value
+                elif kind == 'row':
+                    row, cells = value
+                    self._centered_encoder_on_row(token, row, cells, preset)
+            self.after(50, poll)
+
+        worker = threading.Thread(target=self._new_text_encoder_worker,
+                                  args=(source, preset, cancel, messages, dict(dither_settings)), daemon=True)
+        self._centered_encoder_thread = worker
+        self.text_ntsc_stop_btn.state(['!disabled'])
+        self.set_status('Encoding 640x200 (1024 Colors): preparing full-domain search...')
+        self.set_progress(0)
+        worker.start()
+        self.after(50, poll)
+
+    @staticmethod
+    def _new_text_completion_status(diagnostics):
+        """Expose the achieved search guarantee without claiming exhaustive optimality."""
+        data = diagnostics or {}
+        details = [str(data.get('backend', '640x200 (1024 Colors)'))]
+        if data.get('dither_family') == 'Diffusion':
+            details.append(str(data.get('diffusion_method', 'Error diffusion')) + ' diffusion')
+        elif data.get('dither_family') == 'Ordered':
+            details.append('Ordered dithering')
+        if 'seconds' in data:
+            details.append(f"{float(data['seconds']):.1f}s")
+        if 'passes' in data:
+            details.append(f"{int(data['passes'])} passes")
+        if data.get('converged') and data.get('optimization_scope') == 'causal_rows':
+            details.append('each row converged against its diffused target')
+        elif data.get('converged') and data.get('dither_family') == 'Ordered':
+            details.append('converged against the ordered-dither target')
+        elif data.get('converged'):
+            details.append('converged to a single-cell local optimum' if data.get('local_optimum')
+                           else 'converged')
+        details.append('global optimum certified' if data.get('global_optimum_certified')
+                       else 'no global optimality certificate')
+        return 'Ready — ' + '; '.join(details) + '.'
+
+    @staticmethod
+    def _new_text_encoder_worker(source, preset, cancel, messages, dither_settings=None):
+        """Send immutable snapshots through a queue; never access Tk from a worker."""
+        try:
+            from cga_text_new import encode_image_to_640x200_1024_new
+            cells = encode_image_to_640x200_1024_new(
+                source, preset,
+                progress_cb=lambda pct: messages.put(('progress', pct)),
+                row_cb=lambda row, snapshot: messages.put(('row', (row, list(snapshot)))),
+                status_cb=lambda message: messages.put(('status', str(message))),
+                diagnostics_cb=lambda data: messages.put(('diagnostics', dict(data))),
+                cancel_event=cancel,
+                **(dither_settings or {}),
+            )
+            messages.put(('cancelled', None) if cancel.is_set() else ('done', cells))
+        except Exception as exc:
+            messages.put(('cancelled', None) if cancel.is_set()
+                         else ('error', f'{type(exc).__name__}: {exc}'))
 
     def _centered_encoder_worker(self, src, preset, token, cancel_event,
                                   chroma_lowpass=False, k_candidates=64,
@@ -13957,7 +14280,10 @@ class CgaConverterApp(tk.Tk):
             preview = self._render_centered_preview_from_cells(
                 cells_snapshot, preset, rows_filled=rows_filled,
                 background_image=placeholder,
-                is_640x200=is_640x200)
+                is_640x200=is_640x200,
+                full_precision=self.is_text_ntsc_new_mode())
+            if is_640x200:
+                self._cache_text_rgb_preview(cells_snapshot, rows_filled)
 
             # If polish is running, also stash the live state for the "After
             # polish" toggle position. The toggle reads from
@@ -14029,6 +14355,9 @@ class CgaConverterApp(tk.Tk):
         """
         if token != self._centered_encoder_token:
             return  # a newer encoder has been started; ignore this result
+        if self._centered_encoder_cancel is not None and self._centered_encoder_cancel.is_set():
+            self._centered_encoder_on_cancelled(token)
+            return
         try:
             self.text_ntsc_centered_cells = cells
 
@@ -14040,7 +14369,10 @@ class CgaConverterApp(tk.Tk):
 
             preview = self._render_centered_preview_from_cells(
                 cells, preset, rows_filled=100,
-                is_640x200=is_640x200)
+                is_640x200=is_640x200,
+                full_precision=self.is_text_ntsc_new_mode())
+            if is_640x200:
+                self._cache_text_rgb_preview(cells, 100)
             self.output_pimage = preview
             self._centered_encoder_post_polish_pimage = preview if had_polish else None
             self._centered_encoder_last_preset = preset
@@ -14310,7 +14642,7 @@ class CgaConverterApp(tk.Tk):
 
     def _render_centered_preview_from_cells(self, cells, preset, rows_filled=100,
                                             background_image=None,
-                                            is_640x200=False):
+                                            is_640x200=False, full_precision=False):
         """Render a 640x200 preview from (char, attr) cells.
 
         Args:
@@ -14323,6 +14655,8 @@ class CgaConverterApp(tk.Tk):
                 glyph row0 and row1 patterns). When False, render each cell-row
                 as ONE scanline (row0 only) into the centered display area
                 (y=50..149).
+            full_precision: preserve the decoder's full RGB output for NEW;
+                the default retains legacy RGB444 preview quantization.
         """
         params = _COMPOSITE_PRESETS.get(preset, _COMPOSITE_PRESETS["Old CGA"])
         hue, sat, bri, con, shp, new_cga, cgamode = params
@@ -14359,7 +14693,8 @@ class CgaConverterApp(tk.Tk):
                         rgb_out.extend(ctx.decode_scanline_rgba(0, in_rgbi))
 
                 filled_img = Image.new("RGB", (640, rows_to_render * 2))
-                filled_img.putdata([_quantize_rgb444(px) for px in rgb_out])
+                filled_img.putdata([tuple(px[:3]) for px in rgb_out] if full_precision
+                                   else [_quantize_rgb444(px) for px in rgb_out])
                 # Paste at y=0 (full screen, no letterboxing)
                 preview.paste(filled_img, (0, 0))
             else:
@@ -14387,6 +14722,58 @@ class CgaConverterApp(tk.Tk):
 
         return preview
 
+    @staticmethod
+    def _render_text_rgb_preview_from_cells(cells, rows_filled=100):
+        """Render the encoded 80x100 text cells as a 640x200 RGBI raster.
+
+        The exported mode displays font scanlines 0 and 1, with blink disabled
+        so attribute bit 7 supplies background intensity. Unfinished rows are
+        black rather than showing unencoded input pixels as RGB output.
+        """
+        rows = min(100, max(0, int(rows_filled)), len(cells) // 80)
+        pixels = bytearray(640 * 200)
+        for ycell in range(rows):
+            for xcell in range(80):
+                ch, attr = cells[ycell * 80 + xcell]
+                fg, bg = int(attr) & 15, (int(attr) >> 4) & 15
+                for row in (0, 1):
+                    bits = _CGA_FONT[int(ch) & 255][row]
+                    offset = (2 * ycell + row) * 640 + xcell * 8
+                    pixels[offset:offset + 8] = bytes(
+                        fg if bits & (128 >> x) else bg for x in range(8))
+        return indices_to_pimage(pixels, CGA_16COLOR_PALETTE, (640, 200)).convert("RGB")
+
+    def _cache_text_rgb_preview(self, cells, rows_filled):
+        self._text_rgb_preview_pimage = self._render_text_rgb_preview_from_cells(cells, rows_filled)
+        self._text_rgb_preview_token = self._centered_encoder_token
+        self._text_rgb_preview_signature = self._output_settings_signature()
+
+    def _get_output_view_image(self):
+        """Return the native raster for the selected display and image export."""
+        if self.output_pimage is None:
+            return None
+        view = getattr(self, 'text_display_var', None)
+        if view is None or view.get() != 'RGB text' or not self.is_text_ntsc_640x200_mode():
+            return self.output_pimage
+        if (getattr(self, '_text_rgb_preview_token', None) == self._centered_encoder_token
+                and getattr(self, '_text_rgb_preview_signature', None) == self._output_settings_signature()):
+            rgb = getattr(self, '_text_rgb_preview_pimage', None)
+            if rgb is not None:
+                return rgb
+        # A new job or changed source must not display the previous job's cells.
+        return Image.new("RGB", (640, 200))
+
+    def _update_text_display_controls(self):
+        frame = getattr(self, 'text_display_frame', None)
+        if frame is None:
+            return
+        if self.is_text_ntsc_640x200_mode():
+            if not frame.winfo_manager():
+                frame.pack(side=tk.BOTTOM, fill=tk.X, padx=4, pady=(0, 4),
+                           before=self.preview_size_label)
+        elif frame.winfo_manager():
+            frame.pack_forget()
+
 
     # --- UI callbacks ---
 
@@ -14394,7 +14781,7 @@ class CgaConverterApp(tk.Tk):
         path = filedialog.askopenfilename(
             title="Open image",
             filetypes=[
-                ("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff"),
+                ("Image files", "*.png;*.webp;*.jpg;*.jpeg;*.bmp;*.gif;*.tif;*.tiff"),
                 ("All files", "*.*"),
             ],
         )
@@ -14412,6 +14799,9 @@ class CgaConverterApp(tk.Tk):
 
     def _update_left_preview(self):
         self._left_preview_after_id = None
+        from cga_standard_text_ui import show_input_preview
+        if show_input_preview(self):
+            return
         if not self.src_image:
             return
         # Apply live input adjustments to the LEFT preview.
@@ -14507,9 +14897,10 @@ class CgaConverterApp(tk.Tk):
         self.mid_tk_image = ImageTk.PhotoImage(preview)
         self.mid_label.configure(image=self.mid_tk_image, text="")
     def _make_output_preview_image(self):
-        if not self.output_pimage:
+        output = self._get_output_view_image()
+        if output is None:
             return None
-        img = self.output_pimage.convert("RGB")
+        img = output.convert("RGB")
         w, h = img.size
 
         if self.preview_scale_var.get() in ('Auto (whole pixels)', 'Fit'):
@@ -14571,6 +14962,7 @@ class CgaConverterApp(tk.Tk):
         return img
 
     def _update_right_preview(self):
+        self._update_text_display_controls()
         if not self.output_pimage:
             return
         preview = self._make_output_preview_image()
@@ -14606,29 +14998,65 @@ class CgaConverterApp(tk.Tk):
             pass
         self._update_tone_preview()
 
-        # Mode Switch layout map (diagnostic): full-width image showing per-scanline
-        # segment positions with chosen palette colors filling each segment's actual x-range.
-        if getattr(self, 'ms_pal_pimage', None) is not None:
-            strip = self.ms_pal_pimage
-            try:
-                # Match the preview's WIDTH (since we now display the strip as a banner below the canvas).
-                pw = preview.size[0]
-                # Preserve aspect of the strip image (which is target_w x 200).
-                ph = max(20, int(strip.size[1] * (pw / strip.size[0])))
-                strip_r = strip.resize((pw, ph), resample=get_resample_filter('Nearest'))
-                self.ms_pal_tk = ImageTk.PhotoImage(strip_r)
-                self.ms_pal_label.configure(image=self.ms_pal_tk, text='')
-                # Show the frame (pack it if not already shown)
-                if hasattr(self, 'ms_pal_frame') and not self.ms_pal_frame.winfo_ismapped():
-                    self.ms_pal_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=4, pady=(4, 4))
-            except Exception:
-                self.ms_pal_label.configure(image='', text='')
-                if hasattr(self, 'ms_pal_frame') and self.ms_pal_frame.winfo_ismapped():
-                    self.ms_pal_frame.pack_forget()
+        self._update_mode_switch_map()
+
+    def _schedule_mode_switch_map_refresh(self, event=None):
+        if self.ms_pal_pimage is None:
+            return
+        if self._ms_pal_resize_id is not None:
+            self.after_cancel(self._ms_pal_resize_id)
+        self._ms_pal_resize_id = self.after(80, self._update_mode_switch_map)
+
+    def _scroll_mode_switch_map(self, event):
+        if getattr(event, "num", None) in (4, 5):
+            steps = -3 if event.num == 4 else 3
         else:
-            self.ms_pal_label.configure(image='', text='')
-            if hasattr(self, 'ms_pal_frame') and self.ms_pal_frame.winfo_ismapped():
-                self.ms_pal_frame.pack_forget()
+            delta = getattr(event, "delta", 0)
+            steps = (-int(delta / 120) or (-1 if delta > 0 else 1)) * 3 if delta else 0
+        scroll = self.ms_pal_canvas.xview_scroll if event.state & 1 else self.ms_pal_canvas.yview_scroll
+        scroll(steps, "units")
+        return "break"
+
+    def _update_mode_switch_map(self):
+        """Zoom only the diagnostic map, preserving every source scanline."""
+        if self._ms_pal_resize_id is not None:
+            self.after_cancel(self._ms_pal_resize_id)
+            self._ms_pal_resize_id = None
+        strip = self.ms_pal_pimage
+        canvas = self.ms_pal_canvas
+        if strip is None:
+            canvas.delete("all")
+            canvas.configure(scrollregion=(0, 0, 0, 0))
+            self.ms_pal_canvas_img_id = None
+            self.ms_pal_tk = None
+            self._ms_pal_source = None
+            self.ms_pal_size_var.set("")
+            self.ms_pal_frame.pack_forget()
+            return
+        if not self.ms_pal_frame.winfo_manager():
+            self.ms_pal_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=4, pady=(4, 4))
+        cw, ch = max(1, canvas.winfo_width()), max(1, canvas.winfo_height())
+        zoom = self.ms_pal_zoom_var.get()
+        if zoom == "Auto":
+            factor = max(1, min(cw // strip.width, ch // strip.height))
+        else:
+            factor = {"1x": 1, "2x": 2, "4x": 4, "8x": 8}.get(zoom, 1)
+        size = (strip.width * factor, strip.height * factor)
+        source_changed = strip is not self._ms_pal_source
+        view = (canvas.xview()[0], canvas.yview()[0])
+        if source_changed or self.ms_pal_tk is None or size != (self.ms_pal_tk.width(), self.ms_pal_tk.height()):
+            self.ms_pal_tk = ImageTk.PhotoImage(strip.resize(size, Image.Resampling.NEAREST))
+            self._ms_pal_source = strip
+            if self.ms_pal_canvas_img_id is None:
+                self.ms_pal_canvas_img_id = canvas.create_image(0, 0, anchor="nw", image=self.ms_pal_tk)
+            else:
+                canvas.itemconfigure(self.ms_pal_canvas_img_id, image=self.ms_pal_tk)
+        pw, ph = size
+        canvas.coords(self.ms_pal_canvas_img_id, max(0, (cw-pw)//2), max(0, (ch-ph)//2))
+        canvas.configure(scrollregion=(0, 0, max(cw, pw), max(ch, ph)))
+        canvas.xview_moveto(0 if source_changed else view[0])
+        canvas.yview_moveto(0 if source_changed else view[1])
+        self.ms_pal_size_var.set(f"{factor}x  {pw} x {ph}")
 
     def on_preview_scale_changed(self, event=None):
         """When Preview scale changes, re-render the output preview (and size label)."""
@@ -14651,12 +15079,25 @@ class CgaConverterApp(tk.Tk):
         self.activity_bar.configure(mode='determinate', value=0)
         self.activity_var.set(label)
 
-    def on_convert(self):
+    def on_convert(self, *, preview_text_only=False, optimize_text=False):
+        if (preview_text_only or optimize_text) and not self.is_standard_text_mode():
+            return
+        # Detach older jobs before capturing this conversion's validity stamp.
+        # Their queued callbacks must never overwrite a newer synchronous result.
+        self._cancel_multicolor()
+        self._multicolor_cancel = None
+        self._multicolor_busy = False
+        previous = self._centered_encoder_cancel
+        if previous is not None:
+            previous.set()
+        self._centered_encoder_token += 1
+        self._centered_encoder_thread = None
         self._valid_output_signature = None
         self._pending_output_signature = self._output_settings_signature()
         self._begin_activity()
         try:
-            return self._convert_impl()
+            if optimize_text: return self._convert_impl(optimize_text=True)
+            return self._convert_impl(preview_text_only=True) if preview_text_only else self._convert_impl()
         except Exception:
             self._pending_output_signature = None
             self._finish_activity('Failed')
@@ -14667,7 +15108,7 @@ class CgaConverterApp(tk.Tk):
                     and self._centered_encoder_thread is None and self._activity_busy):
                 self._finish_activity()
 
-    def _convert_impl(self):
+    def _convert_impl(self, *, preview_text_only=False, optimize_text=False):
         global STATUS_CB
         self._cancel_multicolor()
         self._reset_status_steps()
@@ -14818,6 +15259,23 @@ class CgaConverterApp(tk.Tk):
 
         self.set_progress(30)
 
+        if self.is_standard_text_mode():
+            from cga_standard_text_ui import start
+            STATUS_CB = None
+            if optimize_text:
+                from cga_standard_text_ui import start_optimizer
+                start_optimizer(self,adjusted_src,_CGA_FONT,CGA_COLORS,resize_with_mode,
+                    dict(family=dither_family,diffusion=diffusion_method,
+                         intensity=dither_intensity,serpentine=serpentine,
+                         ordered_size=ordered_size,ordered_strength=ordered_strength))
+                return
+            start(self, toned, _CGA_FONT, CGA_COLORS,
+                  dict(family=dither_family,diffusion=diffusion_method,
+                       intensity=dither_intensity,serpentine=serpentine,
+                       ordered_size=ordered_size,ordered_strength=ordered_strength),
+                  preview_only=preview_text_only)
+            return
+
         if self.is_640_2color_mode_switch_mode():
             # 640x200 (2 Colors) Mode Switch:
             #   - background is fixed = black (CGA mode 06h has no bg register)
@@ -14933,17 +15391,28 @@ class CgaConverterApp(tk.Tk):
             # Work on a 320x200 image regardless of other target sizes.
             scaled = resize_with_mode(adjusted_src, 320, 200, scale_mode, resample_name)
             toned_ms = scaled  # keep full RGB so dithering influences per-scanline palette selection
-            # Mode Switch background behavior:
-            #   - 'Multiple' => allow background/palette to vary per scanline (current behavior)
-            #   - any color  => force that CGA background color for all scanlines
+            # The ordinary mode supports all fixed backgrounds or Per line.
+            # Repeat supports fixed colors, free backgrounds, or unequal neighbors.
+            repeat_mode_320 = self.is_mode_switch_repeat_mode()
             forced_bg_idx = None
-            bg_sel = getattr(self, 'bg_color_var', tk.StringVar(value='Multiple')).get()
-            if bg_sel and bg_sel != 'Multiple' and bg_sel in CGA_COLOR_NAMES:
-                forced_bg_idx = CGA_COLOR_NAMES.index(bg_sel)
+            if repeat_mode_320:
+                bg_sel = self.ms_repeat_background_var.get()
+                if bg_sel in CGA_COLOR_NAMES:
+                    forced_bg_idx = CGA_COLOR_NAMES.index(bg_sel)
+                elif bg_sel not in ("Adjustable", "Forced No Repeats"):
+                    raise ValueError("Choose a fixed CGA background, Adjustable, or Forced No Repeats")
+            else:
+                bg_sel = getattr(self, 'bg_color_var', tk.StringVar(value='Per line')).get()
+                if bg_sel in CGA_COLOR_NAMES:
+                    forced_bg_idx = CGA_COLOR_NAMES.index(bg_sel)
+                elif bg_sel not in ('Per line', 'Multiple'):
+                    raise ValueError("Choose a CGA background color or Per line")
 
             want_pal_strip = bool(getattr(self, 'ms_show_palette_var', tk.BooleanVar(value=False)).get())
             seg_n_320 = mode_switch_write_count(getattr(self, "ms_switches_var", tk.StringVar(value="1")).get())
-            seg_n_320 = _CGA_FREE16_WRITES if seg_n_320 == _CGA_FREE16_WRITES else 1
+            seg_n_320 = _CGA_FREE16_WRITES if seg_n_320 == _CGA_FREE16_WRITES and not repeat_mode_320 else 1
+            force_unique_palette_320 = not repeat_mode_320 and seg_n_320 == 1 and bool(
+                getattr(self, "ms_force_unique_palette_var", tk.BooleanVar(value=False)).get())
 
             pattern_320 = normalize_mode_switch_max_pattern(
                 getattr(
@@ -14965,13 +15434,26 @@ class CgaConverterApp(tk.Tk):
                     stagger_step_320 = find_best_stagger_step_320(toned_ms.convert("RGB"), seg_n_320)
                     self.status_step(f"Best stagger step (320): {stagger_step_320} px")
 
-            # Resolve tweaked palette mode from GUI ("off" = mode 04 only, "on" = mode 05 Tweaked only)
+            # N=1/Repeat: "off" searches standard; "on" also allows tweaked.
             tweaked_mode_320 = getattr(self, "tweaked_mode_var", tk.StringVar(value="off")).get()
 
             lockstep_n2_plan = None
             lockstep_n3_plan = None
             lockstep_max_plan = None
-            if seg_n_320 == _CGA_FREE16_WRITES:
+            self.ms_repeat_diagnostics = None
+            if repeat_mode_320:
+                repeat_rows = int(self.ms_repeat_rows_var.get())
+                repeat_image, repeat_palettes, self.ms_repeat_diagnostics = quantize_320x200_mode_switch_repeat(
+                    toned_ms, repeat_rows=repeat_rows, forced_bg_idx=forced_bg_idx,
+                    force_no_repeat_background=bg_sel == "Forced No Repeats",
+                    dither_family=dither_family, diffusion_name=diffusion_method,
+                    diffusion_intensity=dither_intensity, serpentine=serpentine,
+                    ordered_matrix_size=ordered_size, ordered_strength=ordered_strength,
+                    tweaked_mode=tweaked_mode_320,
+                    progress_cb=(lambda frac: self.set_progress(int(30 + frac*65))),
+                    return_diagnostics=True)
+                pimg = (repeat_image, repeat_palettes)
+            elif seg_n_320 == _CGA_FREE16_WRITES:
                 max_kwargs = {
                     # Conversion and export share the STARTLCK mode-4 geometry.
                     # Hardware qualification is separate from emulator validation.
@@ -15013,6 +15495,7 @@ class CgaConverterApp(tk.Tk):
                     forced_bg_idx=forced_bg_idx,
                     dither_family="Ordered",
                     dither_aware=bool(getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()),
+                    force_unique_palette_per_scanline=force_unique_palette_320,
                     ordered_matrix_size=ordered_size,
                     ordered_strength=ordered_strength,
                     serpentine=serpentine,
@@ -15031,6 +15514,7 @@ class CgaConverterApp(tk.Tk):
                     forced_bg_idx=forced_bg_idx,
                     dither_family="Diffusion",
                     dither_aware=bool(getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()),
+                    force_unique_palette_per_scanline=force_unique_palette_320,
                     diffusion_name=diffusion_method,
                     diffusion_intensity=dither_intensity,
                     serpentine=serpentine,
@@ -15048,6 +15532,7 @@ class CgaConverterApp(tk.Tk):
                     forced_bg_idx=forced_bg_idx,
                     dither_family="None",
                     dither_aware=bool(getattr(self, "ms_dither_aware_var", tk.BooleanVar(value=False)).get()),
+                    force_unique_palette_per_scanline=force_unique_palette_320,
                     serpentine=serpentine,
                     segments_per_line=seg_n_320,
                     stagger_mode=stagger_mode_320,
@@ -15179,7 +15664,7 @@ class CgaConverterApp(tk.Tk):
             #   - "80x100 (512 Colors)" mode
             # but NOT for "640x100 (1024 Colors)" or "640x200 (1024 Colors)",
             # which use Viterbi encoders directly and don't need any 80x100 cells.
-            need_4pattern_setup = not self.is_text_ntsc_viterbi_mode()
+            need_4pattern_setup = not self.is_text_ntsc_background_mode()
 
             if need_4pattern_setup:
                 lut = (_build_text_ntsc_512_lut(preset) if self.is_text_ntsc_512_mode()
@@ -15262,10 +15747,19 @@ class CgaConverterApp(tk.Tk):
             # dropdown items:
             #   "80x100 (1024 Colors)"  → 4-pattern LUT encoder (synchronous, fast)
             #   "640x100 (1024 Colors)" → 40-pattern centered Viterbi (background)
-            #   "640x200 (1024 Colors)" → 2-row-per-cell full-screen Viterbi (background)
+            #   "640x200 (1024 Colors)" → full-screen CPU/GPU optimizer (background)
             # The 4-pattern path (when active) populated text_ntsc_chosen and renders
             # a preview synchronously. Both Viterbi modes kick off a worker thread
             # that posts the real preview asynchronously.
+            if self.is_text_ntsc_new_mode():
+                self._start_new_text_encoder(
+                    src640x200, preset, dither_family=dither_family,
+                    diffusion_method=diffusion_method, dither_strength=dither_intensity,
+                    serpentine=serpentine, ordered_matrix_size=ordered_size,
+                    ordered_strength=ordered_strength)
+                STATUS_CB = None
+                return
+
             use_viterbi = self.is_text_ntsc_viterbi_mode()
             is_640x200 = self.is_text_ntsc_640x200_mode()
 
@@ -15565,6 +16059,8 @@ class CgaConverterApp(tk.Tk):
             pass
 
     def on_optimize(self):
+        if self.is_standard_text_mode():
+            return self.on_convert(optimize_text=True)
         self._begin_activity()
         try:
             return self._optimize_impl()
@@ -15692,21 +16188,35 @@ class CgaConverterApp(tk.Tk):
             names += ['ordered_size_var', 'ordered_strength_var']
         if self.is_4color_mode() or self.is_mono_mode():
             names += ['palette_var']
-        if self.is_4color_mode() or self.is_any_mode_switch():
+        if self.is_mode_switch_repeat_mode():
+            names += ['ms_repeat_background_var']
+        elif self.is_4color_mode() or self.is_any_mode_switch():
             names += ['bg_color_var', 'tone_var']
         if self.is_composite_mode() or self.is_text_ntsc_mode():
             names += ['composite_palette_var']
         if self.is_multicolor_composite_mode():
             names += ['multicolor_diffusion_timing_var']
         if self.is_text_ntsc_viterbi_mode():
-            names += ['text_ntsc_k_var', 'text_ntsc_shape_var', 'text_ntsc_polish_var']
-        if self.is_any_mode_switch():
+            names += ['text_ntsc_k_var', 'text_ntsc_shape_var', 'text_ntsc_polish_var', 'tone_var']
+        if self.is_mode_switch_repeat_mode():
+            names += ['ms_repeat_rows_var', 'tweaked_mode_var']
+        elif self.is_any_mode_switch():
             names += ['ms_switches_var', 'tweaked_mode_var', 'ms_stagger_mode_var',
-                      'ms_stagger_optimize_var', 'ms_black_border_var', 'ms_dither_aware_var']
+                      'ms_stagger_optimize_var', 'ms_dither_aware_var']
+            if mode_switch_write_count(self.ms_switches_var.get()) != 1:
+                names += ['ms_black_border_var']
+        if (self.is_mode_switch_mode() and not self.is_mode_switch_repeat_mode()
+                and mode_switch_write_count(self.ms_switches_var.get()) == 1):
+            names += ['ms_force_unique_palette_var']
         if self.is_hicolor_mode():
             names += ['hicolor_limit_var']
         if self.is_16color_char_mode():
             names += ['char16_subsample_var']
+        if self.is_standard_text_mode():
+            names += ['standard_text_height_var', 'standard_text_match_var',
+                      'standard_text_preprocess_var', 'standard_text_quantize_var',
+                      'standard_text_dct_structure_var','standard_text_dct_falloff_var',
+                      'standard_text_dct_color_var','standard_text_dct_vertical_var']
         return (id(self.src_image), tuple((name, getattr(self, name).get()) for name in names))
 
     def _require_current_output(self):
@@ -15728,8 +16238,78 @@ class CgaConverterApp(tk.Tk):
     def on_export_dsk(self):
         self.on_export_com("dsk")
 
-    def on_export_com(self, export_kind="com"):
-        """Build the current DOS COM and save it as COM, ASM, or bootable DSK."""
+    def on_link_marty(self):
+        import marty_link
+        executable = filedialog.askopenfilename(title='Select MartyPC executable',
+            filetypes=[('MartyPC executable', '*.exe')])
+        if not executable:
+            return None
+        folder = Path(executable).parent
+        candidates = [folder/'martypc.toml', folder/'install/martypc.toml',
+                      folder.parent.parent/'install/martypc.toml']
+        initial = next((p for p in candidates if p.is_file()), folder/'martypc.toml')
+        config = filedialog.askopenfilename(title='Select working MartyPC main configuration',
+            initialdir=str(initial.parent), initialfile=initial.name,
+            filetypes=[('MartyPC configuration', '*.toml')])
+        if not config:
+            return None
+        try:
+            link = marty_link.validate_link(executable, config)
+            marty_link.save_link(link)
+        except (OSError, ValueError) as exc:
+            messagebox.showerror('Link to MartyPC', str(exc))
+            return None
+        messagebox.showinfo('MartyPC linked',
+            'MartyPC is linked. Click Open in MartyPC after converting.\n\n'
+            'The selected machine and ROMs are retained. Choose a configuration with the correct video card and a bootable floppy drive. Studio uses a separate launch configuration.')
+        return link
+
+    def _resolve_marty_link(self):
+        import marty_link
+        try:
+            link = marty_link.resolve_link()
+        except (OSError, ValueError, TypeError) as exc:
+            messagebox.showerror('MartyPC link', f'{exc}\n\nUse Export > Link to MartyPC to select the installation again.')
+            return None
+        if link is None:
+            link = self.on_link_marty()
+        return link
+
+    def on_open_marty(self):
+        """Boot the current encoded output without asking the user to save a disk."""
+        if not self._require_current_output():
+            return
+        link = self._resolve_marty_link()
+        if link is None:
+            return
+        import marty_link
+        try:
+            path = marty_link.create_run_dir() / 'preview.dsk'
+        except OSError as exc:
+            messagebox.showerror('MartyPC launch', f'Could not prepare the bootable disk folder:\n{exc}')
+            return
+        self.on_export_com('dsk', marty_launch=link, output_path=path)
+
+    def on_export_marty(self):
+        if not self._require_current_output():
+            return
+        link = self._resolve_marty_link()
+        if link is not None:
+            self.on_export_com('dsk', marty_launch=link)
+
+    def _marty_composite_display(self):
+        """Match the selected composite/RGB text view when booting its COM."""
+        view = getattr(self, 'text_display_var', None)
+        if self.is_text_ntsc_640x200_mode() and view is not None and view.get() == 'RGB text':
+            return False
+        return self.is_composite_mode() or self.is_text_ntsc_mode()
+
+    def on_export_com(self, export_kind="com", marty_launch=None, output_path=None):
+        """Build the current DOS COM and save it as COM, ASM, or bootable DSK.
+
+        An internal output_path lets Open in MartyPC use this same export path
+        without a Save As dialog or a second conversion.
+        """
         if not self._require_current_output():
             return
         export_kind = str(export_kind or "com").lower()
@@ -15738,9 +16318,12 @@ class CgaConverterApp(tk.Tk):
         mode = self.mode_var.get()
 
         SUPPORTED = (
+            "40-column Text (RGB)",
+            "80-column Text (RGB)",
             "640x200 Multicolor Composite",
             "320x200 (4 Colors)",
             "320x200 (4 Colors) Mode Switch",
+            "320x200 Mode Switch Repeat",
             "640x200 (2 Colors)",
             "160x200 (16 Colors) Composite",
             "160x100 (16 Colors)",
@@ -15751,6 +16334,7 @@ class CgaConverterApp(tk.Tk):
             "80x100 (1024 Colors)",
             "640x100 (1024 Colors)",
             "640x200 (1024 Colors)",
+            "640x200x1024 NEW",
         )
         if mode not in SUPPORTED:
             # Provide specific guidance for the explicitly-not-yet-supported modes.
@@ -15763,14 +16347,16 @@ class CgaConverterApp(tk.Tk):
                     "new foreground nibble to port 3D9h. Multi-segment-per-scanline mode "
                     "additionally requires cycle-counted code to write 3D9h at known "
                     "horizontal screen positions.\n\n"
-                    "Use 'Save GIF...' to export a previewable image for now."
+                    "Use 'Export > Image...' to export a previewable image for now."
                 )
             else:
                 messagebox.showinfo(
                     "Export COM",
                     "COM export is supported for:\n"
+                    "- 40/80-column RGB text (configurable character height)\n"
                     "- 320x200 (4-color)\n"
                     f"- 320x200 (4-color) Mode Switch (fixed 1 or {_CGA_FREE16_WRITES} writes per line)\n"
+                    "- 320x200 Mode Switch Repeat (2-6 rows)\n"
                     "- 640x200 (2-color)\n"
                     "- 160x200 Composite (16-color)\n"
                     "- 160x100 (16-color)\n"
@@ -15810,7 +16396,12 @@ class CgaConverterApp(tk.Tk):
 
         asm_plan = None
         try:
-            if mode == "320x200 (4 Colors)":
+            if self.is_standard_text_mode():
+                from cga_standard_text import build_com
+                geometry = self.standard_text_output_geometry
+                com = build_com(self.standard_text_cells, geometry)
+                default_name = f'cga_text_{geometry.columns}x{geometry.rows}_h{geometry.height}.com'
+            elif mode == "320x200 (4 Colors)":
                 vram = pack_cga_320x200_4color_vram(self.output_pimage)
                 pal_name = (self.palette_var.get() or "").strip()
                 bg_name = getattr(self, "bg_color_var", tk.StringVar(value="Black")).get()
@@ -15825,11 +16416,13 @@ class CgaConverterApp(tk.Tk):
                 com = build_com_static_cga(mode_bios, vram, color_select_3d9=palbyte)
                 default_name = "cga_320.com"
 
-            elif mode == "320x200 (4 Colors) Mode Switch":
+            elif mode in ("320x200 (4 Colors) Mode Switch", "320x200 Mode Switch Repeat"):
                 # Per-scanline palette change (CGA mode 04h with timed 3D9h writes).
                 # N=1: simple builder (writes 3D8+3D9 once per line during hblank).
                 # N=8: use the timing backend retained in the conversion plan.
                 seg_n = int(getattr(self, "ms_seg_n", 1))
+                if mode == "320x200 Mode Switch Repeat" and seg_n != 1:
+                    raise ValueError("Repeat mode requires one palette per scanline. Convert again before exporting.")
                 if seg_n not in (1, _CGA_FREE16_WRITES):
                     messagebox.showinfo(
                         "Export COM — N out of range",
@@ -15846,6 +16439,27 @@ class CgaConverterApp(tk.Tk):
                         "No per-scanline palettes available. Please click Convert first."
                     )
                     return
+
+                if mode == "320x200 Mode Switch Repeat":
+                    repeat_rows = int(self.ms_repeat_rows_var.get())
+                    if not 2 <= repeat_rows <= 6:
+                        raise ValueError("Repeat rows must be between 2 and 6.")
+                    cycle = [tuple(tuple(color) for color in palette) for palette in pals_by_y]
+                    color_sets = {frozenset(palette[1:]) for palette in cycle[:repeat_rows]}
+                    if len(color_sets) != repeat_rows:
+                        raise ValueError("Every foreground color combination in the repeat cycle must be unique. Changing the background does not make a palette unique. Convert again before exporting.")
+                    if any(palette != cycle[y % repeat_rows] for y, palette in enumerate(cycle)):
+                        raise ValueError("The palette schedule does not match the selected repeat length. Convert again before exporting.")
+                    background = self.ms_repeat_background_var.get()
+                    if background in CGA_COLOR_NAMES:
+                        forced_color = tuple(CGA_COLORS[CGA_COLOR_NAMES.index(background)])
+                        if any(palette[0] != forced_color for palette in cycle):
+                            raise ValueError("The repeat palette schedule does not preserve the selected fixed background. Convert again before exporting.")
+                    elif background == "Forced No Repeats":
+                        if any(cycle[y][0] == cycle[(y+1) % repeat_rows][0] for y in range(repeat_rows)):
+                            raise ValueError("Forced No Repeats requires different backgrounds on adjacent rows, including the cycle boundary. Convert again before exporting.")
+                    elif background != "Adjustable":
+                        raise ValueError("Choose a fixed CGA background, Adjustable, or Forced No Repeats before converting.")
 
                 if seg_n == _CGA_FREE16_WRITES:
                     plan = getattr(self, "ms_lockstep_max_plan", None)
@@ -15883,8 +16497,10 @@ class CgaConverterApp(tk.Tk):
                         vram,
                         reg_table,
                         exit_on_keypress=True,
+                        keep_border_black=bool(self.ms_black_border_var.get()),
                     )
-                    default_name = "cga_320_modeswitch_n1.com"
+                    default_name = (f"cga_320_repeat{int(self.ms_repeat_rows_var.get())}.com"
+                                    if mode == "320x200 Mode Switch Repeat" else "cga_320_modeswitch_n1.com")
 
             elif mode in ("160x200 (16 Colors) Composite", "640x200 Multicolor Composite"):
                 # Export as CGA 640x200 2-color (BIOS mode 06h). The *apparent* 16 colors
@@ -16080,93 +16696,21 @@ class CgaConverterApp(tk.Tk):
                                          f"Failed to encode 640x100 (1024 Colors):\n{e}")
                     return
 
-            elif mode == "640x200 (1024 Colors)":
-                # 640x200 1024-color full-screen set-and-forget mode. Each cell
-                # renders 2 scanlines using (row0, row1) byte pairs from the
-                # CGA font. Cells were produced asynchronously during Convert
-                # by the background Viterbi worker and stashed in
-                # self.text_ntsc_centered_cells. If the worker is still running,
-                # ask the user to wait. If neither cached cells nor a running
-                # worker, re-encode now synchronously.
-                try:
-                    cells = getattr(self, 'text_ntsc_centered_cells', None)
-                    if cells is None:
-                        worker = getattr(self, '_centered_encoder_thread', None)
-                        if worker is not None and worker.is_alive():
-                            messagebox.showinfo(
-                                "Export COM",
-                                "The 640x200 (1024 Colors) encoder is still running in the "
-                                "background. Please wait for it to finish "
-                                "(status bar shows progress), then try again."
-                            )
-                            return
-                        # Fallback re-encode at 640x200.
-                        src640x200 = getattr(self, 'text_ntsc_src640x200', None)
-                        if src640x200 is None:
-                            messagebox.showinfo(
-                                "Export COM",
-                                "Please click Convert first so there is a source image to encode."
-                            )
-                            return
-                        preset = (self.composite_palette_var.get()
-                                  if hasattr(self, 'composite_palette_var') else "Old CGA")
-                        chroma_lowpass = bool(self.tone_var.get()) if hasattr(self, 'tone_var') else False
-                        k_value = 64
-                        if hasattr(self, 'text_ntsc_k_var'):
-                            try:
-                                k_value = max(8, min(256, int(self.text_ntsc_k_var.get())))
-                            except Exception:
-                                k_value = 64
-
-                        _df = self.dither_family_var.get() if hasattr(self, 'dither_family_var') else "None"
-                        if _df in ("Error diffusion", "Diffusion"):
-                            _df = "Diffusion"
-                        elif _df not in ("Ordered", "Diffusion"):
-                            _df = "None"
-                        _dm = self.diffusion_var.get() if hasattr(self, 'diffusion_var') else "Floyd-Steinberg"
-                        _ds = float(self.dither_intensity_var.get()) if hasattr(self, 'dither_intensity_var') else 1.0
-                        _serp = bool(self.serpentine_var.get()) if hasattr(self, 'serpentine_var') else False
-
-                        # Shape-vs-color slider for DCT pruning
-                        _shape_slider = 50
-                        if hasattr(self, 'text_ntsc_shape_var'):
-                            try:
-                                _shape_slider = max(0, min(100, int(self.text_ntsc_shape_var.get())))
-                            except Exception:
-                                _shape_slider = 50
-                        _shape_weight = _dct_shape_weight_from_slider(_shape_slider)
-
-                        status_dbg(
-                            f"Encoding 640x200 (1024) Viterbi K={k_value} "
-                            f"({preset}, chroma_lowpass={chroma_lowpass}, "
-                            f"dither={_df}/{_dm}, strength={_ds}, serp={_serp}, "
-                            f"shape={_shape_weight:.2f})..."
-                        )
-                        cells = encode_image_to_640x200_1024_viterbi(
-                            src640x200, preset,
-                            k_candidates=k_value,
-                            dither_strength=_ds,
-                            dither_family=_df,
-                            diffusion_method=_dm,
-                            serpentine=_serp,
-                            dct_shape_weight=_shape_weight,
-                            chroma_lowpass=chroma_lowpass,
-                        )
-
-                    buf = pack_text_640x200_1024color(cells)
-                    com = build_com_text_640x200_1024color(buf)
-                    default_name = "cga_640x200_1024c.com"
-                except Exception as e:
-                    messagebox.showerror("Export COM",
-                                         f"Failed to encode 640x200 (1024 Colors):\n{e}")
+            elif self.is_text_ntsc_new_mode():
+                cells = getattr(self, 'text_ntsc_centered_cells', None)
+                if cells is None:
+                    messagebox.showinfo("Export COM", "Click Convert and wait for the optimizer to finish.")
                     return
+                buf = pack_text_640x200_1024color(cells)
+                com = build_com_text_640x200_1024color(buf)
+                default_name = "cga_640x200_1024c.com"
 
         except Exception as e:
             messagebox.showerror("Export COM", f"Failed to build COM:\n{e}")
             return
 
         # Suffix the filename so the user can tell the variants apart.
-        if target_video == "EGA/VGA" and default_name.endswith(".com"):
+        if target_video == "EGA/VGA" and not self.is_standard_text_mode() and default_name.endswith(".com"):
             default_name = default_name[:-4] + "_vga.com"
 
         if export_kind == "asm":
@@ -16184,12 +16728,14 @@ class CgaConverterApp(tk.Tk):
             extension = ".com"
             filetypes = [("DOS COM", "*.com"), ("All files", "*.*")]
 
-        path = filedialog.asksaveasfilename(
-            title=title,
-            defaultextension=extension,
-            initialfile=default_name,
-            filetypes=filetypes,
-        )
+        path = output_path
+        if path is None:
+            path = filedialog.asksaveasfilename(
+                title=title,
+                defaultextension=extension,
+                initialfile=default_name,
+                filetypes=filetypes,
+            )
         if not path:
             return
         try:
@@ -16202,12 +16748,28 @@ class CgaConverterApp(tk.Tk):
                 messagebox.showinfo("Export ASM", f"Saved NASM source:\n{path}")
             elif export_kind == "dsk":
                 dsk = build_bootable_dsk_from_com(com)
-                if self.is_multicolor_composite_mode():
+                if self.is_multicolor_composite_mode() or marty_launch is not None:
                     from tools.make_marty_disk import inject_file
                     boot = bytearray(dsk)
                     inject_file(boot, b'@ECHO OFF\r\nPROMPT $P$G\r\nTEST\r\n', 'AUTOEXEC.BAT')
                     dsk = bytes(boot)
                 Path(path).write_bytes(dsk)
+                if marty_launch is not None:
+                    import marty_link
+                    try:
+                        process, log = marty_link.launch(marty_launch, path,
+                            self._marty_composite_display())
+                    except (OSError, ValueError) as exc:
+                        messagebox.showerror('MartyPC launch', f'Disk saved to:\n{path}\n\nMartyPC could not start: {exc}')
+                        return
+                    self.status_var.set('Disk saved. MartyPC launched.')
+                    def check_launch():
+                        result = process.poll()
+                        if result is not None and result != 0:
+                            messagebox.showerror('MartyPC launch',
+                                f'The disk was saved, but MartyPC exited with code {result}.\nCheck the selected machine and ROMs.\n\nLog: {log}')
+                    self.after(2000, check_launch)
+                    return
                 messagebox.showinfo(
                     "Export Bootable DSK",
                     f"Saved bootable DOS disk:\n{path}\n\n"
@@ -16232,16 +16794,35 @@ class CgaConverterApp(tk.Tk):
             messagebox.showinfo("No output", "There is no converted image to save yet.")
             return
         path = filedialog.asksaveasfilename(
-            title="Save GIF",
-            defaultextension=".gif",
-            filetypes=[("GIF image", "*.gif")],
+            title="Save image",
+            defaultextension=".png",
+            filetypes=[
+                ("PNG image", "*.png"),
+                ("WebP image (lossless)", "*.webp"),
+                ("GIF image (256 colors)", "*.gif"),
+            ],
         )
         if not path:
             return
         try:
-            self.output_pimage.save(path, format="GIF")
+            image = self._get_output_view_image()
+            suffix = Path(path).suffix.lower()
+            if not suffix:
+                path += ".png"
+                suffix = ".png"
+            if suffix == ".png":
+                image.save(path, format="PNG")
+            elif suffix == ".webp":
+                # Keep the complete RGB preview; WebP's default is lossy.
+                has_alpha = "A" in image.getbands() or "transparency" in image.info
+                image = image.convert("RGBA" if has_alpha else "RGB")
+                image.save(path, format="WEBP", lossless=True, exact=True)
+            elif suffix == ".gif":
+                image.save(path, format="GIF")
+            else:
+                raise ValueError("Choose a .png, .webp, or .gif filename.")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to save GIF:\n{e}")
+            messagebox.showerror("Error", f"Failed to save image:\n{e}")
 
 
 def main():
@@ -16250,4 +16831,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
     main()

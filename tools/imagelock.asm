@@ -14,7 +14,11 @@ cpu 8086
 org 100h
 
 %ifndef IMAGE_TICKS
+%ifdef N1_BORDER
+%define IMAGE_TICKS 2227
+%else
 %define IMAGE_TICKS 2241        ; measured bridge-to-PREP delay; MAIN follows 152 ticks later
+%endif
 %endif
 %ifndef DISPLAY_FRAMES
 %define DISPLAY_FRAMES 3600     ; about 60 seconds, or Escape
@@ -99,13 +103,18 @@ mode4_handoff:
     out dx,ax
     loop .crtc
     mov dx,03D9h
+%ifdef N1_BORDER
+    mov al,0                   ; black throughout acquisition/vertical overscan
+%else
     mov al,31h                 ; white index 3 / dark-blue background while hunting
+%endif
     out dx,al
     dec dx
     mov al,0Ah                 ; ordinary BIOS-mode-4 interpretation
     out dx,al
     mov word [hunt_left],256
     mov byte [seen_high],0
+n1_frames_setup:
     mov word [frames_left],DISPLAY_FRAMES
     mov byte [stop_requested],0
     xor ax,ax
@@ -202,7 +211,11 @@ image_bridge:
     mov word [es:20h],raster_prep
     mov dx,03D9h
 bridge_palette:
+%ifdef N1_BORDER
+    mov al,0                   ; image backgrounds are loaded only at the image edge
+%else
     mov al,30h                 ; patched palette for row 0 leading pixels
+%endif
     out dx,al
     mov al,0FEh                ; only IRQ0; poll Escape after each timed raster
     out 21h,al
@@ -446,6 +459,11 @@ fine_sample:    db 0
 hunt_left:      dw 256
 frames_left:    dw DISPLAY_FRAMES
 stop_requested: db 0
+%ifdef N1_BORDER
+n1_exit_on_keypress: db 0
+n1_last_key: db 0
+n1_key_initialized: db 0
+%endif
 mode4_crtc:
     dw 3800h,2801h,2D02h,0A03h,7F04h,0605h
     dw 6406h,7007h,0208h,0109h,000Ch,000Dh
@@ -458,13 +476,31 @@ msg_failed:
     ; Versioned template descriptor at file offset 0E00h (COM address 0F00h).
     ; All stored pointers below are FILE OFFSETS, ready for bytearray patching.
     times 0F00h-($-$$+100h) db 0
+%ifdef N1_BORDER
+    db 'N1BRD001'
+    dw bitmap-$$,palette_offsets-$$,600,n1_frames_setup-$$+4
+    dw frames_left-$$,n1_exit_on_keypress-$$,image_irq-$$,raster_end-$$
+    dw palette_1-$$+2,palette_0-$$+2
+    dw n1_first_foreground-$$+1
+%else
     db 'IMGLK001'
     dw bitmap-$$,palette_offsets-$$,1600,first_line_palette-$$+1
     dw frames_left-$$
     dw image_irq-$$,raster_end-$$
     dw LINE_NOPS,LEAD_NOPS,INTER_NOPS,HBLANK_AFTER_NOPS,IMAGE_TICKS
+%endif
 
+%ifdef N1_BORDER
+    ; Keep the initializer's absolute data addresses; the larger N=1 kernel
+    ; starts after them. The default eight-write binary remains unchanged.
+    times 45C6h-($-$$+100h) db 0
+sample_segment: dw 0
+    times 45E4h-($-$$+100h) db 0
+    dw 13FDh,0045h,0000h
+    times 4800h-($-$$+100h) db 90h
+%else
     times 1000h-($-$$+100h) db 90h
+%endif
 image_irq:
     ; PREP drained pending refresh. Restore it at this fixed instruction offset.
     ; The current LONG interval is 19760 ticks; SHORT completes the 19912-tick frame.
@@ -489,6 +525,9 @@ image_irq:
     ; after visible write 7: 13; after the HBLANK write: 6. Total: 33.
     ; These positions were selected by comparing completed RGBI frames across
     ; startup phases, not by inferring palette-latch times from OUT endpoints.
+%ifdef N1_BORDER
+%include "tools/n1_border_kernel.inc"
+%else
 %assign palette_index 0
 %assign raster_row 0
 %rep 200+PREROLL_LINES
@@ -560,12 +599,33 @@ first_line_palette:
 %if PREROLL_LINES == 0
 first_line_palette equ bridge_palette
 %endif
+%endif
 raster_end:
     ; Poll/acknowledge keyboard only in the vertical blanking budget. Keyboard
     ; IRQ1 is masked while showing the image, so no handler can disturb a row.
     in al,60h
+%ifdef N1_BORDER
+    cmp byte [cs:n1_key_initialized],0
+    jne .check_key
+    mov [cs:n1_last_key],al
+    mov byte [cs:n1_key_initialized],1
+    jmp short .ack_key
+.check_key:
+    mov ah,[cs:n1_last_key]
+    mov [cs:n1_last_key],al
+    cmp al,ah
+    je .ack_key
+    test al,80h               ; ignore release codes and extended prefixes
+    jnz .ack_key
+    or al,al
+    jz .ack_key
+    cmp byte [cs:n1_exit_on_keypress],0
+    jne .done
+.ack_key:
+%else
     cmp al,01h
     je .done
+%endif
     in al,61h
     mov ah,al
     or al,80h
@@ -607,10 +667,12 @@ raster_prep:
     jmp $
 
     ; Absolute data references preserved from the released initializer.
+%ifndef N1_BORDER
     times 45C6h-($-$$+100h) db 0
 sample_segment: dw 0
     times 45E4h-($-$$+100h) db 0
     dw 13FDh,0045h,0000h
+%endif
 
 %ifdef MODE4_DIRECT
     times 4800h-($-$$+100h) db 0
@@ -623,10 +685,17 @@ mode4_tiny_lock:
     times 8000h-($-$$+100h) db 0
 palette_offsets:
 %assign palette_index 0
+%ifdef N1_BORDER
+%rep 600
+    dw palette_%+palette_index-$$+1
+%assign palette_index palette_index+1
+%endrep
+%else
 %rep 1600
     dw palette_%+palette_index-$$+1
 %assign palette_index palette_index+1
 %endrep
+%endif
 
     times 0A000h-($-$$+100h) db 0
 bitmap:

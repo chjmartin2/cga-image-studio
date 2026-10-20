@@ -56,28 +56,32 @@ def whole_pixel_preview_size(source_size, available_size):
 MODE_GROUPS = {
     'RGB Graphics': (
         '320x200 (4 Colors)', '640x200 (2 Colors)',
-        '320x200 (4 Colors) Mode Switch'),
+        '320x200 (4 Colors) Mode Switch', '320x200 Mode Switch Repeat'),
     'Composite': (
         '160x200 (16 Colors) Composite', '640x200 Multicolor Composite',
         '80x100 (512 Colors)', '80x100 (1024 Colors) Mini-Frames',
         '80x100 (1024 Colors)', '640x100 (1024 Colors)',
         '640x200 (1024 Colors)'),
     'RGB Text': (
+        '40-column Text (RGB)', '80-column Text (RGB)',
         '160x100 (16 Colors)', '640x200 (16 Colors) Char',
         '80x100 (4352 Colors) HiColor'),
 }
 
 DESCRIPTIONS = {
+    '40-column Text (RGB)': 'RGB text · Standard 40×25 at 8 scanlines per character. All 256 ROM glyphs and 16 foreground/background colors; selectable matching and cell height.',
+    '80-column Text (RGB)': 'RGB text · Standard 80×25 at 8 scanlines per character. All 256 ROM glyphs and 16 foreground/background colors; selectable matching and cell height.',
     '320x200 (4 Colors)': 'RGB graphics · Four-color CGA palette.',
     '640x200 (2 Colors)': 'RGB graphics · Two-color high-resolution bitmap.',
-    '320x200 (4 Colors) Mode Switch': 'RGB graphics · Palette changes during each scanline. Select 1, 8, or 8 staggered changes.',
+    '320x200 (4 Colors) Mode Switch': 'RGB graphics · 1 selects one four-color palette for each whole scanline. The 8-write profiles change palettes within a scanline.',
+    '320x200 Mode Switch Repeat': 'RGB graphics · Search a repeating cycle with unique three-color foreground combinations. Standard palettes support 2–4 rows; adding tweaked palettes supports 2–6. Backgrounds can be black or adjustable independently of foreground uniqueness.',
     '160x200 (16 Colors) Composite': 'Composite graphics · Nearest RGB match to a 16-color palette; NTSC-simulated preview.',
     '640x200 Multicolor Composite': 'Composite graphics · NTSC signal search over a 640×200 bitmap; simulated colors depend on neighboring bits.',
     '80x100 (512 Colors)': 'Composite text · Repeating character patterns select an apparent color for each 80×100 cell.',
     '80x100 (1024 Colors) Mini-Frames': 'Composite text · Full-height Mini-Frames timing; the exported display runs for the selected duration.',
     '80x100 (1024 Colors)': 'Composite text · Centered display using character patterns and NTSC simulation.',
     '640x100 (1024 Colors)': 'Composite text · Per-pixel NTSC search in a centered 640×100 display.',
-    '640x200 (1024 Colors)': 'Composite text · Full-screen 640×200 NTSC search using character patterns.',
+    '640x200 (1024 Colors)': 'Composite text · Automatic CPU/GPU search with error diffusion, ordered dithering, or direct matching. Preview the same encoded characters in Composite or RGB text. Apparent NTSC colors depend on neighboring patterns; 1024 is a historical label.',
     '160x100 (16 Colors)': 'RGB text · Character blocks form a 160×100 image from the 16 RGBI colors.',
     '640x200 (16 Colors) Char': 'RGB text · Character and attribute matching preserve image detail using 16 RGBI colors.',
     '80x100 (4352 Colors) HiColor': 'RGB text · Character patterns mix foreground and background colors into apparent cell colors.',
@@ -167,17 +171,41 @@ class SettingsLayout:
 
         a = app
         composite = lambda: a.is_composite_mode() or a.is_text_ntsc_mode()
-        rgbtext = lambda: a.mode_var.get() in MODE_GROUPS['RGB Text']
-        diffusion = lambda: a.dither_family_var.get() == 'Error diffusion'
-        ordered = lambda: a.dither_family_var.get() == 'Ordered'
+        rgbtext = lambda: a.mode_var.get() in MODE_GROUPS['RGB Text'] and not a.is_standard_text_mode()
+        use_dither = lambda: not a.is_standard_text_mode() or a.standard_text_quantize_var.get()
+        diffusion = lambda: use_dither() and a.dither_family_var.get() == 'Error diffusion'
+        ordered = lambda: use_dither() and a.dither_family_var.get() == 'Ordered'
         find = lambda variable: next(w for w in children if 'textvariable' in w.keys() and str(w.cget('textvariable')) == str(variable))
         add('Output mode', [mode_cb], 'Choose a mode within this display type. Its description explains graphics versus text output.')
+        from cga_standard_text import METHODS, PREPROCESS, HEIGHTS
+        for title, attr, variable, values, tip in (
+            ('Character height (scanlines)', 'standard_text_height_cb', a.standard_text_height_var,
+             tuple(map(str,HEIGHTS)), 'Choose 2-8 scanlines per cell. 8 gives standard 25-row text; shorter cells show only the top ROM rows. Static CGA timing and the 16 KiB memory limit are enforced.'),
+            ('Character matching', 'standard_text_match_cb', a.standard_text_match_var,
+             METHODS, 'Search every character and color pair. DCT (default) weights broad structure; Pixel compares linear RGB; averaging favors local coverage; Balanced combines pixel and viewing scales.'),
+            ('Text preprocessing', 'standard_text_preprocess_cb', a.standard_text_preprocess_var,
+             PREPROCESS, 'Original preserves source detail. Downsample simplifies before matching. Cartoon simplify uses a 3x3 median filter to remove small details, then reduces each RGB channel to 16 levels (up to 4096 colors). Use Preview text input to inspect the result.'),
+        ):
+            widget = ttk.Combobox(options, textvariable=variable, values=values, state='readonly')
+            setattr(a, attr, widget)
+            widget.bind('<<ComboboxSelected>>', a._on_standard_text_options_changed)
+            add(title,[widget],tip,a.is_standard_text_mode)
+        from cga_standard_text_ui import open_dct_tweaker
+        a.standard_text_dct_button=ttk.Button(options,text='DCT Tweaker',command=lambda:open_dct_tweaker(a))
+        add('',[a.standard_text_dct_button],'Adjust DCT weights and automatically refresh the text conversion.',a.is_standard_text_mode)
+        info = ttk.Label(options,textvariable=a.standard_text_info_var,wraplength=285)
+        add('',[info],'CGA font ROM is fixed. The export disables blink to allow all sixteen background colors.',a.is_standard_text_mode)
+        a.standard_text_quantize_cb = ttk.Checkbutton(options,text='Reduce to CGA colors before matching',
+            variable=a.standard_text_quantize_var,command=a._on_standard_text_options_changed)
+        add('',[a.standard_text_quantize_cb],'Enable a 16-color intermediate raster using the dithering controls below. Off matches the original RGB colors directly.',a.is_standard_text_mode)
         add('CGA palette / color', [a.palette_cb], 'Select the hardware palette used to match image colors.', lambda: a.is_4color_mode() or a.is_mono_mode())
-        add('Background color', [a.bg_color_cb], 'Select the shared background color. Mode Switch can choose different backgrounds with Multiple.', a.is_4color_mode)
+        add('Background color', [a.bg_color_cb], 'Choose any of the 16 CGA colors as the shared background. In Mode Switch, Per line selects a background for each scanline.', lambda: a.is_4color_mode() or (a.is_mode_switch_mode() and not a.is_mode_switch_repeat_mode()))
+        add('Background', [a.ms_repeat_background_cb], 'Adjustable freely chooses each cycle slot\'s background. A named CGA color forces that background on every row. Forced No Repeats chooses backgrounds with no equal adjacent rows, including the cycle wrap. Background changes never count as a new foreground palette.', a.is_mode_switch_repeat_mode)
         add('Composite model', [a.composite_palette_cb], 'Match the Old or New CGA composite circuit used by the target display.', composite)
-        add('Palette changes per line', [a.ms_switches_spin], '1 changes during blanking; 8 uses aligned boundaries; 8 staggered offsets boundaries on alternating lines.', a.is_any_mode_switch)
+        add('Palette changes per line', [a.ms_switches_spin], '1 changes during blanking; 8 uses aligned boundaries; 8 staggered offsets boundaries on alternating lines.', lambda: a.is_any_mode_switch() and not a.is_mode_switch_repeat_mode())
+        add('Repeat rows', [a.ms_repeat_rows_cb, a.ms_repeat_limit_label], 'Every slot must have a distinct three-color foreground combination. A different background does not make a palette unique. The cycle repeats after this many rows. Available repeat lengths depend on the enabled CGA palette families.', a.is_mode_switch_repeat_mode)
         add('Target video card', [a.target_video_cb], 'Select the card that will run the exported text-mode program.', rgbtext)
-        add('Dithering', [find(a.dither_family_var)], 'None uses direct matching. Error diffusion spreads residual error; Ordered uses a regular pattern.')
+        add('Dithering', [find(a.dither_family_var)], 'None uses direct matching. Error diffusion spreads residual error; Ordered uses a regular pattern. In standard text this affects only the optional preconversion raster.',use_dither)
         add('Diffusion method', [a.diffusion_cb], 'Choose how error is distributed. None disables diffusion even when Error diffusion is selected.', diffusion)
         add('Diffusion strength', [a.diffusion_intensity_scale, a.diffusion_intensity_label], 'Reduce the amount of propagated error. Zero disables error diffusion.', diffusion)
         add('Ordered matrix', [a.ordered_size_cb], 'Set the repeating ordered-dither pattern size.', ordered)
@@ -207,15 +235,16 @@ class SettingsLayout:
             add('', [w], tip, predicate, True)
         for w, title, tip, predicate in (
             (a.ms_show_palette_cb, 'Show palette layout', 'Display a diagnostic map of palette boundaries.', a.is_any_mode_switch),
-            (a.ms_black_border_cb, 'Keep border black', 'Restore black after the final palette change.', a.is_any_mode_switch),
-            (a.ms_dither_aware_cb, 'Dither-aware palette search', 'Score palette choices using simulated dithering; slower.', a.is_any_mode_switch),
+            (a.ms_black_border_cb, 'Keep border black', 'Single-line/Repeat: experimental timed black overscan, with freely selected image backgrounds. Startup timing can leave a border seam or blacken a few image-edge pixels; see docs/N1_BORDER.md.', a.is_any_mode_switch),
+            (a.ms_dither_aware_cb, 'Dither-aware palette search', 'Evaluate palette choices with the selected dithering. Enabled by default for one palette per scanline.', lambda: a.is_any_mode_switch() and not a.is_mode_switch_repeat_mode()),
+            (a.ms_force_unique_palette_cb, 'Force unique palette per scanline', 'Exclude the previous scanline\'s three foreground colors from the next scanline. Background selection is independent. A, B, A palette sequences are allowed.', lambda: a.is_mode_switch_mode() and not a.is_mode_switch_repeat_mode() and a.ms_switches_var.get() == '1'),
             (a.hicolor_limit_cb, 'Limit character patterns', 'Restrict HiColor to solids, shades and stripes.', a.is_hicolor_mode),
             (a.char16_subsample_cb, 'Subsample character matching', 'Balance color matching against character detail.', a.is_16color_char_mode),
         ):
             w.configure(text=title)
             add('', [w], tip, predicate, True)
         tweaked = a.tweaked_off_rb.master
-        add('Tweaked palettes', [tweaked], 'Choose standard mode 04 or tweaked mode 05 palettes.', a.is_any_mode_switch, True)
+        add('Tweaked palettes', [tweaked], 'Off searches the four standard foreground combinations. On adds both tweaked combinations, retaining every standard choice.', a.is_any_mode_switch, True)
         add('', [a.input_adjust_frame], 'Adjust the input brightness, contrast, and RGB gains before conversion.', lambda: a.show_input_adjust_var.get())
         for widget, tip in (
             (a.in_brightness_scale, 'Lighten or darken the input before conversion. Zero is neutral.'),
@@ -258,5 +287,6 @@ class SettingsLayout:
                     widget.lift()
         if hasattr(a, 'optimize_button'):
             a.optimize_button.pack_forget()
-            if a.is_4color_mode() and not a.is_any_mode_switch():
+            a.optimize_button.configure(text='Optimize' if a.is_standard_text_mode() else 'Find best palette')
+            if a.is_standard_text_mode() or (a.is_4color_mode() and not a.is_any_mode_switch()):
                 a.optimize_button.pack(side=tk.LEFT, padx=4)

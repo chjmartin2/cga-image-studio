@@ -1,0 +1,749 @@
+{
+  "upstream_commit": "6f9ac9c0ab643c371931bd8a993152c2598d9f42",
+  "cheetara_com_sha256": "43e4aef4da292e43e91be10f3cbe20ccc021a073382deb336472088d13f99f4c",
+  "core_files_verified_unchanged": 227,
+  "main_exe_unchanged": true,
+  "default": {
+    "upstream_commit": "6f9ac9c0ab643c371931bd8a993152c2598d9f42",
+    "archive_sha256": "8e456963aa06a6ce7ef3727554ed1cea96e4061429b26917a896c5a39904b848",
+    "cheetara_com_sha256": "43e4aef4da292e43e91be10f3cbe20ccc021a073382deb336472088d13f99f4c",
+    "main_exe_sha256": "0234e53512ee0d086ddb88c62a3cf44e05a5407712b3b9de02b14190292c983f",
+    "latest_core_source_unmodified": true,
+    "method": "Independent DOS disk boots using latest unmodified core and its native startup RNG; IBM5160, non-turbo 8088, wait states and DMA refresh enabled, default CGA clocking.",
+    "validator_exe_sha256": "ceb140aa005a6090309c24a3219bba9bc21542448db15831a5306c62e3d447d8",
+    "disk_sha256": "8449d15cbe6719d61a4f38782bcb2b54c3348009126e986b4b9d2db8af11b918",
+    "results": [
+      {
+        "name": "control-pit9-cga0",
+        "randomized": false,
+        "pit_phase": 9,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 290,
+        "mismatching_dots": [
+          5146
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "48eed6b698a7311ba3afcd75eb0d2ab9e98616aafcb9a1838b311988c71fb3bb",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-01",
+        "randomized": true,
+        "pit_phase": 4,
+        "cga_phase": 6,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-02",
+        "randomized": true,
+        "pit_phase": 5,
+        "cga_phase": 15,
+        "exit_code": 0,
+        "frames": 289,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-03",
+        "randomized": true,
+        "pit_phase": 10,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 290,
+        "mismatching_dots": [
+          5146
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "48eed6b698a7311ba3afcd75eb0d2ab9e98616aafcb9a1838b311988c71fb3bb",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-04",
+        "randomized": true,
+        "pit_phase": 4,
+        "cga_phase": 9,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-05",
+        "randomized": true,
+        "pit_phase": 5,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 289,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-06",
+        "randomized": true,
+        "pit_phase": 7,
+        "cga_phase": 1,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-07",
+        "randomized": true,
+        "pit_phase": 2,
+        "cga_phase": 8,
+        "exit_code": 0,
+        "frames": 289,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-08",
+        "randomized": true,
+        "pit_phase": 3,
+        "cga_phase": 14,
+        "exit_code": 0,
+        "frames": 291,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-09",
+        "randomized": true,
+        "pit_phase": 1,
+        "cga_phase": 11,
+        "exit_code": 0,
+        "frames": 289,
+        "mismatching_dots": [
+          5146
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "48eed6b698a7311ba3afcd75eb0d2ab9e98616aafcb9a1838b311988c71fb3bb",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-10",
+        "randomized": true,
+        "pit_phase": 1,
+        "cga_phase": 3,
+        "exit_code": 0,
+        "frames": 290,
+        "mismatching_dots": [
+          5146
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "48eed6b698a7311ba3afcd75eb0d2ab9e98616aafcb9a1838b311988c71fb3bb",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-11",
+        "randomized": true,
+        "pit_phase": 7,
+        "cga_phase": 4,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-12",
+        "randomized": true,
+        "pit_phase": 6,
+        "cga_phase": 5,
+        "exit_code": 0,
+        "frames": 290,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-13",
+        "randomized": true,
+        "pit_phase": 0,
+        "cga_phase": 5,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          10112
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "28d7e391f77018628795bc1905fc2d3cd2e24c5d57e696c0d3335b9e9aff1f61",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-14",
+        "randomized": true,
+        "pit_phase": 11,
+        "cga_phase": 15,
+        "exit_code": 0,
+        "frames": 290,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-15",
+        "randomized": true,
+        "pit_phase": 3,
+        "cga_phase": 10,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-16",
+        "randomized": true,
+        "pit_phase": 1,
+        "cga_phase": 2,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-17",
+        "randomized": true,
+        "pit_phase": 8,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          14372
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "fe97341ae0f7585cd6839da7d718266b7621995680c019281b6d7a31f0e03ed2",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-18",
+        "randomized": true,
+        "pit_phase": 11,
+        "cga_phase": 14,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          10112
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "28d7e391f77018628795bc1905fc2d3cd2e24c5d57e696c0d3335b9e9aff1f61",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-19",
+        "randomized": true,
+        "pit_phase": 8,
+        "cga_phase": 15,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          10112
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "28d7e391f77018628795bc1905fc2d3cd2e24c5d57e696c0d3335b9e9aff1f61",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-20",
+        "randomized": true,
+        "pit_phase": 3,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 289,
+        "mismatching_dots": [
+          2752
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": false,
+        "last_frame_sha256": "75c1a3c78ec1eb0199465d89839da31ac4a2756599863d2fba2847348428220d",
+        "distinct_visible_frame_hashes": 1
+      }
+    ],
+    "total_frames": 6121,
+    "main_exe_unchanged": true
+  },
+  "cycle": {
+    "upstream_commit": "6f9ac9c0ab643c371931bd8a993152c2598d9f42",
+    "archive_sha256": "8e456963aa06a6ce7ef3727554ed1cea96e4061429b26917a896c5a39904b848",
+    "cheetara_com_sha256": "43e4aef4da292e43e91be10f3cbe20ccc021a073382deb336472088d13f99f4c",
+    "main_exe_sha256": "0234e53512ee0d086ddb88c62a3cf44e05a5407712b3b9de02b14190292c983f",
+    "latest_core_source_unmodified": true,
+    "method": "Independent DOS disk boots using latest unmodified core and its native startup RNG; IBM5160, non-turbo 8088, wait states and DMA refresh enabled, default CGA clocking.",
+    "validator_exe_sha256": "66e0c6931926f667b8d64927e3935669eee718cab3175e1de05c68cd4b453366",
+    "disk_sha256": "8449d15cbe6719d61a4f38782bcb2b54c3348009126e986b4b9d2db8af11b918",
+    "clocking_mode": "Cycle",
+    "results": [
+      {
+        "name": "control-pit9-cga0",
+        "randomized": false,
+        "pit_phase": 9,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-01",
+        "randomized": true,
+        "pit_phase": 8,
+        "cga_phase": 4,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-02",
+        "randomized": true,
+        "pit_phase": 11,
+        "cga_phase": 4,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-03",
+        "randomized": true,
+        "pit_phase": 6,
+        "cga_phase": 9,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-04",
+        "randomized": true,
+        "pit_phase": 7,
+        "cga_phase": 10,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-05",
+        "randomized": true,
+        "pit_phase": 9,
+        "cga_phase": 12,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-06",
+        "randomized": true,
+        "pit_phase": 2,
+        "cga_phase": 0,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-07",
+        "randomized": true,
+        "pit_phase": 5,
+        "cga_phase": 12,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-08",
+        "randomized": true,
+        "pit_phase": 7,
+        "cga_phase": 8,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-09",
+        "randomized": true,
+        "pit_phase": 4,
+        "cga_phase": 7,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-10",
+        "randomized": true,
+        "pit_phase": 0,
+        "cga_phase": 6,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-11",
+        "randomized": true,
+        "pit_phase": 0,
+        "cga_phase": 11,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-12",
+        "randomized": true,
+        "pit_phase": 0,
+        "cga_phase": 5,
+        "exit_code": 0,
+        "frames": 295,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-13",
+        "randomized": true,
+        "pit_phase": 7,
+        "cga_phase": 4,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-14",
+        "randomized": true,
+        "pit_phase": 7,
+        "cga_phase": 8,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-15",
+        "randomized": true,
+        "pit_phase": 8,
+        "cga_phase": 2,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-16",
+        "randomized": true,
+        "pit_phase": 3,
+        "cga_phase": 7,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-17",
+        "randomized": true,
+        "pit_phase": 5,
+        "cga_phase": 13,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-18",
+        "randomized": true,
+        "pit_phase": 11,
+        "cga_phase": 15,
+        "exit_code": 0,
+        "frames": 293,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-19",
+        "randomized": true,
+        "pit_phase": 3,
+        "cga_phase": 13,
+        "exit_code": 0,
+        "frames": 292,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      },
+      {
+        "name": "random-20",
+        "randomized": true,
+        "pit_phase": 11,
+        "cga_phase": 10,
+        "exit_code": 0,
+        "frames": 294,
+        "mismatching_dots": [
+          0
+        ],
+        "unequal_pixel_pairs": [
+          0
+        ],
+        "pass": true,
+        "last_frame_sha256": "7dd998050dec3a0c223695b91d533b1c72c5a3561a7cf9b3410d03a1b20d0b3b",
+        "distinct_visible_frame_hashes": 1
+      }
+    ],
+    "total_frames": 6153,
+    "main_exe_unchanged": true
+  }
+}

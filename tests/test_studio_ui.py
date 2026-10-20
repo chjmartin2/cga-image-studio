@@ -42,6 +42,10 @@ class StudioLayoutTests(unittest.TestCase):
             a.settings_layout.group_var.set(group)
             a.settings_layout.select_group()
             self.assertEqual(a.mode_var.get(), modes[0])
+        # Standard RGB text keeps preconversion dithering disabled by default.
+        # Exercise ordinary dither disclosure in a mode that always uses it.
+        a.mode_var.set('320x200 (4 Colors)')
+        a.on_mode_changed()
         for family in ('None', 'Ordered', 'Error diffusion', 'None'):
             a.dither_family_var.set(family)
             a.on_dither_family_changed()
@@ -76,7 +80,25 @@ class StudioLayoutTests(unittest.TestCase):
         self.assertEqual((a.out_tk_image.width(), a.out_tk_image.height()), (640, 480))
         self.assertEqual(a.output_pimage.size, (640, 200))
         self.assertEqual(a.output_pimage.tobytes(), original)
-        self.assertEqual(a.export_menu.index('end'), 3)
+        self.assertEqual(a.export_menu.index('end'), 6)
+
+    def test_palette_map_auto_zoom_settles(self):
+        a = self.app
+        a.output_pimage = Image.new('RGB', (320, 200), 'red')
+        a.preview_scale_var.set('Auto (whole pixels)')
+        for size in ('960x640', '1200x780', '1600x1000'):
+            a.geometry(size)
+            a.update()
+            for visible in (True, False, True):
+                a.ms_pal_pimage = Image.new('RGB', (320, 200), 'blue') if visible else None
+                states = []
+                for _ in range(12):
+                    a._update_right_preview()
+                    a.update()
+                    states.append((a.out_canvas.winfo_width(), a.out_canvas.winfo_height(),
+                                   a.out_tk_image.width(), a.out_tk_image.height()))
+                self.assertEqual(len(set(states[-6:])), 1, states)
+                self.assertEqual(bool(a.ms_pal_frame.winfo_ismapped()), visible)
 
     def test_auto_zoom_repeats_every_source_pixel_equally(self):
         import numpy as np

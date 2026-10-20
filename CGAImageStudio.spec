@@ -9,7 +9,11 @@ a = Analysis(
            (str(root / "assets/branding/raster-crt"), "assets/branding/raster-crt"),
            (str(root / "files/dos_boot_template.dsk"), "files")],
     hiddenimports=[], hookspath=[], hooksconfig={}, runtime_hooks=[],
-    excludes=["scipy", "pytest"], noarchive=False,
+    # The portable build includes compiled CPU search. CUDA remains an optional
+    # source installation so this executable needs no CUDA toolkit or GPU.
+    excludes=["scipy", "pytest", "cupy", "cupyx", "cuda", "nvidia"], noarchive=False,
+    # Numba's cache needs the scorer's source file in the frozen extraction tree.
+    module_collection_mode={"cga_text_new_cpu": "py"},
 )
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, a.binaries, a.datas, [],

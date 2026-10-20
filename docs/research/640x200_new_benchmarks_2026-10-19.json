@@ -1,0 +1,353 @@
+{
+  "date": "2026-10-19",
+  "objective": "Sum of squared CIE Lab distances to original target, full decoder RGB; f32 Lab conversion, f64 accumulation",
+  "environment": {
+    "python": "3.12.0 (tags/v3.12.0:0fb18b0, Oct  2 2023, 13:03:39) [MSC v.1935 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "cpu_count": 32,
+    "packages": {
+      "numpy": "2.4.6",
+      "pillow": "12.2.0",
+      "numba": "0.68.0",
+      "cupy-cuda12x": "14.2.0"
+    }
+  },
+  "timing_note": "Encoding wall time includes lazy initialization/JIT; rendering/files excluded. Second encoder may reuse candidate caches. Alternate --order for startup comparisons. Legacy K64+5% result was measured separately; same source resize and scoring objective.",
+  "display_note": "Raw PNGs preserve full decoder RGB. Display PNGs use nearest-neighbor 640x480 CRT aspect. Legacy GUI RGB444 quantization is intentionally excluded from both scores.",
+  "single_runs_not_guarantees": true,
+  "measurements": {
+    "raiders_vs_k64_polish5": {
+      "source": {
+        "path": "raiders-of-the-lost-ark.webp",
+        "file_sha256": "62711d2fb5af04998706a2a114ad98d6eb6bddf96efef55a6962f0be6eeaa2af",
+        "original_size": [
+          680,
+          478
+        ],
+        "target_size": [
+          640,
+          200
+        ],
+        "target_rgb_sha256": "1ed13156c6d5a1e41ea465f8366217137e25ea36e980701d678fa815c7f38807"
+      },
+      "settings": {
+        "preset": "Old CGA",
+        "backend": "cuda",
+        "workers": null,
+        "scale": "stretch",
+        "resample": "Lanczos",
+        "legacy_k": 64,
+        "legacy_polish_percent": 5,
+        "legacy_dither": "None",
+        "legacy_chroma_lowpass": false,
+        "legacy_shape_weight": 1.0,
+        "order": "new-first"
+      },
+      "source_hashes": {
+        "cga_v167.py": "5009514f1a4d158f5c7ee1695e6a6ac01c592ee97fecd24f8efa63a888b9c16a",
+        "cga_text_new.py": "8808f02b8f39b82932b280e37d54ddda06ec015b66e890bd4b7805fd4dae93c7",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "32b79903eacf31671634df9786677d6038371ad80d7c7fc4ab7e5c4d4da6439e",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "results": {
+        "new": {
+          "seconds": 22.383473399997456,
+          "objective": 8689303.459039338,
+          "rms_delta_e": 8.239246523423414,
+          "decoded_rgb_sha256": "e9652fbb269ac79229eccb3f1880295ed5cc33b61ae78565773e574a5607279c",
+          "cells_sha256": "502de9395e813591aa957a6e9c4806b6e95abdca206ea186e87bbebc0658872d",
+          "search": {
+            "backend": "CUDA / NVIDIA GeForce RTX 3090",
+            "candidate_count": 23536,
+            "domain_widths": [
+              8,
+              16,
+              32,
+              64
+            ],
+            "passes": 26,
+            "diversity_passes": 2,
+            "local_optimum": true,
+            "global_optimum_certified": false,
+            "numerical_tolerance": 1e-07,
+            "converged": true,
+            "runtime_fallbacks": []
+          }
+        },
+        "legacy": {
+          "seconds": 162.8216614999983,
+          "objective": 13765642.441743582,
+          "rms_delta_e": 10.370346261148745,
+          "decoded_rgb_sha256": "8fc005705b44b7aa613529670d0a04507543b9f34181fb7dbdf871386fc84025",
+          "cells_sha256": "8e033ba293656beca63c1264f2030a6bc3479aa239966605b428de80c0ba0831"
+        }
+      },
+      "squared_lab_error_reduction_percent": 36.87687664551358
+    },
+    "raiders_vs_k8_polish0": {
+      "source": {
+        "path": "raiders-of-the-lost-ark.webp",
+        "file_sha256": "62711d2fb5af04998706a2a114ad98d6eb6bddf96efef55a6962f0be6eeaa2af",
+        "original_size": [
+          680,
+          478
+        ],
+        "target_size": [
+          640,
+          200
+        ],
+        "target_rgb_sha256": "1ed13156c6d5a1e41ea465f8366217137e25ea36e980701d678fa815c7f38807"
+      },
+      "settings": {
+        "preset": "Old CGA",
+        "backend": "cuda",
+        "workers": null,
+        "scale": "stretch",
+        "resample": "Lanczos",
+        "legacy_k": 8,
+        "legacy_polish_percent": 0,
+        "legacy_dither": "None",
+        "legacy_chroma_lowpass": false,
+        "legacy_shape_weight": 1.0,
+        "order": "new-first"
+      },
+      "source_hashes": {
+        "cga_v167.py": "5009514f1a4d158f5c7ee1695e6a6ac01c592ee97fecd24f8efa63a888b9c16a",
+        "cga_text_new.py": "8808f02b8f39b82932b280e37d54ddda06ec015b66e890bd4b7805fd4dae93c7",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "32b79903eacf31671634df9786677d6038371ad80d7c7fc4ab7e5c4d4da6439e",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "results": {
+        "new": {
+          "seconds": 22.383473399997456,
+          "objective": 8689303.459039338,
+          "rms_delta_e": 8.239246523423414,
+          "decoded_rgb_sha256": "e9652fbb269ac79229eccb3f1880295ed5cc33b61ae78565773e574a5607279c",
+          "cells_sha256": "502de9395e813591aa957a6e9c4806b6e95abdca206ea186e87bbebc0658872d",
+          "search": {
+            "backend": "CUDA / NVIDIA GeForce RTX 3090",
+            "candidate_count": 23536,
+            "domain_widths": [
+              8,
+              16,
+              32,
+              64
+            ],
+            "passes": 26,
+            "diversity_passes": 2,
+            "local_optimum": true,
+            "global_optimum_certified": false,
+            "numerical_tolerance": 1e-07,
+            "converged": true,
+            "runtime_fallbacks": []
+          }
+        },
+        "legacy": {
+          "seconds": 15.854142099997262,
+          "objective": 23266035.6467683,
+          "rms_delta_e": 13.482058577620013,
+          "decoded_rgb_sha256": "500c1ab4d6b709a09bf03548ad44a8f2025adbf62ae58e92205226830973582b",
+          "cells_sha256": "31c36584ca540ea541c7aa592f7903390dd070711e0d0ea057d38b4bf43adccd"
+        }
+      },
+      "squared_lab_error_reduction_percent": 62.65241061707778
+    },
+    "picard_vs_k8_polish0": {
+      "source": {
+        "path": "picard_input_copy.bmp",
+        "file_sha256": "e03831c6201b34d2895d2d48d4735cb2a3c80639d968cf2712de5b3c65b37056",
+        "original_size": [
+          160,
+          102
+        ],
+        "target_size": [
+          640,
+          200
+        ],
+        "target_rgb_sha256": "28924dcbe51004f2353adb7322f9dc61c5ad96a8a68b179b6cbfce946df61b7b"
+      },
+      "settings": {
+        "preset": "Old CGA",
+        "backend": "cuda",
+        "workers": null,
+        "scale": "stretch",
+        "resample": "Lanczos",
+        "legacy_k": 8,
+        "legacy_polish_percent": 0,
+        "legacy_dither": "None",
+        "legacy_chroma_lowpass": false,
+        "legacy_shape_weight": 1.0,
+        "order": "new-first"
+      },
+      "source_hashes": {
+        "cga_v167.py": "5009514f1a4d158f5c7ee1695e6a6ac01c592ee97fecd24f8efa63a888b9c16a",
+        "cga_text_new.py": "0aa0517c3a08131bce3e52bfd2fe888edb8f233c1b81d29a78a575b50d22d617",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "32b79903eacf31671634df9786677d6038371ad80d7c7fc4ab7e5c4d4da6439e",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "results": {
+        "new": {
+          "seconds": 14.120902599999681,
+          "objective": 15875667.958595786,
+          "rms_delta_e": 11.136815340416199,
+          "decoded_rgb_sha256": "6acea1364262fc062e39cd5a54662e8c76b7cd0dde104b33d2d9bea2c375d7df",
+          "cells_sha256": "3c7c61c6112c8d32b098f1b723426f098771367b69a5b3102e60211c1897f7c2",
+          "search": {
+            "backend": "CUDA / NVIDIA GeForce RTX 3090",
+            "candidate_count": 23536,
+            "domain_widths": [
+              8,
+              16,
+              32,
+              64
+            ],
+            "passes": 25,
+            "diversity_passes": 2,
+            "local_optimum": true,
+            "global_optimum_certified": false,
+            "numerical_tolerance": 1e-07,
+            "converged": true,
+            "runtime_fallbacks": []
+          }
+        },
+        "legacy": {
+          "seconds": 15.940488499996718,
+          "objective": 32224639.61228441,
+          "rms_delta_e": 15.866789119761187,
+          "decoded_rgb_sha256": "8204cc299c4bb9ff219707a8f91cd6e0d62a2f417c68d234e0679b10b4c48d0e",
+          "cells_sha256": "72aae0c7a9be215870af6d1c2512cb5674eed1cab11f80fe868e63fd83c09edc"
+        }
+      },
+      "squared_lab_error_reduction_percent": 50.734381673135
+    }
+  },
+  "stronger_comparison_reuses_new_measurement": true,
+  "gui": {
+    "wall_seconds": 19.07998310000403,
+    "optimizer_seconds": 18.620760099991458,
+    "source_sha256": "3d095775c6c44193b0faa7cad350c3979472b1844fb14b0a092be96be9a2ffc6",
+    "full_rgb_preview_exact": true,
+    "com_matches_cells": true,
+    "asm_roundtrip_exact": true,
+    "disk_com_exact": true,
+    "com_sha256": "8d146ceb3be2e08563ef2235ab5f9a3ef2069dfbfb4baa3f58184254a5f76968"
+  },
+  "cancellation": [
+    {
+      "action": "STOP",
+      "seconds": 0.06610109997563995,
+      "status": "Encode cancelled.",
+      "export_blocked": true
+    },
+    {
+      "action": "mode change",
+      "seconds": 0.09700939999311231,
+      "status": "Encode cancelled.",
+      "export_blocked": true
+    },
+    {
+      "action": "preset change",
+      "seconds": 0.9097768999927212,
+      "status": "Encode cancelled.",
+      "export_blocked": true
+    },
+    {
+      "action": "source change",
+      "seconds": 1.0509409999940544,
+      "status": "Encode cancelled.",
+      "export_blocked": true
+    }
+  ],
+  "validation": {
+    "full_suite_command": "pytest tests -q",
+    "passed": 83,
+    "subtests": 174,
+    "failed": 2,
+    "seconds": 69.86,
+    "failures": [
+      "tests/test_export_validity.py::ExportValidityTests::test_old_text_worker_cannot_replace_new_conversion",
+      "tests/test_export_validity.py::ExportValidityTests::test_preview_and_export_only_controls_remain_valid"
+    ],
+    "failure_stage": "Existing Tk initialization in _tkinter.create before application construction",
+    "errors": [
+      "cannot read vistaTheme.tcl",
+      "invalid tcl_findLibrary"
+    ],
+    "isolated_reruns_passed": true,
+    "isolated_rerun_seconds": [
+      0.66,
+      0.57
+    ],
+    "export_file_rerun": {
+      "passed": 3,
+      "initialization_failed": 1
+    },
+    "limitation": "Unrelated Tcl runtime issue was not fixed; full suite is not claimed green",
+    "new_specific_aggregate": {
+      "files": 6,
+      "passed": 26,
+      "subtests": 57,
+      "tk_initialization_errors": 1,
+      "affected_test": "tests/test_text_new_integration.py::NewTextIntegrationTests::test_queue_completion_preserves_diagnostics_and_exports_same_cells",
+      "error": "Cannot initialize Tk: ttk/scrollbar.tcl unavailable",
+      "isolated_rerun_passed": true,
+      "isolated_rerun_seconds": 0.5,
+      "separate_benchmark_tests_passed": 1,
+      "all_completed_numerical_and_behavioral_assertions_passed": true,
+      "aggregate_all_green": false
+    },
+    "new_test_isolation": {
+      "scope": "NEW GUI integration test isolation; no application behavior changes",
+      "plain_create_destroy_loops": {
+        "without_explicit_gc": {
+          "attempts": 30,
+          "failures": 0
+        },
+        "with_explicit_gc": {
+          "attempts": 30,
+          "failures": 0
+        }
+      },
+      "captured_aggregate_without_gc": {
+        "suite": "NEW integration, existing studio UI, existing export validity",
+        "passed": 17,
+        "failed": 1,
+        "failure": "Tk initialization before application code: installed ttk/defaults.tcl reported unreadable"
+      },
+      "explicit_gc_experiment": {
+        "gui_aggregate_passed": 18,
+        "gui_aggregate_subtests_passed": 58,
+        "all_new_suite_passed": 27,
+        "all_new_suite_failed": 1,
+        "failure": "Tk initialization before application code: installed ttk/fonts.tcl reported unreadable",
+        "reliable_fix": false,
+        "test_changes_reverted": true
+      },
+      "capture_disabled_aggregate": {
+        "suite": "All NEW tests with pytest -q -s",
+        "passed": 28,
+        "subtests_passed": 57,
+        "failed": 0,
+        "note": "One passing run does not establish capture as the cause"
+      },
+      "fresh_process_validation_after_revert": {
+        "test_mode_is_separate_and_hides_unsupported_controls": "pass",
+        "test_conversion_dispatch_and_validity_ignore_only_unused_settings": "pass",
+        "test_queue_completion_preserves_diagnostics_and_exports_same_cells": "pass",
+        "test_full_precision_preview_keeps_decoder_colors_and_legacy_quantization": "pass",
+        "test_mode_change_cancels_queued_completion_without_accepting_stale_preview": "pass",
+        "retries": 0,
+        "skips": 0
+      },
+      "conclusion": "All NEW GUI assertions pass in fresh processes; intermittent repeated-interpreter Tk initialization remains an aggregate test-environment limitation. Cause unproven."
+    },
+    "final_non_gui_new_tests": {
+      "passed": 22,
+      "subtests_passed": 57,
+      "failed": 0
+    }
+  }
+}

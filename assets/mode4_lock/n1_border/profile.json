@@ -1,0 +1,21 @@
+{
+  "template_sha256": "6153bfc1a2e059f83792b7cc02fe82c2294c14d3d367dc55e11762543f06b525",
+  "source": "tools/imagelock.asm with N1_BORDER; tools/n1_border_kernel.inc",
+  "image_ticks": 2227,
+  "line_cpu_cycles": 304,
+  "frame_cpu_cycles": 79648,
+  "preroll_lines": 8,
+  "visible_lines": 200,
+  "image_palette_writes_per_row": 1,
+  "black_border_writes_per_row": 1,
+  "physical_hardware_validated": false,
+  "status": "Experimental edge timing: see the recorded renderer/phase limitations",
+  "direct_load_exact_pixel_clock_phases": [
+    0,
+    1,
+    2
+  ],
+  "exact_default_renderer": false,
+  "exact_dos_reentry": false,
+  "validation": "docs/N1_BORDER.md"
+}

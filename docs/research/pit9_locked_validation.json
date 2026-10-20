@@ -1,0 +1,2516 @@
+{
+  "emulator": {
+    "baseline_commit": "05c0d088e84ad6bbfac9b3f0d051e7eadefd9f44",
+    "archive_sha256": "fce9bb71f7f948336097c4c802eba5bfb55da48fc75b4b70115a1d439193f0a1",
+    "files": [
+      {
+        "path": "crates/bin/martypc_eframe/src/emulator/mod.rs",
+        "baseline_sha256": "d3a9b068cfb44b9562c929a065714d0f4c78a65a318869b6df5a63a769dceb85",
+        "modified_sha256": "6fb863d36c46c65d342629f4897953397f58b94d4dc1f1954d8e20abeeff4a8c"
+      },
+      {
+        "path": "crates/lib/marty_core/src/bus/mod.rs",
+        "baseline_sha256": "8b2fde2368ef42cbc4b8b8e21bc97754b5cb7299e08875ba419e5f05f494dcc6",
+        "modified_sha256": "52073dfdfeb02fab33acea85461645a500f6cd06a0fa6dbd36f77115a408e1a4"
+      },
+      {
+        "path": "install/martypc.toml",
+        "baseline_sha256": "a6ed5ad741baf0aaa3b88a47e6905f9d0f4a100c7911072b40d6227118be7f6b",
+        "modified_sha256": "3c9ab6ec5b3f1ef25a9e0e71f5775918f036cd460b2d74d20e3cda92bbe481d1"
+      }
+    ],
+    "harness_change": "Pass PIT offset without masking to 0..3",
+    "baseline_exe_sha256": "0234e53512ee0d086ddb88c62a3cf44e05a5407712b3b9de02b14190292c983f",
+    "modified_exe_sha256": "4c08aa9639d2eb8225eed3bf6954d6b018b4db548e1ec2f65a453dcf0d73c8f7"
+  },
+  "encoder": {
+    "experimental": true,
+    "bounds": [
+      0,
+      24,
+      59,
+      113,
+      159,
+      207,
+      248,
+      288,
+      320
+    ],
+    "image_source": "D:\\RetroComputerist\\Projects\\CGA Image Studio\\Source\\external\\research\\pit9-cycle\\hardware-original\\expected.png",
+    "source_sha256": "0c85edb759162715d583e139ca871ee2ae68ace0ce998d2ed3ff99a5d42d51a9",
+    "template_sha256": "3ec259cfcae342d6645592298bc98401fbb315d254253813297683c5f5644aaa",
+    "entry_nops": 0,
+    "image": {
+      "com_sha256": "43e4aef4da292e43e91be10f3cbe20ccc021a073382deb336472088d13f99f4c",
+      "expected_sha256": "29bd4bd39aeccbda67080c62f8dba05068fe8afb6ddf1a7ab569722553239442",
+      "first_out_ip": "1212",
+      "rgbi_colors": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "registration": {
+      "com_sha256": "f7efcd28e7c36c85f50ad1c23f69ce1928f724c1fd91a19e804507296c8db852",
+      "expected_sha256": "a6ccc43c336a623a95b985235b608d49f50f0b3e9a0f17710b7faf29fa7714d5",
+      "first_out_ip": "1212",
+      "rgbi_colors": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    "disk_sha256": "eca2492624e2735ef0f472b40856ca2b5cca1de463728d17fc016465a97fdd92",
+    "guard_strips": false,
+    "shared_palette_constraints": false
+  },
+  "checks": {
+    "initial": [
+      {
+        "name": "image-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "image-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "image-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "image-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      }
+    ],
+    "coverage": [
+      {
+        "name": "CHEETL-entry0-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry0-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry0-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry1-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry1-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry2-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry2-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry3-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry3-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry7-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry7-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry13-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry13-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry31-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry31-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "CHEETL-entry127-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p0",
+        "phase": 0,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p1",
+        "phase": 1,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p2",
+        "phase": 2,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p3",
+        "phase": 3,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p4",
+        "phase": 4,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p5",
+        "phase": 5,
+        "frames": 86,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p6",
+        "phase": 6,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p7",
+        "phase": 7,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p8",
+        "phase": 8,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p9",
+        "phase": 9,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p10",
+        "phase": 10,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "REGLOCK-entry127-p11",
+        "phase": 11,
+        "frames": 84,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      }
+    ],
+    "boot": [
+      {
+        "name": "boot-p0",
+        "phase": 0,
+        "frames": 293,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p1",
+        "phase": 1,
+        "frames": 293,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p2",
+        "phase": 2,
+        "frames": 293,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p3",
+        "phase": 3,
+        "frames": 295,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p4",
+        "phase": 4,
+        "frames": 295,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p5",
+        "phase": 5,
+        "frames": 295,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p6",
+        "phase": 6,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p7",
+        "phase": 7,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p8",
+        "phase": 8,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p9",
+        "phase": 9,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p10",
+        "phase": 10,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "boot-p11",
+        "phase": 11,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      }
+    ],
+    "reentry": [
+      {
+        "name": "reentry-p0",
+        "phase": 0,
+        "frames": 115,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "reentry-p3",
+        "phase": 3,
+        "frames": 115,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "reentry-p6",
+        "phase": 6,
+        "frames": 115,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "reentry-p9",
+        "phase": 9,
+        "frames": 115,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      }
+    ],
+    "long": [
+      {
+        "name": "long-p9",
+        "phase": 9,
+        "frames": 3599,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      }
+    ],
+    "packet": [
+      {
+        "name": "packet-p0",
+        "phase": 0,
+        "frames": 293,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "packet-p3",
+        "phase": 3,
+        "frames": 295,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "packet-p6",
+        "phase": 6,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      },
+      {
+        "name": "packet-p9",
+        "phase": 9,
+        "frames": 292,
+        "wrong_dots": [
+          0
+        ],
+        "unequal_pairs": [
+          0
+        ]
+      }
+    ]
+  },
+  "qualified_cases": 217,
+  "exact_completed_frames": 25309,
+  "cpu_options": {
+    "enable_wait_states": true,
+    "dram_refresh_schedule_enabled_at_first_out": true,
+    "pit1_reload_at_first_out": 19,
+    "pit1_current_at_first_out": 7,
+    "pit1_counting_at_first_out": true,
+    "pit1_retrigger_at_first_out": true,
+    "pit1_mode_at_first_out": "RateGenerator",
+    "first_out_cpu_cycle": 29321962,
+    "first_visible_out_ip": 4626,
+    "raster_end_ip": 16023
+  },
+  "original_emulator_preserved": true,
+  "supplied_modified_emulator_preserved": true,
+  "native_desktop_launched": true,
+  "native_visual_capture_verified": false,
+  "native_capture_error": "Computer Use native pipe unavailable; os error 2",
+  "hardware_tested": false,
+  "actual_core_capture_png_sha256": "0a0f0e5190e60a262e98727efd74b5381b5fdf88cefe050d36342842bc9c7849",
+  "packet_sha256": "6951af1e1ee261f7fba0346cf323bd091fb7ce0c5e51e32e3b8e5acc3170b2fa",
+  "packet_disk_sha256": "8449d15cbe6719d61a4f38782bcb2b54c3348009126e986b4b9d2db8af11b918"
+}

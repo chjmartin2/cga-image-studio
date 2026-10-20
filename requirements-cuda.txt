@@ -1,0 +1,7 @@
+# Optional NVIDIA CUDA backend for composite search and standard RGB text,
+# including live DCT matching and text-settings optimization.
+# CUDA runtime libraries are bundled by the ctk extra; a compatible NVIDIA
+# driver is still required. CPU fallback is automatic when CUDA is unavailable.
+# Install using this project's Python, not the copied pip.exe wrapper.
+-r requirements-acceleration.txt
+cupy-cuda12x[ctk]>=14.2,<15

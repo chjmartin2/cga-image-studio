@@ -1,6 +1,8 @@
 # Initial release closeout checklist
 
-Working checklist — 2026-09-27. Baseline: v0.3.0-alpha.3.
+Release candidate: **v1.0.0-rc.1**, 2026-10-20. The historical acceptance
+records below remain the evidence for their individual features. Open items
+are still open in this prerelease; see [RC notes](RELEASE_v1.0.0-rc.1.md).
 
 ## Interactive validation agreement
 
@@ -14,10 +16,34 @@ Working checklist — 2026-09-27. Baseline: v0.3.0-alpha.3.
   states, X stop button, and whole-pixel automatic preview zoom. User confirmed
   the GUI looks and works great on 2026-09-28.
 
-Next proposed item: output-validity safeguards across all modes. Verify that
-changing an input or conversion setting cannot export stale output under new
-settings; preview-only zoom must not invalidate a conversion. Include export
-before conversion, during background work, and after cancellation/failure.
+- [x] **Output-validity safeguards completed — user confirmed 2026-09-28.**
+  All four export entry points are checked before conversion, after source/mode/
+  settings changes, during text encoding, and after cancellation/failure. Zoom
+  and export-only options remain valid. Fixed stale worker completion overwriting
+  newer output and queued completion after STOP. All 52 regression tests passed;
+  user confirmed the final source/mode, running, cancellation and zoom cases.
+
+- [x] Mode Switch palette layout resizing loop fixed; user confirmed fixed.
+  The map now has a fixed display area independent of output Auto zoom.
+- [x] Optional MartyPC link and Save DSK and launch: user confirmed working
+  on 2026-09-28. Remembered executable/configuration, automatic TEST.COM startup,
+  RGB/composite selection, separate runtime disk/configuration, and export guards.
+  Native smoke check launched a Raiders RGB disk through the GUI export handler.
+  No emulator or ROMs bundled.
+
+- [x] **640x100 text-composite export validation — user confirmed 2026-09-28.**
+Image appearance, keypress exit, and rerun without rebooting passed in Marty.
+The initial user test failed (flicker/no picture). Replaced the old timed kernel
+with a centered 101+161-scanline CRTC sequence, linear VRAM and black guard row,
+composite burst enabled, and BIOS keypress exit during blanking. Marty-core
+validation: 300 identical visible frames, zero expected-pixel mismatches, and
+bootable Raiders disk restores text mode on an injected keyboard event. COM/ASM
+round-trip and disk payload checks pass. User confirmed the corrected test
+worked perfectly. Both centered 1024-color modes share the repaired kernel.
+
+- [x] **Regular 80x100 centered, 1024 colors — user confirmed 2026-09-28.**
+  User confirmed the picture and keypress exit worked perfectly in Marty after
+  the shared display-kernel repair. This is separate from Mini-Frames.
 
 - [x] **640x200 Multicolor Composite implementation — user confirmed complete.**
   Includes the exhaustive bitmap encoder, Old/New CGA selection, the explicit
@@ -159,8 +185,8 @@ These are the 13 current GUI entries, not 13 confirmed distinct hardware capabil
 - [ ] Show only relevant controls; explain disabled controls where useful.
 - [ ] Use consistent language for palette changes: 1, 8, 8 staggered. Explain the fixed alternating stagger without implying randomness or animation.
 - [ ] Disable conversion until an image is loaded; disable exports until a valid conversion exists.
-- [ ] Track changes that invalidate output across all modes. Prevent exporting old image data with newly selected settings.
-- [ ] Separate preview-only changes from settings that require reconversion.
+- [x] Track changes that invalidate output across all modes. Prevent exporting old image data with newly selected settings. Automated checks and user export-validity signoff completed 2026-09-28.
+- [x] Separate preview-only changes from settings that require reconversion. Zoom-only export confirmed by user 2026-09-28.
 - [ ] Show conversion progress and busy state; prevent conflicting actions and duplicate jobs.
 - [ ] Verify cancellation and window close during long conversions leave no orphan worker or corrupted output.
 - [ ] Give useful errors with a recovery step; remove implementation jargon from normal dialogs.

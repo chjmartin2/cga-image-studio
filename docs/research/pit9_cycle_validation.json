@@ -1,0 +1,1505 @@
+{
+  "date": "2026-10-07",
+  "status": "guarded encoding experiment passes; acquisition timing remains unresolved",
+  "setup": {
+    "baseline_commit": "05c0d088e84ad6bbfac9b3f0d051e7eadefd9f44",
+    "archive_sha256": "fce9bb71f7f948336097c4c802eba5bfb55da48fc75b4b70115a1d439193f0a1",
+    "files": [
+      {
+        "path": "crates/bin/martypc_eframe/src/emulator/mod.rs",
+        "baseline_sha256": "d3a9b068cfb44b9562c929a065714d0f4c78a65a318869b6df5a63a769dceb85",
+        "modified_sha256": "6fb863d36c46c65d342629f4897953397f58b94d4dc1f1954d8e20abeeff4a8c"
+      },
+      {
+        "path": "crates/lib/marty_core/src/bus/mod.rs",
+        "baseline_sha256": "8b2fde2368ef42cbc4b8b8e21bc97754b5cb7299e08875ba419e5f05f494dcc6",
+        "modified_sha256": "52073dfdfeb02fab33acea85461645a500f6cd06a0fa6dbd36f77115a408e1a4"
+      },
+      {
+        "path": "install/martypc.toml",
+        "baseline_sha256": "a6ed5ad741baf0aaa3b88a47e6905f9d0f4a100c7911072b40d6227118be7f6b",
+        "modified_sha256": "3c9ab6ec5b3f1ef25a9e0e71f5775918f036cd460b2d74d20e3cda92bbe481d1"
+      }
+    ],
+    "harness_change": "Pass PIT offset without masking to 0..3",
+    "baseline_exe_sha256": "0234e53512ee0d086ddb88c62a3cf44e05a5407712b3b9de02b14190292c983f",
+    "modified_exe_sha256": "4c08aa9639d2eb8225eed3bf6954d6b018b4db548e1ec2f65a453dcf0d73c8f7"
+  },
+  "original_cheetara": {
+    "name": "TEST.COM",
+    "sha256": "dc2311e92d0262e8e39ea6e3629aaf9b4d5405691a4811c8e4b28610af4b6f89",
+    "first_out_ip": "11E7"
+  },
+  "guarded_manifest": {
+    "status": "experimental; acquisition unchanged; reduced color choices at seams",
+    "source": "D:\\RetroComputerist\\Projects\\CGA Image Studio\\Source\\external\\research\\pit9-cycle\\hardware-original\\expected.png",
+    "bounds": [
+      0,
+      25,
+      65,
+      113,
+      161,
+      209,
+      249,
+      289,
+      320
+    ],
+    "guards": [
+      [
+        22,
+        31
+      ],
+      [
+        62,
+        72
+      ],
+      [
+        110,
+        120
+      ],
+      [
+        157,
+        166
+      ],
+      [
+        205,
+        214
+      ],
+      [
+        245,
+        255
+      ],
+      [
+        286,
+        295
+      ]
+    ],
+    "palette_policy": "neighboring palettes share background or foreground colors",
+    "guard_policy": "only indices with the same RGBI interpretation in both palettes",
+    "com_sha256": "6a2d6a7b9c166346dfc7d5742f1d318b5f06ba8457ad0a78fe860483eab016f3",
+    "expected_sha256": "ba2d0370c7f75741ad7a37a5e1e97cebe42546ea443a390690e3010a2ad3159a"
+  },
+  "tests": {
+    "startup": [
+      {
+        "entry": 0,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 0,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 1,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 2,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 3,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 7,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 13,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 123,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 123,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 123,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 120,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 120,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 120,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 31,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 0,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 1,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 2,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 3,
+        "returncode": 0,
+        "frames": 123,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 4,
+        "returncode": 0,
+        "frames": 123,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 5,
+        "returncode": 0,
+        "frames": 123,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 6,
+        "returncode": 0,
+        "frames": 120,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 7,
+        "returncode": 0,
+        "frames": 120,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 8,
+        "returncode": 0,
+        "frames": 120,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 9,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 10,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "entry": 127,
+        "phase": 11,
+        "returncode": 0,
+        "frames": 111,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      }
+    ],
+    "boot": [
+      {
+        "case": "cycle-p0",
+        "returncode": 0,
+        "frames": 75,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 1,
+        "visible_frames": 75,
+        "cpu_cycles": 90000000
+      },
+      {
+        "case": "cycle-p3",
+        "returncode": 0,
+        "frames": 75,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 1,
+        "visible_frames": 75,
+        "cpu_cycles": 90000000
+      },
+      {
+        "case": "cycle-p6",
+        "returncode": 0,
+        "frames": 74,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 1,
+        "visible_frames": 74,
+        "cpu_cycles": 90000006
+      },
+      {
+        "case": "cycle-p9",
+        "returncode": 0,
+        "frames": 78,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 1,
+        "visible_frames": 78,
+        "cpu_cycles": 90000005
+      },
+      {
+        "case": "baseline-p0",
+        "returncode": 0,
+        "frames": 74,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 1,
+        "visible_frames": 74,
+        "cpu_cycles": 90000001
+      }
+    ],
+    "duration_and_reentry": [
+      {
+        "case": "reentry-p0",
+        "returncode": 0,
+        "frames": 115,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 5,
+        "visible_frames": 115,
+        "cpu_cycles": 180000010
+      },
+      {
+        "case": "reentry-p3",
+        "returncode": 0,
+        "frames": 115,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 5,
+        "visible_frames": 115,
+        "cpu_cycles": 180000021
+      },
+      {
+        "case": "reentry-p6",
+        "returncode": 0,
+        "frames": 115,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 5,
+        "visible_frames": 115,
+        "cpu_cycles": 180000003
+      },
+      {
+        "case": "reentry-p9",
+        "returncode": 0,
+        "frames": 115,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 5,
+        "visible_frames": 115,
+        "cpu_cycles": 180000002
+      },
+      {
+        "case": "full-duration-p9",
+        "returncode": 0,
+        "frames": 3599,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ],
+        "activations": 1,
+        "visible_frames": 3599,
+        "cpu_cycles": 400000011
+      }
+    ],
+    "registration": [
+      {
+        "phase": 0,
+        "returncode": 0,
+        "frames": 122,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "phase": 3,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "phase": 6,
+        "returncode": 0,
+        "frames": 119,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "phase": 9,
+        "returncode": 0,
+        "frames": 110,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      }
+    ],
+    "delivered_package_boot": [
+      {
+        "phase": 0,
+        "returncode": 0,
+        "frames": 189,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "phase": 3,
+        "returncode": 0,
+        "frames": 201,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "phase": 6,
+        "returncode": 0,
+        "frames": 197,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      },
+      {
+        "phase": 9,
+        "returncode": 0,
+        "frames": 201,
+        "mismatches": [
+          0
+        ],
+        "pairs": [
+          0
+        ]
+      }
+    ]
+  },
+  "cases": 114,
+  "exact_frames": 16778,
+  "package_sha256": "f56122253bdd61d6a472c5f093b3107de2b7de92bbf45e7e05ee82074b27863a",
+  "original_reproduction": {
+    "normal_core_phase0": {
+      "frames": 117,
+      "mismatching_dots_per_frame": 0
+    },
+    "cycle_core_offset9": {
+      "frames": 110,
+      "mismatching_dots_per_frame": 4252
+    }
+  },
+  "measured_boundaries_min": [
+    24,
+    64,
+    112,
+    159,
+    207,
+    247,
+    288
+  ],
+  "measured_boundaries_max": [
+    29,
+    70,
+    118,
+    164,
+    212,
+    253,
+    293
+  ]
+}

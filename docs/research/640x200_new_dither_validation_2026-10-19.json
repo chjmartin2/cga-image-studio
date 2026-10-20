@@ -1,0 +1,112 @@
+{
+  "date": "2026-10-19",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "cpu_threads": 32,
+  "note": "Corrected contiguous GPU inputs; legacy matching-settings baseline reused without rerunning. Single measurements, not visual-quality guarantees. Photographs remain local artifacts.",
+  "results": [
+    {
+      "image": "raiders",
+      "settings": {
+        "preset": "Old CGA",
+        "backend": "cuda",
+        "workers": null,
+        "scale": "stretch",
+        "resample": "Lanczos",
+        "legacy_k": 64,
+        "legacy_polish_percent": 5,
+        "legacy_dither": "Diffusion",
+        "new_dither": "Diffusion",
+        "diffusion_method": "Floyd-Steinberg",
+        "dither_strength": 1.0,
+        "serpentine": true,
+        "legacy_chroma_lowpass": false,
+        "legacy_shape_weight": 1.0,
+        "order": "new-first"
+      },
+      "source_sha256": "62711d2fb5af04998706a2a114ad98d6eb6bddf96efef55a6962f0be6eeaa2af",
+      "source_rgb_sha256": "1ed13156c6d5a1e41ea465f8366217137e25ea36e980701d678fa815c7f38807",
+      "source_hashes": {
+        "cga_v167.py": "3cfdc5180f0fdc563b8d6e7d2017aa2943d3886f5e8d8aa97ee73e042b2cf963",
+        "cga_text_new.py": "8de7a8c17af015066d507b131dde7eb12b594952c0153ffc023722cb82738d34",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "b58750f14632f71ccf4270b6fbac9e3935b2caab0b11deeabae47ff14633620b",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "legacy_source_hashes": {
+        "cga_v167.py": "e65670cb9f807fff7d2eb740809cafc2e499fc15a555a6522e1ee277908fc5c7",
+        "cga_text_new.py": "0356cf1c68095f00e2402283cbdf7914edc04af7a34a37b7fc72867302a17f0f",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "7f2dffdf93d1eab9ea1bfeece9a0b2eec54bc39dc58fd5b901813d2466799c5a",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "new": {
+        "seconds": 15.898101400001906,
+        "objective": 11095912.742330145,
+        "rms_delta_e": 9.310575615903362,
+        "rgb_color_count": 19968,
+        "decoded_rgb_sha256": "911abf3b12864ec00297eaa7ab342a70d4728ab3a859f8f74967e0164503b03f",
+        "cells_sha256": "bd18a91c428e351025b4a70bd3d3edb91bdac2d696ce5ecef72db5c0e4691eb2"
+      },
+      "legacy": {
+        "seconds": 174.94397349999053,
+        "objective": 17019261.415395588,
+        "rms_delta_e": 11.530957454078912,
+        "rgb_color_count": 25489,
+        "decoded_rgb_sha256": "01f08ea42314b1e426b6742817ee1bb45ce89b3c9a65b1a3230a36e0206dc067",
+        "cells_sha256": "39ccaf3362c6a656094c0900502927a9acf8c66cab6402561be297c743c78926"
+      }
+    },
+    {
+      "image": "picard",
+      "settings": {
+        "preset": "Old CGA",
+        "backend": "cuda",
+        "workers": null,
+        "scale": "stretch",
+        "resample": "Lanczos",
+        "legacy_k": 64,
+        "legacy_polish_percent": 5,
+        "legacy_dither": "Diffusion",
+        "new_dither": "Diffusion",
+        "diffusion_method": "Floyd-Steinberg",
+        "dither_strength": 1.0,
+        "serpentine": true,
+        "legacy_chroma_lowpass": false,
+        "legacy_shape_weight": 1.0,
+        "order": "new-first"
+      },
+      "source_sha256": "e03831c6201b34d2895d2d48d4735cb2a3c80639d968cf2712de5b3c65b37056",
+      "source_rgb_sha256": "28924dcbe51004f2353adb7322f9dc61c5ad96a8a68b179b6cbfce946df61b7b",
+      "source_hashes": {
+        "cga_v167.py": "3cfdc5180f0fdc563b8d6e7d2017aa2943d3886f5e8d8aa97ee73e042b2cf963",
+        "cga_text_new.py": "8de7a8c17af015066d507b131dde7eb12b594952c0153ffc023722cb82738d34",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "b58750f14632f71ccf4270b6fbac9e3935b2caab0b11deeabae47ff14633620b",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "legacy_source_hashes": {
+        "cga_v167.py": "3cfdc5180f0fdc563b8d6e7d2017aa2943d3886f5e8d8aa97ee73e042b2cf963",
+        "cga_text_new.py": "1971e4633bea7e0597eabd71867e06720d4303f2e60c7ac9902fd9863109a92a",
+        "cga_text_new_cpu.py": "472808c76379163ce3601eaf49cfd443145be599dcc27f7c37b855b3396a9ff0",
+        "cga_text_new_cuda.py": "3e8cf95a64e2c239b4ddbfae1b92abb32a7289862ca227d69d695a7d69f81354",
+        "cga_text_new_search.py": "901dc530920392b1f24988110ef9ecc8364ee1382267ce7a36300a2644140dcd"
+      },
+      "new": {
+        "seconds": 13.561739999975543,
+        "objective": 19207807.53457672,
+        "rms_delta_e": 12.249938626943427,
+        "rgb_color_count": 16777,
+        "decoded_rgb_sha256": "a7bae6fd523f35e3719124a77418b15f0915b113333331673706a3199706aec8",
+        "cells_sha256": "d671bb48b78c19bdecd971f4f2a80267803c4a61e0b660e508ebfad82d38dcc6"
+      },
+      "legacy": {
+        "seconds": 180.7251457000093,
+        "objective": 27218285.22564598,
+        "rms_delta_e": 14.582278742547723,
+        "rgb_color_count": 20918,
+        "decoded_rgb_sha256": "26172ede00b664d9b82f13647b0ec81bb07feb3fda37bb4c678cbdec633ba96f",
+        "cells_sha256": "036c8a3838025237c2e1446f631d9d368d9fae78fb34016fe2a91cf85853f56d"
+      }
+    }
+  ]
+}

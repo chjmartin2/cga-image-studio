@@ -69,6 +69,14 @@ fn main() {
  let mut manifest=MachineRomManifest::new();
  manifest.roms.push(MachineRomEntry{name:"GLaBIOS 0.2.6 XT".into(),addr:0xFE000,repeat:1,data:fs::read(&rom_path).unwrap(),path:rom_path,..Default::default()});
  let mut machine=MachineBuilder::new().with_core_config(Box::new(&Config)).with_machine_config(&mc).with_roms(manifest).build().unwrap();
+ // Overscan validation must use display colors, not diagnostic I/O markers.
+ if args.iter().any(|p|p=="--no-debug-video") {
+  machine.bus_mut().primary_video_mut().unwrap().set_debug_draw_state(false);
+ }
+ if args.iter().any(|p|p=="--pixel-clock") {
+  machine.bus_mut().primary_video_mut().unwrap().set_clocking_mode(
+   marty_core::device_traits::videocard::ClockingMode::Cycle);
+ }
  // MachineBuilder leaves this false; the desktop frontend explicitly enables it.
  // Without this, device waits AND effective DMA refresh steals are suppressed.
  machine.cpu_mut().set_option(CpuOption::EnableWaitStates(true));
